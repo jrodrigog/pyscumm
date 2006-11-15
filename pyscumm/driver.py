@@ -1,14 +1,36 @@
+#    PySCUMM Engine. SCUMM based engine for Python
+#    Copyright (C) 2006  PySCUMM Engine. http://pyscumm.org
+#
+#    This library is free software; you can redistribute it and/or
+#    modify it under the terms of the GNU Lesser General Public
+#    License as published by the Free Software Foundation; either
+#    version 2.1 of the License, or any later version.
+#
+#    This library is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#    Lesser General Public License for more details.
+#
+#    You should have received a copy of the GNU Lesser General Public
+#    License along with this library; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+#!/usr/bin/env python
+
+"""
+@author: Juan Jose Alonso Lara (KarlsBerg, jjalonso@pyscumm.org)
+@author: Juan Carlos Rodrigo Garcia (Brainsucker, jrodrigo@pyscumm.org)
+@since: 14/11/2006
+"""
 
 import pygame.display, pygame.mouse, time
 import gfx.vector.Vector2D
 
-
-
 class Mouse( object ):
-    """Mouse Controller"""
+    """A Mouse Controller Class."""
 
     def __init__( self ):
-        self._time_doubleclick = 0.300
+        self._time_double_click = 0.300
         self._distance_drag = 8
         self._visible = True
 
@@ -31,16 +53,16 @@ class Mouse( object ):
         """
         pygame.mouse.set_pos( position )
 
-    def get_time_doubleclick( self ):
+    def get_time_double_click( self ):
         """
         Get the current minimal time needed for wait 2 click and consider him a double click.
 
         @return: The current time for a doubleclick
         @rtype: Float
         """
-        return self._time_doubleclick
+        return self._time_double_click
 
-    def set_time_doubleclick( self, value ):
+    def set_time_double_click( self, value ):
         """
         Set the minimal time needed for wait 2 click and consider him a double click.
 
@@ -48,7 +70,7 @@ class Mouse( object ):
         @type value: Float
         @return: None
         """
-        self._time_doubleclick = value
+        self._time_double_click = value
 
     def get_distance_drag( self ):
         """
@@ -87,23 +109,22 @@ class Mouse( object ):
         """
         self._visible = value
 
-    time_doubleclick    = property( get_time_doubleclick, set_time_doubleclick )
+    time_double_click   = property( get_time_double_click, set_time_double_click )
     distance_drag       = property( get_distance_drag, set_distance_drag )
     visible             = property( get_visible, set_visible )
 
 
 class Display( object ):
-    """Display controller"""
+    """A Display Controller class."""
 
     def __init__( self ):
         self._size = None
         self._icon = None
-        self.__isopen__ = False
+        self._opened = False
 
     def info( self ):
         """
         Get some info of the video system.
-
         @return: driver, info, window manager
         @rtype: String, Dict, String
         """
@@ -112,28 +133,20 @@ class Display( object ):
     def open( self ):
         """
         Open the display window with the size setted.
-
         @return: None
         """
-        if not self.__isopen__:
-            self.__isopen__ = True
-            pygame.display.init()
-            pygame.display.set_mode( self._size, pygame.DOUBLEBUF | pygame.OPENGL )
+        raise NotImplementedError
 
     def close( self ):
         """
         Close que display window.
-
         @return None
         """
-        if __isopen__:
-            __isopen__ = False
-            pygame.display.quit()
+        raise NotImplementedError
 
     def list_modes( self ):
         """
         Get a list of possible dimensions to the current/best color depth.
-
         @return: A list of possible dimensions.
         @rtype: List
         """
@@ -142,7 +155,6 @@ class Display( object ):
     def toggle_fullscreen( self ):
         """
         Switch between windowed and fullscreen mode.
-
         @return: if available and successfull, will return True, else return False.
         @rtype: Boolean
         """
@@ -151,7 +163,6 @@ class Display( object ):
     def get_size( self ):
         """
         Get the current size of the display.
-
         @return: The current display size.
         @rtype: Tuple
         """
@@ -160,19 +171,17 @@ class Display( object ):
     def set_size( self, size ):
         """
         Set a new size to the display.
-
         @param size: The new size of the display (X,Y).
         @type size: 2-integer tuple
         @return: None
         """
         self._size = size
-        if __isopen__:
+        if _opened:
             pygame.display.set_mode( (self._size[0], self._size[1]), pygame.DOUBLEBUF | pygame.OPENGL )
 
     def get_title( self ):
         """
         Get the current title of the display.
-
         @return: The current title of the new display.
         @rtype: String
         """
@@ -181,7 +190,6 @@ class Display( object ):
     def set_title( self, title ):
         """
         Set the title of the display.
-
         @param title: The name title of the display
         @type title: string
         @return: None
@@ -191,7 +199,6 @@ class Display( object ):
     def get_icon( self ):
         """
         Get the current image icon setted.
-
         @return: a icon image that are current setted on a window
         @rtype: Image
         """
@@ -201,12 +208,10 @@ class Display( object ):
         """
         Sets the runtime icon that your system uses to decorate the program window.
         It is also used when the application is iconified and in the window frame.
-
         You likely want this to be a smaller image, a size that your system
         window manager will be able to deal with.
         Some window managers on X11 don't allow you to change the icon
         after the window has been shown the first time.
-
         @param image: A icon image
         @type image: Image
         @return: None
@@ -214,14 +219,54 @@ class Display( object ):
         self._icon = icon
         pygame.display.set_icon( icon )
 
+    title       = property( get_title, set_title )
     size        = property( get_size, set_size )
     icon        = property( get_icon, set_icon )
 
+class GLDisplay( Display ):
+    """OpenGL Display class."""
+    def open( self ):
+        """
+        Open the display window with the size setted.
+
+        @return: None
+        """
+        if self._opened: return
+        self._opened = True
+        pygame.display.init()
+        pygame.display.set_mode( self._size, pygame.DOUBLEBUF | pygame.OPENGL )
+
+    def close( self ):
+        """
+        Close que display window.
+
+        @return None
+        """
+        if not self._opened: return
+        pygame.display.quit()
+
+class SDLDisplay( Display ):
+    """SDL Display class."""
+    def open( self ):
+        """
+        Open the display window with the size setted.
+        @return: None
+        """
+        raise NotImplementedError
+
+    def close( self ):
+        """
+        Close que display window.
+
+        @return None
+        """
+        raise NotImplementedError
 
 class Clock( object ):
     sec_to_msec = 1000.
 
     def __init__( self ):
+        """Init a Clock object."""
         # Next frame tick time
         self._next_time = 0
         # Interval between frame ticks */
@@ -232,22 +277,35 @@ class Clock( object ):
         self._limit = 60
 
     def set_limit( self, fps ):
-        # Set the frame rate limit
+        """
+        Set the frame rate limit.
+        @param fps: Maximum fps
+        @type fps: float
+        """
         self._limit = fps
         self._tick_interval = self.sec_to_msec / self._limit
         self._tick_interval *= 2 # double speed
 
     def get_limit( self ):
-        # Get the frame rate limit
+        """
+        Get the frame rate limit
+        @return: float
+        """
         return self._limit
 
     def tick( self ):
-        # Tick a frame and wait till next frame */
+        """
+        Tick a frame and wait till next frame
+        if we are drawing too fast.
+        """
         self._frame_count += 1
         time.sleep( self._get_raw_time() / self.sec_to_msec )
 
     def _get_raw_time( self ):
-        # Get the raw time, time pending untill the next frame
+        """
+        Get the raw time, time pending untill the next frame.
+        @return: float
+        """
         now = pygame.time.get_ticks()
         if self._next_time <= now:
             self._next_time = now + self._tick_interval
@@ -255,13 +313,20 @@ class Clock( object ):
         return self._next_time - now
 
     def get_time( self ):
-        # Get the next frame time
+        """
+        Get the next frame time.
+        Use this time for your calculations.
+        @return: float
+        """
         return self._next_time
 
     def get_fps( self ):
-        # Get the frames per second
+        """
+        Get the frames per second.
+        @return: float
+        """
         return self._frame_count / ( pygame.time.get_ticks() / self.sec_to_msec );
 
-    fps        = property( get_fps )
-    time    = property( get_time )
+    fps      = property( get_fps )
+    time     = property( get_time )
     limit    = property( get_limit, set_limit )

@@ -21,8 +21,7 @@
 import pygame, os.path
 import base, vm
 
-
-class Scene( base.StateMachine ):
+class Scene( base.StateMachine, dict ):
     """
     A scene Machine for handle SceneStates
     """
@@ -134,7 +133,7 @@ class Scene( base.StateMachine ):
         print "[Scene::%s] 'on_drag_end' event launched (%s, %s)" % ( self._state.__class__.__name__, obj, button )
         self._state = self._state.on_drag_end( obj, button )
 
-    def key_up( self, key ):
+    def on_key_up( self, key ):
         """
         Call the "on_key_up" method of the active SceneState.
 
@@ -160,17 +159,18 @@ class Scene( base.StateMachine ):
 
     def draw( self ):
         """
-        Draw the
-
-        @return: None
+        Draw the Scene, delegate in the state.
         """
         self._state = self._state.draw()
 
     def update( self ):
+        """
+        Update the Scene, delegate in the state.
+        """
         self._state = self._state.update()
 
 
-class SceneState( base.StateMachine, dict ):
+class SceneState( base.StateMachine ):
     """
     Abstract SceneState.
 
@@ -183,7 +183,7 @@ class SceneState( base.StateMachine, dict ):
 
         @return: Scene
         """
-        return vm.VM.scene
+        return vm.VM().scene
 
     def get_vm( self ):
         """
@@ -191,7 +191,7 @@ class SceneState( base.StateMachine, dict ):
 
         @return: VM
         """
-        return vm.VM.instance
+        return vm.VM()
 
     def on_action_end( self, action ):
         """
@@ -275,23 +275,17 @@ class SceneState( base.StateMachine, dict ):
 
     def draw( self ):
         """
-        (See: draw() method on scene.Scene class).
-
-        @return: self
+        Draw all the scene objects.
         """
+        for obj in self.scene: obj.draw()
         return self
 
     def update( self ):
         """
-        (See: update() method on scene.Scene class).
-
-        @return: self
+        Update all the Scene objects. 
         """
+        for obj in self.scene: obj.update()
         return self
 
     scene    = property( get_scene )
     vm       = property( get_vm )
-
-
-
-

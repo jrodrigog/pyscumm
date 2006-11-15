@@ -17,18 +17,14 @@
 
 #!/usr/bin/env python
 
-from types import *
-import base
-
-
-
 """
 @author: Juan Jose Alonso Lara (KarlsBerg, jjalonso@pyscumm.org)
 @author: Juan Carlos Rodrigo Garcia (Brainsucker, jrodrigo@pyscumm.org)
 @since: 8/11/2006
 """
 
-
+from types import NoneType
+import base
 
 class VM( base.StateMachine ):
     """
@@ -49,7 +45,8 @@ class VM( base.StateMachine ):
             - vm.MouseMode: This state only launch mouse events to Game class.
             - vm.DialogMode: This state only launch mouse events to HUD class.
     """
-
+    # Singleton's shared state
+    _shared_state = {}
     def __init__( self, scene, clock=None, display=None, mouse=None ):
         """
         Construct the Virtual Machine object saving some instances of components in private attributes.
@@ -65,22 +62,24 @@ class VM( base.StateMachine ):
         @param mouse: a Mouse instance.
         @type mouse: game.Mouse
         """
+        self.__dict__ = self._shared_state
+        if self._shared_state: return
         base.StateMachine.__init__( self )
         if isinstance( mouse, NoneType ):
             self._mouse = driver.Mouse()
         if isinstance( display, NoneType ):
-            self._display = driver.Display()
+            self._display = driver.GLDisplay()
         if isinstance( clock, NoneType ):
             self._clock = driver.Clock()
-        self._scene =
+        self._scene = scene
 
-    def on_quit( self ):
+    def quit( self ):
         """
         Report to the active state a quit event.
 
         @return: None
         """
-        self._state = self._state.on_quit()
+        self._state = self._state.quit()
 
     def keyboard_pressed( self, event ):
         """
@@ -122,13 +121,19 @@ class VM( base.StateMachine ):
         """
         self._state = self._state.mouse_released( event )
 
-    def on_update( self ):
-        # ToDo
-        pass
+    def update( self ):
+        """
+        Send an update message to the active scene.
+        @return: None
+        """
+        self._state.update()
 
-    def on_draw( self ):
-        #ToDo
-        pass
+    def draw( self ):
+        """
+        Send an update message to the active scene.
+        @return: None
+        """
+        self._state.draw()
 
     def start( self ):
         """
@@ -153,9 +158,10 @@ class VM( base.StateMachine ):
         leave = False
         while not leave:
             try:
+                self._clock.tick()
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
-                        self.on_quit()
+                        self.quit()
                     elif event.type == pygame.KEYDOWN:
                         self.keyboard_pressed( event )
                     elif event.type == pygame.KEYUP:
@@ -166,22 +172,86 @@ class VM( base.StateMachine ):
                         self.mouse_released( event )
                 self._scene.update()
                 self._scene.draw()
-                self._clock.tick()
-            except SceneChange, e:
+            except pyscumm.exception.SceneChange, e:
                 self._scene.stop()
                 self._scene = e.scene
                 self._scene.start()
-            except StopScene:
+            except pyscumm.exception.StopScene:
                 leave = True
-                self._display.close()
+        self._display.close()
 
-    def boot( self, scene ):
-        vm = self( scene )
+    def boot( self, scene, clock=None, display=None, mouse=None  ):
+        """
+        Boot a scene. Prepare a Virtual Machine and
+        start running the main loop.
+        """
+        vm = self( scene, clock=None, display=None, mouse=None  )
         vm.main()
 
-     def get_clock( self ): pass
+    def get_clock( self ):
+        """
+        Get the VM's clock.
+        @return: driver.Clock
+        """
+        return self._clock
 
+    def set_clock( self, clock ):
+        """
+        Set the VM's clock.
+        @param mouse: a Clock object
+        @type mouse: driver.Clock
+        """
+        self._clock = clock
 
+    def get_display( self ):
+        """
+        Get the VM's display.
+        @return: driver.Display
+        """
+        return self._display
+
+    def set_display( self, display ):
+        """
+        Set the VM's display.
+        @param mouse: a Display object
+        @type mouse: driver.Display
+        """
+        self._display = display
+
+    def get_mouse( self ):
+        """
+        Get the VM's mouse.
+        @return: driver.Mouse
+        """
+        return self._mouse
+
+    def set_mouse( self, mouse ):
+        """
+        Set the VM's mouse.
+        @param mouse: a Mouse object
+        @type mouse: driver.Mouse
+        """
+        self._mouse = mouse
+
+    def get_scene( self ):
+        """
+        Get the VM's Scene.
+        @return: scene.Scene
+        """
+        return self._scene
+
+    def set_scene( self, scene ):
+        """
+        Set the VM's Scene.
+        @param scene: a Scene object
+        @type scene: scene.Scene
+        """
+        self._scene = scene
+
+    scene   = property( get_scene, set_scene )
+    mouse   = property( get_mouse, set_mouse )
+    display = property( get_display, set_display )
+    clock   = property( get_clock, set_clock )
     boot    = classmethod( boot )
 
 

@@ -22,7 +22,6 @@
 @since: 9/11/2006
 """
 
-
 class StateMachine( object ):
     """
     Abstract state machine (See: state pattern).

@@ -17,25 +17,40 @@
 
 #!/usr/bin/env python
 
-
-
 """
 @author: Juan Jose Alonso Lara (KarlsBerg, jjalonso@pyscumm.org)
 @author: Juan Carlos Rodrigo Garcia (Brainsucker, jrodrigo@pyscumm.org)
 @since: 14/11/2006
 """
 
-
 class ChangeScene( Exception ):
+    """
+    Change the VM's activa escene. You can raise this
+    exception anytime and give a new scene to the VM.
+    raise ChangeScene( MyScene() ), the VM will take
+    care of calling the scene stop and start method's.
+    """
+    def __init__( self, scene ):
+        """
+        Init's the ChangeScene exception, takes one
+        parameter the new active Scene.
+        @param scene: The VM's active scene
+        @type scene: scene.Scene
+        """
+        self._scene = scene
 
-  def __init__( self, scene ):
-    self._scene = scene
+    def get_scene( self ):
+        """
+        Get the Scene.
+        @return: scene.Scene
+        """
+        return self._scene
 
-  def get_scene( self ):
-    return self._scene
-
-  scene = property( get_scene )
+    scene = property( get_scene )
 
 
-class StopEscene( Exception ):
+class StopVM( Exception ):
+    """
+    This exception halts the VM, completely stopping it. 
+    """
     pass
