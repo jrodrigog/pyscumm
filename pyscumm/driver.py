@@ -43,7 +43,7 @@ class Mouse( object ):
         """
         return gfx.vector.Vector2D( pygame.mouse.get_pos )
 
-    def set_position( self, position ):
+    def set_position( self, pos ):
         """
         Set a new X,Y position of the mouse cursor.
 
