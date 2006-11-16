@@ -24,7 +24,7 @@
 """
 
 import pygame.display, pygame.mouse, time
-import gfx.vector.Vector2D
+import pyscumm.vector
 
 class Mouse( object ):
     """A Mouse Controller Class."""
@@ -39,19 +39,19 @@ class Mouse( object ):
         Get the current X,Y position of the mouse cursor.
 
         @return: the cursor position
-        @rtype: Vector2D
+        @rtype: pyscumm.vector.Vector3D
         """
-        return gfx.vector.Vector2D( pygame.mouse.get_pos )
+        return pyscumm.vector.Vector3D( pygame.mouse.get_pos )
 
     def set_position( self, pos ):
         """
         Set a new X,Y position of the mouse cursor.
 
         @param pos: The new position of mouse cursor
-        @type pos: Vector2D
+        @type pos: pyscumm.vector.Vector3D
         @return: None
         """
-        pygame.mouse.set_pos( position )
+        pygame.mouse.set_pos( position[:2] )
 
     def get_time_double_click( self ):
         """
