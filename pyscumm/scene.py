@@ -26,6 +26,14 @@ class Scene( base.StateMachine, dict ):
     A scene Machine for handle SceneStates
     """
 
+    def on_quit( self ):
+        """
+        Call the "on_quit" method of the active SceneState.
+
+        This method notify a user request of close the display.
+        """
+        self._state = self._state.on_quit()
+
     def on_action_end( self, action ):
         """
         Call the "on_action_end" method of the active SceneState.
@@ -193,6 +201,14 @@ class SceneState( base.StateMachine ):
         """
         return vm.VM()
 
+    def on_quit( self ):
+        """
+        (See: on_quit() method on scene.Scene class).
+
+        @return: self
+        """
+        return self
+
     def on_action_end( self, action ):
         """
         (See: on_action_end() method on scene.Scene class).
@@ -282,7 +298,7 @@ class SceneState( base.StateMachine ):
 
     def update( self ):
         """
-        Update all the Scene objects. 
+        Update all the Scene objects.
         """
         for obj in self.scene: obj.update()
         return self

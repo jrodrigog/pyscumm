@@ -24,7 +24,8 @@
 """
 
 from types import NoneType
-import base
+import pygame.event
+import base, driver, exception
 
 class VM( base.StateMachine ):
     """
@@ -47,14 +48,13 @@ class VM( base.StateMachine ):
     """
     # Singleton's shared state
     _shared_state = {}
-    def __init__( self, scene, clock=None, display=None, mouse=None ):
+    def __init__( self ):
         """
         Construct the Virtual Machine object saving some instances of components in private attributes.
         this objects are statics, if one of this argument dont is passed, or already exist a instance of this,
         this argument will be a new instance of the object.
-
-        @param game: a Game instance.
-        @type game: game.Game
+        @param scene: a Scene instance.
+        @type scene: scene.Scene
         @param clock: a Clock instance.
         @type clock: game.Clock
         @param display: a Display instance.
@@ -65,21 +65,17 @@ class VM( base.StateMachine ):
         self.__dict__ = self._shared_state
         if self._shared_state: return
         base.StateMachine.__init__( self )
-        if isinstance( mouse, NoneType ):
-            self._mouse = driver.Mouse()
-        if isinstance( display, NoneType ):
-            self._display = driver.GLDisplay()
-        if isinstance( clock, NoneType ):
-            self._clock = driver.Clock()
-        self._scene = scene
+        self._mouse = driver.Mouse()
+        self._display = driver.GLDisplay()
+        self._clock = driver.Clock()
+        self._scene = None
 
     def quit( self ):
         """
         Report to the active state a quit event.
-
         @return: None
         """
-        self._state = self._state.quit()
+        self._state = self._state.on_quit()
 
     def keyboard_pressed( self, event ):
         """
@@ -104,7 +100,6 @@ class VM( base.StateMachine ):
     def mouse_pressed( self, event ):
         """
         Report to the active state a mouse button pressed.
-
         @param event: a PyGame MOUSEBUTTONDOWN event
         @type event: PyGame Event
         @return: None
@@ -114,7 +109,6 @@ class VM( base.StateMachine ):
     def mouse_released( self, event ):
         """
         Report to the active state a mouse button released.
-
         @param event: a PyGame MOUSEBUTTONUP event
         @type event: PyGame Event
         @return: None
@@ -170,13 +164,13 @@ class VM( base.StateMachine ):
                         self.mouse_pressed( event )
                     elif event.type == pygame.MOUSEBUTTONUP:
                         self.mouse_released( event )
-                self._scene.update()
-                self._scene.draw()
-            except pyscumm.exception.SceneChange, e:
+                self._state.update()
+                self._state.draw()
+            except exception.ChangeScene, e:
                 self._scene.stop()
                 self._scene = e.scene
                 self._scene.start()
-            except pyscumm.exception.StopScene:
+            except exception.StopVM:
                 leave = True
         self._display.close()
 
@@ -185,8 +179,11 @@ class VM( base.StateMachine ):
         Boot a scene. Prepare a Virtual Machine and
         start running the main loop.
         """
-        vm = self( scene, clock=None, display=None, mouse=None  )
-        vm.main()
+        if not isinstance( clock, NoneType ): VM().clock = clock
+        if not isinstance( display, NoneType ): VM().display = display
+        if not isinstance( mouse, NoneType ): VM().mouse = mouse
+        VM().scene = scene
+        VM().main()
 
     def get_clock( self ):
         """
@@ -265,28 +262,88 @@ class VMState( base.State ):
     and depending of the VMState setted on VM, will launch the hight-level event to scene instance, the HUD, etc.
     """
 
+    def __init__( self ):
+        base.State.__init__( self )
+
+    def on_quit( self ):
+        raise NotImplementedError
+
     def keyboard_pressed( self, event ):
-        # Detect key
-        # Detect if collide with any object
-        # Send all info to scene instance
+        raise NotImplementedError
+
+    def keyboard_released( self, event ):
+        raise NotImplementedError
+
+    def mouse_pressed( self, event ):
+        raise NotImplementedError
+
+    def mouse_released( self, event ):
+        raise NotImplementedError
+
+    def update( self ):
+        raise NotImplementedError
+
+    def draw( self ):
+        raise NotImplementedError
+
+
+class NormalMode( VMState ):
+
+    MASK_BTN_LEFT = 1<<0
+    MASK_BTN_CENTER = 1<<1
+    MASK_BTN_RIGHT = 1<<2
+
+    BTN_LEFT = 0
+    BTN_CENTER = 1
+    BTN_RIGHT = 2
+
+    def __init__( self ):
+        VMState.__init__( self )
+        self._pressed = 000
+        self._time = [ None, None, None ]
+
+    def on_quit( self ):
+        VM().scene.on_quit()
+        return self
+
+    def keyboard_pressed( self, event ):
+        VM().scene.on_key_down( event.key )
         return self
 
     def keyboard_released( self, event ):
-        # Detect key
-        # Detect if collide with any object
-        # Send all info to scene instance
+        VM().scene.on_key_up( event.key )
         return self
 
     def mouse_pressed( self, event ):
-        # Detect button
-        # Detect if collide with any object
-        # Send all info to scene instance
+        if event.button == 1:
+            self._pressed |= self.MASK_BTN_LEFT
+            self._time[ self.BTN_LEFT ] = VM().clock.time
+        elif event.button == 2:
+            self._pressed |= self.MASK_BTN_CENTER
+            self._time[ self.BTN_CENTER ] = VM().clock.time
+        elif event.button == 3:
+            self._pressed |= self.MASK_BTN_RIGHT
+            self._time[ self.BTN_RIGHT ] = VM().clock.time
         return self
 
     def mouse_released( self, event ):
-        # Detect button
-        # Detect if collide with any object
-        # Send all info to scene instance
+        if event.button == 1:
+            self._pressed &= ~self.MASK_BTN_LEFT
+            self._time[ self.BTN_LEFT ] = VM().clock.time
+        elif event.button == 2:
+            self._pressed &= ~self.MASK_BTN_CENTER
+            self._time[ self.BTN_CENTER ] = VM().clock.time
+        elif event.button == 3:
+            self._pressed &= ~self.MASK_BTN_RIGHT
+            self._time[ self.BTN_RIGHT ] = VM().clock.time
+        return self
+
+    def update( self ):
+        if (self._pressed & self.MASK_BTN_LEFT) == self.MASK_BTN_LEFT:
+            VM().scene.on_mouse_click( 1, None )
+        return self
+
+    def draw( self ):
         return self
 
 
@@ -300,7 +357,6 @@ class PassiveMode( VMState ):
     def keyboard_pressed( self, event ):
         """
         PassiveMode ignore all PyGame events.
-
         @param event: a PyGame KEYDOWN event
         @type event: PyGame Event
         @return: self
@@ -310,7 +366,6 @@ class PassiveMode( VMState ):
     def keyboard_released( self, event ):
         """
         PassiveMode ignore all PyGame events.
-
         @param event: a PyGame KEYUP event
         @type event: PyGame Event
         @return: self
@@ -320,7 +375,6 @@ class PassiveMode( VMState ):
     def mouse_pressed( self, event ):
         """
         PassiveMode ignore all PyGame events.
-
         @param event: a PyGame MOUSEBUTTONDOWN event
         @type event: PyGame Event
         @return: self
@@ -330,7 +384,6 @@ class PassiveMode( VMState ):
     def mouse_released( self, event ):
         """
         PassiveMode ignore all PyGame events.
-
         @param event: a PyGame MOUSEBUTTONUP event
         @type event: PyGame Event
         @return: self
@@ -338,7 +391,7 @@ class PassiveMode( VMState ):
         return self
 
 
-class KeyMode( VMState ):
+class KeyMode( NormalMode ):
     """
     This state of the VM, ignore PyGame mouse events, he get the PyGame Mouse events and it dont do anything with them.
     if the event come of a keyboard device, it lauch to scene.
@@ -349,7 +402,6 @@ class KeyMode( VMState ):
     def mouse_pressed( self, event ):
         """
         KeyMode Ignore mouse events.
-
         @param event: a PyGame MOUSEBUTTONDOWN event
         @type event: PyGame Event
         @return: self
@@ -359,7 +411,6 @@ class KeyMode( VMState ):
     def mouse_released( self, event ):
         """
         KeyMode Ignore mouse events.
-
         @param event: a PyGame MOUSEBUTTONUP event
         @type event: PyGame Event
         @return: self
@@ -368,7 +419,7 @@ class KeyMode( VMState ):
 
 
 
-class MouseMode( VMState ):
+class MouseMode( NormalMode ):
     """
     This mode (state) of the VM, ignore PyGame key events, he get the PyGame key events and it dont do anything with them.
     if the event come of a mouse device, it lauch to scene.
@@ -379,7 +430,6 @@ class MouseMode( VMState ):
     def keyboard_pressed( self, event ):
         """
         MouseMode ignore keyboard events.
-
         @param event: a PyGame KEYDOWN event
         @type event: PyGame Event
         @return: self
@@ -389,7 +439,6 @@ class MouseMode( VMState ):
     def keyboard_released( self, event ):
         """
         MouseMode ignore keyboard events.
-
         @param event: a PyGame KEYUP event
         @type event: PyGame Event
         @return: self
@@ -416,7 +465,6 @@ class DialogMode( MouseMode ):
         """
         Detect the pressed mouse button,check if collide with any object of the HUD
         and send all info to Dialog.
-
         @param event: a PyGame MOUSEBUTTONDOWN event
         @type event: PyGame Event
         @return: self
@@ -427,7 +475,6 @@ class DialogMode( MouseMode ):
         """
         Detect the released mouse button,check if collide with any object of the HUD
         and send all info to Dialog.
-
         @param event: a PyGame MOUSEBUTTONUP event
         @type event: PyGame Event
         @return: self

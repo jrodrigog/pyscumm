@@ -75,7 +75,6 @@ class Mouse( object ):
     def get_distance_drag( self ):
         """
         Get the minimal distance in pixels to condisider a gragging with the mouse.
-
         @return: The distance in pixels
         @rtype: Integer
         """
@@ -84,7 +83,6 @@ class Mouse( object ):
     def set_distance_drag( self, value ):
         """
         Set the minimal distance in pixel to consider a dragging with the mouse.
-
         @param value: The new distance nedeed in pixels
         @type value: Integer
         """
@@ -93,7 +91,6 @@ class Mouse( object ):
     def get_visible( self ):
         """
         Get if the mouse its visible.
-
         @return: The mouse visible value
         @rtype: Boolean
         """
@@ -102,7 +99,6 @@ class Mouse( object ):
     def set_visible( self, value ):
         """
         Set cursor visibility
-
         @param value: the visibility state
         @type value: Boolean
         @return: None
@@ -176,7 +172,7 @@ class Display( object ):
         @return: None
         """
         self._size = size
-        if _opened:
+        if self._opened:
             pygame.display.set_mode( (self._size[0], self._size[1]), pygame.DOUBLEBUF | pygame.OPENGL )
 
     def get_title( self ):
@@ -228,18 +224,21 @@ class GLDisplay( Display ):
     def open( self ):
         """
         Open the display window with the size setted.
-
         @return: None
         """
         if self._opened: return
         self._opened = True
         pygame.display.init()
+        if self.get_size() == None: self.set_size( (640,400) )
+        if self.get_title() == ('pygame window', 'pygame'): self.set_title( 'PySCUMM Engine Display (OpenGL)' )
+        else:
+            print self.get_title()
+            print 'NOO'
         pygame.display.set_mode( self._size, pygame.DOUBLEBUF | pygame.OPENGL )
 
     def close( self ):
         """
         Close que display window.
-
         @return None
         """
         if not self._opened: return
@@ -257,7 +256,6 @@ class SDLDisplay( Display ):
     def close( self ):
         """
         Close que display window.
-
         @return None
         """
         raise NotImplementedError
@@ -297,6 +295,7 @@ class Clock( object ):
         """
         Tick a frame and wait till next frame
         if we are drawing too fast.
+        @return: None
         """
         self._frame_count += 1
         time.sleep( self._get_raw_time() / self.sec_to_msec )
