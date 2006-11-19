@@ -1,4 +1,5 @@
 from types import NoneType
+import math
 
 class Vector2D( list ):
 	"""2D Vector class"""
@@ -43,6 +44,9 @@ class Vector2D( list ):
 		return self
 	def __eq__( self, o ):
 		return self[0] == o[0] and self[1] == o[1]
+	def length( self ):
+		return math.sqrt(
+			( self[0] * self[0] ) + ( self[1] * self[1] ) )
 	deserialize = classmethod( deserialize )
 		
 class Vector3D( list ):
@@ -99,6 +103,11 @@ class Vector3D( list ):
 		return self[0] == o[0]\
 			and self[1] == o[1]\
 			and self[2] == o[2]
+	def length( self ):
+		return math.sqrt(
+			( self[0] * self[0] )
+			+ ( self[1] * self[1] )
+			+ ( self[2] * self[2] ) )
 	deserialize = classmethod( deserialize )
 		
 class Vector4D( list ):
@@ -165,4 +174,11 @@ class Vector4D( list ):
 			and self[1] == o[1]\
 			and self[2] == o[2]\
 			and self[3] == o[3]
+	def length( self ):
+		return math.sqrt(
+			( self[0] * self[0] )
+			+ ( self[1] * self[1] )
+			+ ( self[2] * self[2] )
+			+ ( self[3] * self[3] ) )
+			
 	deserialize = classmethod( deserialize )
