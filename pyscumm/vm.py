@@ -24,7 +24,7 @@
 """
 
 from types import NoneType
-import pygame.event, base, driver
+import pygame.event, base, driver, vector
 
 class ChangeScene( Exception ):
     """
@@ -345,6 +345,7 @@ class NormalMode( VMState ):
         self._flag = 0
         self._time = [ None ] * 4
         self._drag = [ None ] * 4
+        self._loc  = vector.Vector3D()
 
     def keyboard_pressed( self, event ):
         VM().scene.on_key_down( event )
@@ -357,13 +358,13 @@ class NormalMode( VMState ):
     def mouse_pressed( self, event ):
         if event.button == self.BTN_LEFT:
             self._flag |= self.BTN_PRESS_LEFT
-            self._drag[ self.BTN_LEFT ] = VM().mouse.position
+            self._drag[ self.BTN_LEFT ] = VM().mouse.location
         elif event.button == self.BTN_CENTER:
             self._flag |= self.BTN_PRESS_CENTER
-            self._drag[ self.BTN_CENTER ] = VM().mouse.position
+            self._drag[ self.BTN_CENTER ] = VM().mouse.location
         elif event.button == self.BTN_RIGHT:
             self._flag |= self.BTN_PRESS_RIGHT
-            self._drag[ self.BTN_RIGHT ] = VM().mouse.position
+            self._drag[ self.BTN_RIGHT ] = VM().mouse.location
         return self
 
     def mouse_released( self, event ):
@@ -401,13 +402,21 @@ class NormalMode( VMState ):
 
     def update( self ):
         """Update method, generates drag, click and doubleclick events"""
+        # Current mouse location
+        location = VM().mouse.location
+        # Different position?
+        if not ( location == self._loc ):
+            # Send a mouse motion event
+            VM().scene.on_mouse_motion( self._loc.clone() )
+        # Update the mouse position
+        self._loc = location
 
         # Left Button
         # Button pressed?
         if ( self._flag & self.BTN_PRESS_LEFT ) == self.BTN_PRESS_LEFT:
             # Mouse not dragging?, Start a drag? Only after distance_drag pixels moved
             if ( ( self._flag & self.BTN_DRAG_LEFT ) != self.BTN_DRAG_LEFT ) \
-            and ( ( self._drag[ self.BTN_LEFT ] - VM().mouse.position ).length() > VM().mouse.distance_drag ):
+            and ( ( self._drag[ self.BTN_LEFT ] - location ).length() > VM().mouse.distance_drag ):
                 # Start dragging, set the drag bit
                 self._flag |= self.BTN_DRAG_LEFT
                 # ... launch an event
@@ -429,7 +438,7 @@ class NormalMode( VMState ):
         # Center Button
         if ( self._flag & self.BTN_PRESS_CENTER ) == self.BTN_PRESS_CENTER:
             if ( ( self._flag & self.BTN_DRAG_CENTER ) != self.BTN_DRAG_CENTER ) \
-            and ( ( self._drag[ self.BTN_CENTER ] - VM().mouse.position ).length() > VM().mouse.distance_drag ):
+            and ( ( self._drag[ self.BTN_CENTER ] - location ).length() > VM().mouse.distance_drag ):
                 self._flag |= self.BTN_DRAG_CENTER
                 VM().scene.on_mouse_drag_start( None, self.BTN_CENTER )
         elif ( self._flag & self.BTN_DRAG_CENTER ) == self.BTN_DRAG_CENTER:
@@ -442,7 +451,7 @@ class NormalMode( VMState ):
         # Right Button
         if ( self._flag & self.BTN_PRESS_RIGHT ) == self.BTN_PRESS_RIGHT:
             if ( ( self._flag & self.BTN_DRAG_RIGHT ) != self.BTN_DRAG_RIGHT ) \
-            and ( ( self._drag[ self.BTN_RIGHT ] - VM().mouse.position ).length() > VM().mouse.distance_drag ):
+            and ( ( self._drag[ self.BTN_RIGHT ] - location ).length() > VM().mouse.distance_drag ):
                 self._flag |= self.BTN_DRAG_RIGHT
                 VM().scene.on_mouse_drag_start( None, self.BTN_RIGHT )
         elif ( self._flag & self.BTN_DRAG_RIGHT ) == self.BTN_DRAG_RIGHT:

@@ -34,21 +34,21 @@ class Mouse( object ):
         self._distance_drag = 8
         self._visible = True
 
-    def get_position( self ):
+    def get_location( self ):
         """
-        Get the current position of the mouse cursor.
-        @return: Mouse cursor position
+        Get the current location of the mouse cursor.
+        @return: Mouse cursor location
         @rtype: pyscumm.vector.Vector3D
         """
         return pyscumm.vector.Vector3D( list( pygame.mouse.get_pos() ) + [0.] )
 
-    def set_position( self, pos ):
+    def set_location( self, pos ):
         """
-        Set the position of the mouse cursor.
-        @param pos: Mouse cursor position
+        Set the location of the mouse cursor.
+        @param pos: Mouse cursor location
         @type pos: pyscumm.vector.Vector3D
         """
-        pygame.mouse.set_pos( position[:2] )
+        pygame.mouse.set_pos( location[:2] )
 
     def get_time_double_click( self ):
         """
@@ -101,7 +101,7 @@ class Mouse( object ):
     time_double_click   = property( get_time_double_click, set_time_double_click )
     distance_drag       = property( get_distance_drag, set_distance_drag )
     visible             = property( get_visible, set_visible )
-    position            = property( get_position, set_position )
+    location            = property( get_location, set_location )
 
 
 class Display( object ):
@@ -150,7 +150,7 @@ class Display( object ):
         """
         return pygame.display.list_modes()
 
-    def toggle_fullscreen( self ):
+    def toggle_full_screen( self ):
         """
         Switch between windowed and fullscreen mode.
         @return: if available and successfull, will return True, else return False.
