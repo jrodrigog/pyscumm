@@ -340,7 +340,8 @@ class NormalMode( VMState ):
 
     def update( self ):
         if (self._pressed & self.MASK_BTN_LEFT) == self.MASK_BTN_LEFT:
-            VM().scene.on_mouse_click( 1, None )
+            pass
+        print VM().clock.time
         return self
 
     def draw( self ):

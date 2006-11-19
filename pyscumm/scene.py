@@ -19,7 +19,7 @@
 
 
 import pygame, os.path
-import base, vm
+import base, vm, logger
 
 class Scene( base.StateMachine, dict ):
     """
@@ -32,6 +32,8 @@ class Scene( base.StateMachine, dict ):
 
         This method notify a user request of close the display.
         """
+        if config.DEBUG:
+            print "[Scene::%s] 'on_quit' event launched ()"
         self._state = self._state.on_quit()
 
     def on_action_end( self, action ):
@@ -43,7 +45,8 @@ class Scene( base.StateMachine, dict ):
         @param action: the action that you wish to notify its aim
         @type action: Action
         """
-        print "[Scene::%s] 'on_action_end' event launched (%s)" % ( self._state.__class__.__name__, action )
+        if config.DEBUG:
+            print "[Scene::%s] 'on_action_end' event launched (%s)" % ( self._state.__class__.__name__, action )
         self._state = self._state.on_action_end( action )
 
     def on_mouse_motion( self, vector ):
@@ -56,7 +59,8 @@ class Scene( base.StateMachine, dict ):
         @type vector: Vector2D
         @return: None
         """
-        print "[Scene::%s] 'on_mouse_motion' event launched (%s)" % ( self._state.__class__.__name__, vector)
+        if config.DEBUG:
+            print "[Scene::%s] 'on_mouse_motion' event launched (%s)" % ( self._state.__class__.__name__, vector)
         self._state = self._state.on_mouse_motion( vector )
 
     def on_mouse_over( self, obj ):
@@ -69,7 +73,8 @@ class Scene( base.StateMachine, dict ):
         @type obj: Object
         @return: None
         """
-        print "[Scene::%s] 'on_mouse_over' event launched (%s)" % ( self._state.__class__.__name__, obj )
+        if config.DEBUG:
+            print "[Scene::%s] 'on_mouse_over' event launched (%s)" % ( self._state.__class__.__name__, obj )
         self._state = self._state.on_mouse_over( obj )
 
     def on_mouse_out( self, obj ):
@@ -82,7 +87,8 @@ class Scene( base.StateMachine, dict ):
         @type obj: Object
         @return: None
         """
-        print "[Scene::%s] 'on_mouse_out' event launched (%s)" % ( self._state.__class__.__name__, obj )
+        if config.DEBUG:
+            print "[Scene::%s] 'on_mouse_out' event launched (%s)" % ( self._state.__class__.__name__, obj )
         self._state = self._state.on_mouse_out( obj )
 
     def on_mouse_click( self, obj, button ):
@@ -96,7 +102,8 @@ class Scene( base.StateMachine, dict ):
         @param button: The name button that did click
         @type button: String
         """
-        print "[Scene::%s] 'mouse_click' event launched (%s, %s)" % ( self._state.__class__.__name__, obj, button )
+        if config.DEBUG:
+            print "[Scene::%s] 'mouse_click' event launched (%s, %s)" % ( self._state.__class__.__name__, obj, button )
         self._state = self._state.on_mouse_click( obj, button )
 
     def on_mouse_doubleclick( self, obj, button ):
@@ -110,7 +117,8 @@ class Scene( base.StateMachine, dict ):
         @param button: The name button that did double click
         @type button: String
         """
-        print "[Scene::%s] 'mouse_doubleclick' event launched (%s, %s)" % ( self._state.__class__.__name__, obj, button )
+        if config.DEBUG:
+            print "[Scene::%s] 'mouse_doubleclick' event launched (%s, %s)" % ( self._state.__class__.__name__, obj, button )
         self._state = self._state.on_mouse_doubleclick( obj, button )
 
     def on_drag_start( self, obj, button ):
@@ -124,7 +132,8 @@ class Scene( base.StateMachine, dict ):
         @param button: The button name that drag start
         @type button: String
         """
-        print "[Scene::%s] 'on_drag_start' event launched (%s, %s)" % ( self._state.__class__.__name__, obj, button )
+        if config.DEBUG:
+            print "[Scene::%s] 'on_drag_start' event launched (%s, %s)" % ( self._state.__class__.__name__, obj, button )
         self._state = self._state.on_drag_start( obj, button )
 
     def on_drag_end( self, obj, button ):
@@ -138,7 +147,8 @@ class Scene( base.StateMachine, dict ):
         @param button: The button name that start the drag
         @type button: String
         """
-        print "[Scene::%s] 'on_drag_end' event launched (%s, %s)" % ( self._state.__class__.__name__, obj, button )
+        if config.DEBUG:
+            print "[Scene::%s] 'on_drag_end' event launched (%s, %s)" % ( self._state.__class__.__name__, obj, button )
         self._state = self._state.on_drag_end( obj, button )
 
     def on_key_up( self, key ):
@@ -150,7 +160,8 @@ class Scene( base.StateMachine, dict ):
         @param key: The key that has released.
         @type key: String
         """
-        print "[Scene::%s] 'key_up' event launched (%s)" % ( self._state.__class__.__name__, key )
+        if config.DEBUG:
+            print "[Scene::%s] 'key_up' event launched (%s)" % ( self._state.__class__.__name__, key )
         self._state = self._state.on_key_up( key )
 
     def on_key_down( self, key ):
@@ -162,7 +173,8 @@ class Scene( base.StateMachine, dict ):
         @param key: The key that has pressed.
         @type key: String
         """
-        print "[Scene::%s] 'key_down' event launched (%s)" % ( self._state.__class__.__name__, key )
+        if config.DEBUG:
+            print "[Scene::%s] 'key_down' event launched (%s)" % ( self._state.__class__.__name__, key )
         self._state = self._state.on_key_down( key )
 
     def draw( self ):
