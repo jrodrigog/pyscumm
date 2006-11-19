@@ -393,7 +393,8 @@ class NormalMode( VMState ):
         if self._flag & btn_click:
             # Then this is a double click
             self._flag &= ~btn_click
-            # ... set the double click flag, update() will take care of it
+            # ... set the double click flag
+            # update() will take care of it
             self._flag |= btn_dbl_click
         # The button is not clicked, this is the first click
         elif not ( self._flag & btn_drag ):
