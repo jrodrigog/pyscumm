@@ -131,7 +131,8 @@ class Display( object ):
         Open the display window with the size setted.
         @return: None
         """
-        raise NotImplementedError
+        self._opened = True
+        pygame.init()
 
     def close( self ):
         """
@@ -227,7 +228,7 @@ class GLDisplay( Display ):
         @return: None
         """
         if self._opened: return
-        self._opened = True
+        Display.open( self )
         pygame.display.init()
         if self.get_size() == None: self.set_size( (640,400) )
         if self.get_title() == ('pygame window', 'pygame'): self.set_title( 'PySCUMM Engine Display (OpenGL)' )
