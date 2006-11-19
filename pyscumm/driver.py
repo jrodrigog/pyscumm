@@ -263,7 +263,7 @@ class Clock( object ):
         """Init a Clock object."""
         # Next frame tick time
         self._next_time = 0
-        # Interval between frame ticks */
+        # Interval between frame ticks
         self._tick_interval = 0
         # Frame count
         self._frame_count = 0
