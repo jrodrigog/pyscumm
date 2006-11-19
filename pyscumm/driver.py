@@ -137,8 +137,8 @@ class Display( object ):
         self._opened = True
         pygame.init()
         pygame.display.init()
-        pygame.display.set_caption( self._title )
-        pygame.display.set_mode( self._size[:2], self.open_flags )
+        self.title = self._title
+        self.size = self._size
 
     def close( self ):
         """
@@ -181,7 +181,7 @@ class Display( object ):
         """
         self._size = size
         if not self._opened: return
-        pygame.display.set_mode( self._size[:2], pygame.DOUBLEBUF | pygame.OPENGL )
+        pygame.display.set_mode( self._size[:2], self._open_flags )
 
     def get_title( self ):
         """
