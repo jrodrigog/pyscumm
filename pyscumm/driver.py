@@ -29,6 +29,7 @@ class Mouse( object ):
     """A Mouse Controller Class."""
 
     def __init__( self ):
+        """Build a Mouse object"""
         self._time_double_click = 0.300
         self._distance_drag = 8
         self._visible = True
@@ -113,9 +114,12 @@ class Display( object ):
     """A Display Controller class."""
 
     def __init__( self ):
+        """Build a Display object"""
         self._size = pyscumm.vector.Vector3D( [ 640, 480, 0 ] )
         self._icon = None
         self._opened = False
+        self._title = "pyscumm window"
+        self._open_flags = pygame.DOUBLEBUF | pygame.OPENGL
 
     def info( self ):
         """
@@ -132,13 +136,17 @@ class Display( object ):
         """
         self._opened = True
         pygame.init()
+        pygame.display.init()
+        pygame.display.set_caption( self._title )
+        pygame.display.set_mode( self._size[:2], self.open_flags )
 
     def close( self ):
         """
         Close que display window.
         @return None
         """
-        raise NotImplementedError
+        if not self._opened: return
+        pygame.display.quit()
 
     def list_modes( self ):
         """
@@ -181,7 +189,7 @@ class Display( object ):
         @return: The current title of the new display.
         @rtype: String
         """
-        return pygame.display.get_caption()
+        return self._title
 
     def set_title( self, title ):
         """
@@ -190,7 +198,25 @@ class Display( object ):
         @type title: string
         @return: None
         """
-        pygame.display.set_caption( title )
+        self._title = title
+        if self._opened: pygame.display.set_caption( self._title )
+
+    def get_open_flags( self ):
+        """
+        Get the Pygame flags used when opening the display.
+        @return: Pygame display open flags
+        @rtype: int
+        """
+        return self._open_flags
+
+    def set_open_flags( self, open_flags ):
+        """
+        Set the Pygame flags used when opening the display.
+        @param open flags: Pygame display open flags
+        @type open flags: int
+        @return: None
+        """
+        self._open_flags = open_flags
 
     def get_icon( self ):
         """
@@ -213,54 +239,29 @@ class Display( object ):
         @return: None
         """
         self._icon = icon
-        pygame.display.set_icon( icon )
+        if self._opened: pygame.display.set_icon( icon )
 
+    open_flags  = property( get_open_flags, get_open_flags )
     title       = property( get_title, set_title )
     size        = property( get_size, set_size )
     icon        = property( get_icon, set_icon )
 
 class GLDisplay( Display ):
     """OpenGL Display class."""
-    def open( self ):
-        """
-        Open the display window with the size setted.
-        @return: None
-        """
-        if self._opened: return
-        Display.open( self )
-        pygame.display.init()
-        self.set_title( 'PySCUMM Engine Display (OpenGL)' )
-        pygame.display.set_mode( self._size[:2], pygame.DOUBLEBUF | pygame.OPENGL )
-
-    def close( self ):
-        """
-        Close que display window.
-        @return None
-        """
-        if not self._opened: return
-        pygame.display.quit()
+    def __init__( self ):
+        """Build a GLDisplay object"""
+        Display.__init__( self )
+        self._open_flags = pygame.DOUBLEBUF | pygame.OPENGL
 
 class SDLDisplay( Display ):
     """SDL Display class."""
-    def open( self ):
-        """
-        Open the display window with the size setted.
-        @return: None
-        """
-        raise NotImplementedError
-
-    def close( self ):
-        """
-        Close que display window.
-        @return None
-        """
-        raise NotImplementedError
+    pass
 
 class Clock( object ):
-    sec_to_msec = 1000.
+    _sec_to_msec = 1000.
 
     def __init__( self ):
-        """Init a Clock object."""
+        """Build a Clock object."""
         # Next frame tick time
         self._next_time = 0
         # Interval between frame ticks
@@ -277,7 +278,7 @@ class Clock( object ):
         @type fps: float
         """
         self._limit = fps
-        self._tick_interval = self.sec_to_msec / self._limit
+        self._tick_interval = self._sec_to_msec / self._limit
         self._tick_interval *= 2 # double speed
 
     def get_limit( self ):
@@ -294,7 +295,7 @@ class Clock( object ):
         @return: None
         """
         self._frame_count += 1
-        time.sleep( self._get_raw_time() / self.sec_to_msec )
+        time.sleep( self._get_raw_time() / self._sec_to_msec )
 
     def _get_raw_time( self ):
         """
@@ -320,7 +321,7 @@ class Clock( object ):
         Get the frames per second.
         @return: float
         """
-        return self._frame_count / ( pygame.time.get_ticks() / self.sec_to_msec );
+        return self._frame_count / ( pygame.time.get_ticks() / self._sec_to_msec );
 
     fps      = property( get_fps )
     time     = property( get_time )
