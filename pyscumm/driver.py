@@ -30,8 +30,8 @@ class Mouse( object ):
 
     def __init__( self ):
         """Build a Mouse object"""
-        self._time_double_click = 150
-        self._distance_drag = 8
+        self._double_click_time = 150
+        self._drag_distance = 8
         self._visible = True
 
     def get_location( self ):
@@ -50,37 +50,37 @@ class Mouse( object ):
         """
         pygame.mouse.set_pos( location[:2] )
 
-    def get_time_double_click( self ):
+    def get_double_click_time( self ):
         """
         Get the current minimal time needed for a double click, in miliseconds.
         @return: Minimal time
         @rtype: float
         """
-        return self._time_double_click
+        return self._double_click_time
 
-    def set_time_double_click( self, value ):
+    def set_double_click_time( self, value ):
         """
         Set the current minimal time needed for a double click, in miliseconds.
         @param value: Minimal time
         @type value: int
         """
-        self._time_double_click = value
+        self._double_click_time = value
 
-    def get_distance_drag( self ):
+    def get_drag_distance( self ):
         """
         Get the minimal distance in pixels to start a mouse drag.
         @return: Distance in pixels
         @rtype: int
         """
-        return self._distance_drag
+        return self._drag_distance
 
-    def set_distance_drag( self, value ):
+    def set_drag_distance( self, value ):
         """
         Set the minimal distance in pixels to start a mouse drag.
         @param value: Distance in pixels
         @type value: int
         """
-        self._distance_drag = value
+        self._drag_distance = value
 
     def get_visible( self ):
         """
@@ -98,8 +98,8 @@ class Mouse( object ):
         """
         self._visible = value
 
-    time_double_click   = property( get_time_double_click, set_time_double_click )
-    distance_drag       = property( get_distance_drag, set_distance_drag )
+    double_click_time   = property( get_double_click_time, set_double_click_time )
+    drag_distance       = property( get_drag_distance, set_drag_distance )
     visible             = property( get_visible, set_visible )
     location            = property( get_location, set_location )
 

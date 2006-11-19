@@ -437,8 +437,8 @@ class NormalMode( VMState ):
         events."""
         # Current mouse location
         location = VM().mouse.location
-        d_drag   = VM().mouse.distance_drag
-        t_click  = VM().mouse.time_double_click
+        d_drag   = VM().mouse.drag_distance
+        t_click  = VM().mouse.double_click_time
         t        = VM().clock.time
 
         # Different position?
