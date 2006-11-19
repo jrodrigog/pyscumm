@@ -23,8 +23,7 @@
 @since: 14/11/2006
 """
 
-import pygame.display, pygame.mouse, time
-import pyscumm.vector
+import time, pygame.display, pygame.mouse, pyscumm.vector
 
 class Mouse( object ):
     """A Mouse Controller Class."""
@@ -114,7 +113,7 @@ class Display( object ):
     """A Display Controller class."""
 
     def __init__( self ):
-        self._size = None
+        self._size = pyscumm.vector.Vector3D( [ 640, 480, 0 ] )
         self._icon = None
         self._opened = False
 
@@ -161,20 +160,20 @@ class Display( object ):
         """
         Get the current size of the display.
         @return: The current display size.
-        @rtype: Tuple
+        @rtype: pygame.vector.Vector3D
         """
         return self._size
 
     def set_size( self, size ):
         """
         Set a new size to the display.
-        @param size: The new size of the display (X,Y).
-        @type size: 2-integer tuple
+        @param size: The new size of the display (X,Y,*).
+        @type size: pygame.vector.Vector3D
         @return: None
         """
         self._size = size
-        if self._opened:
-            pygame.display.set_mode( (self._size[0], self._size[1]), pygame.DOUBLEBUF | pygame.OPENGL )
+        if not self._opened: return
+        pygame.display.set_mode( self._size[:2], pygame.DOUBLEBUF | pygame.OPENGL )
 
     def get_title( self ):
         """
@@ -230,12 +229,8 @@ class GLDisplay( Display ):
         if self._opened: return
         Display.open( self )
         pygame.display.init()
-        if self.get_size() == None: self.set_size( (640,400) )
-        if self.get_title() == ('pygame window', 'pygame'): self.set_title( 'PySCUMM Engine Display (OpenGL)' )
-        else:
-            print self.get_title()
-            print 'NOO'
-        pygame.display.set_mode( self._size, pygame.DOUBLEBUF | pygame.OPENGL )
+        self.set_title( 'PySCUMM Engine Display (OpenGL)' )
+        pygame.display.set_mode( self._size[:2], pygame.DOUBLEBUF | pygame.OPENGL )
 
     def close( self ):
         """
