@@ -119,7 +119,7 @@ class Display( object ):
         self._icon = None
         self._opened = False
         self._title = "pyscumm window"
-        self._open_flags = pygame.DOUBLEBUF | pygame.OPENGL
+        self._open_flags = pygame.DOUBLEBUF
 
     def info( self ):
         """
