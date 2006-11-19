@@ -38,14 +38,14 @@ class ChangeScene( Exception ):
         Init's the ChangeScene exception, takes one
         parameter the new active Scene.
         @param scene: The VM's active scene
-        @type scene: scene.Scene
+        @type scene: Scene
         """
         self._scene = scene
 
     def get_scene( self ):
         """
         Get the Scene.
-        @return: scene.Scene
+        @return: Scene
         """
         return self._scene
 
@@ -53,9 +53,7 @@ class ChangeScene( Exception ):
 
 
 class StopVM( Exception ):
-    """
-    This exception halts the VM, completely stopping it. 
-    """
+    """This exception halts the VM, completely stopping it."""
     pass
 
 
@@ -103,70 +101,51 @@ class VM( base.StateMachine ):
         self._scene = None
 
     def quit( self ):
-        """
-        Report to the active state a quit event.
-        @return: None
-        """
+        """Report to the active state a quit event."""
         self._state = self._state.on_quit()
 
     def keyboard_pressed( self, event ):
         """
         Report to the active state a keyboard key pressed.
-
-        @param event: a PyGame KEYDOWN event
-        @type event: PyGame Event
-        @return: None
+        @param event: A Pygame KEYDOWN event
+        @type event: Event(PyGame)
         """
         self._state = self._state.keyboard_pressed( event )
 
     def keyboard_released( self, event ):
         """
         Report to the active state a keyboard key pressed.
-
-        @param event: a PyGame KEYUP event
-        @type event: PyGame Event
-        @return: None
+        @param event: A Pygame KEYUP event
+        @type event: Event(PyGame)
         """
         self._state = self._state.keyboard_released( event )
 
     def mouse_pressed( self, event ):
         """
         Report to the active state a mouse button pressed.
-        @param event: a PyGame MOUSEBUTTONDOWN event
-        @type event: PyGame Event
-        @return: None
+        @param event: A Pygame MOUSEBUTTONDOWN event
+        @type event: Event(Pygame)
         """
         self._state = self._state.mouse_pressed( event )
 
     def mouse_released( self, event ):
         """
         Report to the active state a mouse button released.
-        @param event: a PyGame MOUSEBUTTONUP event
-        @type event: PyGame Event
-        @return: None
+        @param event: A Pygame MOUSEBUTTONUP event
+        @type event: Event(Pygame)
         """
         self._state = self._state.mouse_released( event )
 
     def update( self ):
-        """
-        Send an update message to the active scene.
-        @return: None
-        """
+        """Send an update message to the active scene."""
         self._state.update()
 
     def draw( self ):
-        """
-        Send an update message to the active scene.
-        @return: None
-        """
+        """Send an update message to the active scene."""
         self._state.draw()
 
     def start( self ):
-        """
-        Reset the VM with the vm.NormalMode state.
-
-        @return: None
-        """
+        """Reset the VM with the vm.NormalMode state."""
         self._state = NormalMode()
 
     def main( self ):
@@ -175,8 +154,6 @@ class VM( base.StateMachine ):
         active state, update and render the scene each frame. if StopScene exception is launched,
         the VM stop self, and close the window.If however SceneChange exception is launched,
         the VM will reset single with the new scene data without close the window.
-
-        @return: None
         """
         self.start()
         self._display.open()
@@ -196,8 +173,8 @@ class VM( base.StateMachine ):
                         self.mouse_pressed( event )
                     elif event.type == pygame.MOUSEBUTTONUP:
                         self.mouse_released( event )
-                self._state.update()
-                self._state.draw()
+                self.update()
+                self.draw()
             except ChangeScene, e:
                 self._scene.stop()
                 self._scene = e.scene
@@ -220,60 +197,64 @@ class VM( base.StateMachine ):
     def get_clock( self ):
         """
         Get the VM's clock.
-        @return: driver.Clock
+        @return: A Clock object
+        @rtype: Clock
         """
         return self._clock
 
     def set_clock( self, clock ):
         """
         Set the VM's clock.
-        @param mouse: a Clock object
-        @type mouse: driver.Clock
+        @param clock: A Clock object
+        @type clock: Clock
         """
         self._clock = clock
 
     def get_display( self ):
         """
         Get the VM's display.
-        @return: driver.Display
+        @return: A Display object
+        @rtype: Display
         """
         return self._display
 
     def set_display( self, display ):
         """
         Set the VM's display.
-        @param mouse: a Display object
-        @type mouse: driver.Display
+        @param display: A Display object
+        @type display: Display
         """
         self._display = display
 
     def get_mouse( self ):
         """
         Get the VM's mouse.
-        @return: driver.Mouse
+        @return: A Mouse object
+        @rtype: Mouse
         """
         return self._mouse
 
     def set_mouse( self, mouse ):
         """
         Set the VM's mouse.
-        @param mouse: a Mouse object
-        @type mouse: driver.Mouse
+        @param mouse: A Mouse object
+        @type mouse: Mouse
         """
         self._mouse = mouse
 
     def get_scene( self ):
         """
         Get the VM's Scene.
-        @return: scene.Scene
+        @return: A Scene object
+        @rtype: Scene
         """
         return self._scene
 
     def set_scene( self, scene ):
         """
         Set the VM's Scene.
-        @param scene: a Scene object
-        @type scene: scene.Scene
+        @param scene: A Scene object
+        @type scene: Scene
         """
         self._scene = scene
 
@@ -286,12 +267,12 @@ class VM( base.StateMachine ):
 
 class VMState( base.State ):
     """
-    This class is a abstract state of the VM, the pre-mades  modes of VM inherit of this class.
-    You can inherit to write your owns modes (states).
-
-    VMState recieve the calls of VM with PyGame events, transform the PyGame Event object and process it to
-    check if was a click, a doubleclick, a key pressed, key released, etc..., check if the coordenate collide with any,
-    and depending of the VMState setted on VM, will launch the hight-level event to scene instance, the HUD, etc.
+    This class is a abstract state of the VM, the pre-mades modes of VM inherit from 
+    this class. You can inherit it to write your own modes (states).
+    VMState recieves the calls of the VM (Pygame events), transforms and process them to
+    check if was a click, a doubleclick, a key pressed, key released, etc..., check if 
+    the mouse collides with any object, and depending of the VMState setted on VM, 
+    will launch high-level events to the scene instance.
     """
 
     def __init__( self ):
