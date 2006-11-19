@@ -369,6 +369,7 @@ class NormalMode( VMState ):
         self._loc  = vector.Vector3D()
 
     def _process_update_motion( self, l_mouse ):
+        """ """
         # Different position?
         if not ( l_mouse == self._loc ):
             # Send a mouse motion event
@@ -377,6 +378,7 @@ class NormalMode( VMState ):
         self._loc = l_mouse
 
     def _process_mouse_pressed( self, btn, btn_press ):
+        """ """
         # Set the pressed flag
         self._flag |= btn_press
         # Record the current location of the mouse
@@ -384,6 +386,7 @@ class NormalMode( VMState ):
 
     def _process_mouse_released( self,
         btn, btn_press, btn_click, btn_dbl_click, btn_drag ):
+        """ """
         # Unset the pressed bit
         self._flag &= ~btn_press
         # Button clicked?
@@ -403,6 +406,7 @@ class NormalMode( VMState ):
     def _process_update_button( self,
         l_mouse, d_drag, t_click, t_now,
             btn, btn_press, btn_click, btn_dbl_click, btn_drag ):
+        """ """
         # Left Button
         # Button double clicked?
         if self._flag & btn_dbl_click:
@@ -490,9 +494,9 @@ class NormalMode( VMState ):
         d_drag  = VM().mouse.drag_distance
         t_click = VM().mouse.double_click_time
         t_now   = VM().clock.time
-
+        # Update the mouse motion
         self._process_update_motion( l_mouse )
-
+        # Process the left button
         self._process_update_button(
             l_mouse, d_drag, t_click, t_now,
             self.BTN_LEFT,
@@ -500,7 +504,7 @@ class NormalMode( VMState ):
             self.BTN_CLICK_LEFT,
             self.BTN_DBL_CLICK_LEFT,
             self.BTN_DRAG_LEFT )
-
+        # Process the center button
         self._process_update_button(
             l_mouse, d_drag, t_click, t_now,
             self.BTN_CENTER,
@@ -508,7 +512,7 @@ class NormalMode( VMState ):
             self.BTN_CLICK_CENTER,
             self.BTN_DBL_CLICK_CENTER,
             self.BTN_DRAG_CENTER )
-
+        # Process the right button
         self._process_update_button(
             l_mouse, d_drag, t_click, t_now,
             self.BTN_RIGHT,
@@ -516,7 +520,7 @@ class NormalMode( VMState ):
             self.BTN_CLICK_RIGHT,
             self.BTN_DBL_CLICK_RIGHT,
             self.BTN_DRAG_RIGHT )
-
+        # Update via the parent
         return VMState.update( self )
 
 class PassiveMode( VMState ):
