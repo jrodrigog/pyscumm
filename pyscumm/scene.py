@@ -19,21 +19,20 @@
 
 
 import pygame, os.path
-import base, vm, logger
+import base, vm
+
+import logger
 
 class Scene( base.StateMachine, dict ):
     """
-    A scene Machine for handle SceneStates
+    Scene Machine handles SceneStates
     """
 
     def on_quit( self ):
         """
         Call the "on_quit" method of the active SceneState.
-
-        This method notify a user request of close the display.
+        This method notifies a request to quit
         """
-        if config.DEBUG:
-            print "[Scene::%s] 'on_quit' event launched ()"
         self._state = self._state.on_quit()
 
     def on_action_end( self, action ):
@@ -42,139 +41,96 @@ class Scene( base.StateMachine, dict ):
 
         This method notify the conclusion of a action.
 
-        @param action: the action that you wish to notify its aim
+        @param action: The action ending
         @type action: Action
         """
-        if config.DEBUG:
-            print "[Scene::%s] 'on_action_end' event launched (%s)" % ( self._state.__class__.__name__, action )
         self._state = self._state.on_action_end( action )
 
-    def on_mouse_motion( self, vector ):
+    def on_mouse_motion( self, location ):
         """
         Call the "on_mouse_motion" method of the active SceneState.
 
         This method notify a movement in the mouse cursor.
 
-        @param vector: The vector position after movement
-        @type vector: Vector2D
-        @return: None
+        @param vector: The location of the cursor
+        @type vector: Vector3D
         """
-        if config.DEBUG:
-            print "[Scene::%s] 'on_mouse_motion' event launched (%s)" % ( self._state.__class__.__name__, vector)
-        self._state = self._state.on_mouse_motion( vector )
+        self._state = self._state.on_mouse_motion( location )
 
     def on_mouse_over( self, obj ):
         """
         Call the "on_mouse_over" method of the active SceneState.
-
-        This method notify that the mouse cursor position it start collision with an object.
-
-        @param obj: The object that are colliding
-        @type obj: Object
-        @return: None
+        @param obj: A list of objects under the cursor
+        @type obj: list
         """
-        if config.DEBUG:
-            print "[Scene::%s] 'on_mouse_over' event launched (%s)" % ( self._state.__class__.__name__, obj )
         self._state = self._state.on_mouse_over( obj )
 
     def on_mouse_out( self, obj ):
         """
         Call the "on_mouse_out" method of the active SceneState.
-
-        This method notify that the mouse cursor position it quit collision with an object.
-
-        @param obj: The object that are quit colliding
-        @type obj: Object
-        @return: None
+        @param obj: A list of objects under the cursor
+        @type obj: list
         """
-        if config.DEBUG:
-            print "[Scene::%s] 'on_mouse_out' event launched (%s)" % ( self._state.__class__.__name__, obj )
         self._state = self._state.on_mouse_out( obj )
 
     def on_mouse_click( self, obj, button ):
         """
         Call the "on_mouse_click" method of the active SceneState.
-
-        This method notify that the mouse did a single click on a object.
-
-        @param obj: The object where did click
-        @type obj: Object
+        This method notifies a mouse click.
+        @param obj: A list of objects under the cursor
+        @type obj: list
         @param button: The name button that did click
         @type button: String
         """
-        if config.DEBUG:
-            print "[Scene::%s] 'mouse_click' event launched (%s, %s)" % ( self._state.__class__.__name__, obj, button )
         self._state = self._state.on_mouse_click( obj, button )
 
-    def on_mouse_doubleclick( self, obj, button ):
+    def on_mouse_double_click( self, obj, button ):
         """
-        Call the "on_mouse_doubleclick" method of the active SceneState.
-
+        Call the "on_mouse_double_click" method of the active SceneState.
         This method notify that the mouse did a double click on a object.
-
-        @param obj: The object where did double click
-        @type obj: Object
+        @param obj: A list of objects under the cursor
+        @type obj: list
         @param button: The name button that did double click
         @type button: String
         """
-        if config.DEBUG:
-            print "[Scene::%s] 'mouse_doubleclick' event launched (%s, %s)" % ( self._state.__class__.__name__, obj, button )
-        self._state = self._state.on_mouse_doubleclick( obj, button )
+        self._state = self._state.on_mouse_double_click( obj, button )
 
     def on_drag_start( self, obj, button ):
         """
         Call the "on_drag_start" method of the active SceneState.
-
         This method notify that the mouse did start a drag movement.
-
-        @param obj: The object where start the drag
-        @type obj: Object
-        @param button: The button name that drag start
+        @param obj: A list of objects under the cursor
+        @type obj: list
+        @param button: The button name that starts the drag
         @type button: String
         """
-        if config.DEBUG:
-            print "[Scene::%s] 'on_drag_start' event launched (%s, %s)" % ( self._state.__class__.__name__, obj, button )
         self._state = self._state.on_drag_start( obj, button )
 
-    def on_drag_end( self, obj, button ):
+    def on_drag_end( self, button ):
         """
         Call the "on_drag_end" method of the active SceneState.
-
         This method notify that the mouse did end a drag movement..
-
-        @param obj: The object where end the drag
-        @type obj: Object
-        @param button: The button name that start the drag
+        @param button: The button that ends the drag
         @type button: String
         """
-        if config.DEBUG:
-            print "[Scene::%s] 'on_drag_end' event launched (%s, %s)" % ( self._state.__class__.__name__, obj, button )
-        self._state = self._state.on_drag_end( obj, button )
+        self._state = self._state.on_drag_end( button )
 
     def on_key_up( self, key ):
         """
         Call the "on_key_up" method of the active SceneState.
-
         This method notify a released key of keyboard.
-
         @param key: The key that has released.
         @type key: String
         """
-        if config.DEBUG:
-            print "[Scene::%s] 'key_up' event launched (%s)" % ( self._state.__class__.__name__, key )
         self._state = self._state.on_key_up( key )
 
     def on_key_down( self, key ):
         """
         Call the "on_key_down" method of the active SceneState.
-
         This method notify a pressed key of keyboard.
-
         @param key: The key that has pressed.
         @type key: String
         """
-        if config.DEBUG:
-            print "[Scene::%s] 'key_down' event launched (%s)" % ( self._state.__class__.__name__, key )
         self._state = self._state.on_key_down( key )
 
     def draw( self ):
@@ -219,6 +175,7 @@ class SceneState( base.StateMachine ):
 
         @return: self
         """
+        logger.Logger().info( "on_quit(%d)" )
         return self
 
     def on_action_end( self, action ):
@@ -227,14 +184,16 @@ class SceneState( base.StateMachine ):
 
         @return: self
         """
+        logger.Logger().info( "on_action_end(%s)" % action )
         return self
 
-    def on_mouse_motion( self, vector ):
+    def on_mouse_motion( self, location ):
         """
         (See: on_mouse_motion() method on scene.Scene class).
 
         @return: self
         """
+        logger.Logger().info( "on_mouse_motion(%s)" % location )
         return self
 
     def on_mouse_click( self, obj, button ):
@@ -243,14 +202,16 @@ class SceneState( base.StateMachine ):
 
         @return: self
         """
+        logger.Logger().info( "on_mouse_motion(%s,%s)" % ( obj, button ) )
         return self
 
-    def on_mouse_doubleclick( self, obj, button ):
+    def on_mouse_double_click( self, obj, button ):
         """
-        (See: on_mouse_doubleclick() method on scene.Scene class).
+        (See: on_mouse_double_click() method on scene.Scene class).
 
         @return: self
         """
+        logger.Logger().info( "on_mouse_double_click(%s,%s)" % ( obj, button ) )
         return self
 
     def on_mouse_over( self, obj ):
@@ -259,6 +220,7 @@ class SceneState( base.StateMachine ):
 
         @return: self
         """
+        logger.Logger().info( "on_mouse_over(%s)" % obj )
         return self
 
     def on_mouse_out( self, obj ):
@@ -267,6 +229,7 @@ class SceneState( base.StateMachine ):
 
         @return: self
         """
+        logger.Logger().info( "on_mouse_out(%s)" % obj )
         return self
 
     def on_drag_start( self, obj, button ):
@@ -275,14 +238,16 @@ class SceneState( base.StateMachine ):
 
         @return: self
         """
+        logger.Logger().info( "on_drag_start(%s,%s)" % ( obj, button ) )
         return self
 
-    def on_drag_end( self, obj, button ):
+    def on_drag_end( self, button ):
         """
         (See: on_drag_end() method on scene.Scene class).
 
         @return: self
         """
+        logger.Logger().info( "on_drag_end(%s)" % button )
         return self
 
     def on_key_up( self, key ):
@@ -291,6 +256,7 @@ class SceneState( base.StateMachine ):
 
         @return: self
         """
+        logger.Logger().info( "on_key_up(%s)" % key )
         return self
 
     def on_key_down( self, key ):
@@ -299,20 +265,21 @@ class SceneState( base.StateMachine ):
 
         @return: self
         """
+        logger.Logger().info( "on_key_down(%s)" % key )
         return self
 
     def draw( self ):
         """
         Draw all the scene objects.
         """
-        for obj in self.scene: obj.draw()
+        #for obj in self.scene: obj.draw()
         return self
 
     def update( self ):
         """
         Update all the Scene objects.
         """
-        for obj in self.scene: obj.update()
+        #for obj in self.scene: obj.update()
         return self
 
     scene    = property( get_scene )

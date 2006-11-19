@@ -266,7 +266,8 @@ class VMState( base.State ):
         base.State.__init__( self )
 
     def on_quit( self ):
-        raise NotImplementedError
+        VM().scene.on_quit()
+        return self
 
     def keyboard_pressed( self, event ):
         raise NotImplementedError
@@ -281,30 +282,33 @@ class VMState( base.State ):
         raise NotImplementedError
 
     def update( self ):
-        raise NotImplementedError
+        VM().scene.update()
+        return self
 
     def draw( self ):
-        raise NotImplementedError
+        VM().scene.draw()
+        return self
 
 
 class NormalMode( VMState ):
 
-    MASK_BTN_LEFT = 1<<0
-    MASK_BTN_CENTER = 1<<1
-    MASK_BTN_RIGHT = 1<<2
+    BTN_PRESS_LEFT   = 1<<1
+    BTN_PRESS_CENTER = 1<<2
+    BTN_PRESS_RIGHT  = 1<<3
 
-    BTN_LEFT = 0
-    BTN_CENTER = 1
-    BTN_RIGHT = 2
+    BTN_DRAG_LEFT    = 1<<5
+    BTN_DRAG_CENTER  = 1<<6
+    BTN_DRAG_RIGHT   = 1<<7
+
+    BTN_LEFT   = 1
+    BTN_CENTER = 2
+    BTN_RIGHT  = 3
 
     def __init__( self ):
         VMState.__init__( self )
-        self._pressed = 000
-        self._time = [ None, None, None ]
-
-    def on_quit( self ):
-        VM().scene.on_quit()
-        return self
+        self._flag = 0
+        self._time = [ None ] * 4
+        self._drag = [ None ] * 4
 
     def keyboard_pressed( self, event ):
         VM().scene.on_key_down( event.key )
@@ -315,38 +319,66 @@ class NormalMode( VMState ):
         return self
 
     def mouse_pressed( self, event ):
-        if event.button == 1:
-            self._pressed |= self.MASK_BTN_LEFT
+        if event.button == self.BTN_LEFT:
+            self._flag |= self.BTN_PRESS_LEFT
             self._time[ self.BTN_LEFT ] = VM().clock.time
-        elif event.button == 2:
-            self._pressed |= self.MASK_BTN_CENTER
+            self._drag[ self.BTN_LEFT ] = VM().mouse.position
+        elif event.button == self.BTN_CENTER:
+            self._flag |= self.BTN_PRESS_CENTER
             self._time[ self.BTN_CENTER ] = VM().clock.time
-        elif event.button == 3:
-            self._pressed |= self.MASK_BTN_RIGHT
+            self._drag[ self.BTN_CENTER ] = VM().mouse.position
+        elif event.button == self.BTN_RIGHT:
+            self._flag |= self.BTN_PRESS_RIGHT
             self._time[ self.BTN_RIGHT ] = VM().clock.time
+            self._drag[ self.BTN_RIGHT ] = VM().mouse.position
         return self
 
     def mouse_released( self, event ):
-        if event.button == 1:
-            self._pressed &= ~self.MASK_BTN_LEFT
-            self._time[ self.BTN_LEFT ] = VM().clock.time
-        elif event.button == 2:
-            self._pressed &= ~self.MASK_BTN_CENTER
-            self._time[ self.BTN_CENTER ] = VM().clock.time
-        elif event.button == 3:
-            self._pressed &= ~self.MASK_BTN_RIGHT
-            self._time[ self.BTN_RIGHT ] = VM().clock.time
+        if event.button == self.BTN_LEFT:
+            self._flag &= ~self.BTN_PRESS_LEFT
+        elif event.button == self.BTN_CENTER:
+            self._flag &= ~self.BTN_PRESS_CENTER
+        elif event.button == self.BTN_RIGHT:
+            self._flag &= ~self.BTN_PRESS_RIGHT
         return self
 
     def update( self ):
-        if (self._pressed & self.MASK_BTN_LEFT) == self.MASK_BTN_LEFT:
-            pass
-        print VM().clock.time
-        return self
+        """Update method, generates drag, click and doubleclick events"""
 
-    def draw( self ):
-        return self
+        # Left Button
+        if ( self._flag & self.BTN_PRESS_LEFT ) == self.BTN_PRESS_LEFT:
+            if ( ( self._flag & self.BTN_DRAG_LEFT ) != self.BTN_DRAG_LEFT ):
+                if ( self._drag[ self.BTN_LEFT ] - VM().mouse.position ).length() > VM().mouse.distance_drag:
+                    self._flag |= self.BTN_DRAG_LEFT
+                    VM().scene.on_drag_start( None, self.BTN_LEFT )
+        else:
+            if ( self._flag & self.BTN_DRAG_LEFT ) == self.BTN_DRAG_LEFT:
+                self._flag &= ~self.BTN_DRAG_LEFT
+                VM().scene.on_drag_end( self.BTN_LEFT )
 
+        # Center Button
+        if ( self._flag & self.BTN_PRESS_CENTER ) == self.BTN_PRESS_CENTER:
+            if ( ( self._flag & self.BTN_DRAG_CENTER ) != self.BTN_DRAG_CENTER ):
+                if ( self._drag[ self.BTN_CENTER ] - VM().mouse.position ).length() > VM().mouse.distance_drag:
+                    self._flag |= self.BTN_DRAG_CENTER
+                    VM().scene.on_drag_start( None, self.BTN_CENTER )
+        else:
+            if ( self._flag & self.BTN_DRAG_CENTER ) == self.BTN_DRAG_CENTER:
+                self._flag &= ~self.BTN_DRAG_CENTER
+                VM().scene.on_drag_end( self.BTN_CENTER )
+
+        # Right Button
+        if ( self._flag & self.BTN_PRESS_RIGHT ) == self.BTN_PRESS_RIGHT:
+            if ( ( self._flag & self.BTN_DRAG_RIGHT ) != self.BTN_DRAG_RIGHT ):
+                if ( self._drag[ self.BTN_RIGHT ] - VM().mouse.position ).length() > VM().mouse.distance_drag:
+                    self._flag |= self.BTN_DRAG_RIGHT
+                    VM().scene.on_drag_start( None, self.BTN_RIGHT )
+        else:
+            if ( self._flag & self.BTN_DRAG_RIGHT ) == self.BTN_DRAG_RIGHT:
+                self._flag &= ~self.BTN_DRAG_RIGHT
+                VM().scene.on_drag_end( self.BTN_RIGHT )
+
+        return VMState.update( self )
 
 class PassiveMode( VMState ):
     """

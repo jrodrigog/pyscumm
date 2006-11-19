@@ -41,7 +41,7 @@ class Mouse( object ):
         @return: the cursor position
         @rtype: pyscumm.vector.Vector3D
         """
-        return pyscumm.vector.Vector3D( pygame.mouse.get_pos )
+        return pyscumm.vector.Vector3D( list( pygame.mouse.get_pos() ) + [0.] )
 
     def set_position( self, pos ):
         """
@@ -108,6 +108,7 @@ class Mouse( object ):
     time_double_click   = property( get_time_double_click, set_time_double_click )
     distance_drag       = property( get_distance_drag, set_distance_drag )
     visible             = property( get_visible, set_visible )
+    position            = property( get_position, set_position )
 
 
 class Display( object ):

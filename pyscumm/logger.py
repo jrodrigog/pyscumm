@@ -8,6 +8,18 @@ class Logger( object ):
         if self._shared_state: return
         self._visual = True
 
+    def warn( self, message ):
+        if not self._visual: return
+        print "warn : %s" % message
+
+    def info( self, message ):
+        if not self._visual: return
+        print "info : %s" % message
+
+    def error( self, message ):
+        if not self._visual: return
+        print "error : %s" % message
+
     def get_visual( self ):
         return self._visual
 
