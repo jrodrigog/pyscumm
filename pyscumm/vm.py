@@ -70,28 +70,17 @@ class VM( base.StateMachine ):
 
     PySCUMM include pre-mades states:
 
-            - vm.PassiveMode: This state ignore all events type.
-            - vm.NormalMode: This state launch all events type to Game class.
-            - vm.KeyMode: This state only launch keyboard events to Game class.
-            - vm.MouseMode: This state only launch mouse events to Game class.
-            - vm.DialogMode: This state only launch mouse events to HUD class.
+            - vm.PassiveMode: This state ignores all events.
+            - vm.NormalMode: This state launchs all events.
+            - vm.KeyMode: This state only launchs keyboard.
+            - vm.MouseMode: This state launches mouse events (click, double_click, drag, ...).
+            - vm.DialogMode: This state only reports object clicked in the HUD.
     """
     # Singleton's shared state
     _shared_state = {}
     def __init__( self ):
-        """
-        Construct the Virtual Machine object saving some instances of components in private attributes.
-        this objects are statics, if one of this argument dont is passed, or already exist a instance of this,
-        this argument will be a new instance of the object.
-        @param scene: a Scene instance.
-        @type scene: scene.Scene
-        @param clock: a Clock instance.
-        @type clock: game.Clock
-        @param display: a Display instance.
-        @type display: game.Display
-        @param mouse: a Mouse instance.
-        @type mouse: game.Mouse
-        """
+        """Singletonize a VM object. Construct a Virtual Machine 
+        with it's default components."""
         self.__dict__ = self._shared_state
         if self._shared_state: return
         base.StateMachine.__init__( self )
@@ -187,6 +176,14 @@ class VM( base.StateMachine ):
         """
         Boot a scene. Prepare a Virtual Machine and
         start running the main loop.
+        @param scene: A Scene object
+        @type scene: Scene
+        @param clock: A Clock object
+        @type clock: Clock
+        @param display: A Display object
+        @type display: Display
+        @param mouse: A Mouse object
+        @type mouse: Mouse
         """
         if not isinstance( clock, NoneType ): VM().clock = clock
         if not isinstance( display, NoneType ): VM().display = display
@@ -276,35 +273,70 @@ class VMState( base.State ):
     """
 
     def __init__( self ):
+        """Build a VMState object."""
         base.State.__init__( self )
 
     def on_quit( self ):
+        """Receives a quit request and forward it to the Scene."""
         VM().scene.on_quit()
         return self
 
     def keyboard_pressed( self, event ):
-        raise NotImplementedError
+        """
+        Receives a keyboard pressed event and forward it.
+        @param event: A Pygame event
+        @type event: Event(Pygame)
+        """
+        VM().scene.on_key_down( event )
+        return self
 
     def keyboard_released( self, event ):
-        raise NotImplementedError
+        """
+        Receives a keyboard released event and forward it.
+        @param event: A Pygame event
+        @type event: Event(Pygame)
+        """
+        VM().scene.on_key_up( event )
+        return self
 
     def mouse_pressed( self, event ):
+        """
+        Receives a mouse pressed event and forwards it.
+        @param event: A Pygame event
+        @type event: Event(Pygame)
+        """
         raise NotImplementedError
 
     def mouse_released( self, event ):
+        """
+        Receives a mouse released event and forwards it.
+        @param event: A Pygame event
+        @type event: Event(Pygame)
+        """
         raise NotImplementedError
 
     def update( self ):
+        """Forward the update event to the Scene."""
         VM().scene.update()
         return self
 
     def draw( self ):
+        """Forward the draw event to the Scene."""
         VM().scene.draw()
         return self
 
 
 class NormalMode( VMState ):
+    """
+    NormalMode is a VM State that does picking (Mouse) related operations.
+    It generates mouse_click, mouse_double_click, mouse_start_drag,
+    mouse_end_drag and mouse_motion events.
+    This class is a Singleton, so when setting the VM's active state you
+    can program it like this:
+        VM().state = NormalMode()
+    """
 
+    # Bit Flags
     BTN_PRESS_LEFT   = 1<<1
     BTN_PRESS_CENTER = 1<<2
     BTN_PRESS_RIGHT  = 1<<3
@@ -317,26 +349,31 @@ class NormalMode( VMState ):
     BTN_DRAG_CENTER  = 1<<10
     BTN_DRAG_RIGHT   = 1<<11
 
+    # Button index, numbered as in Pygame's Events
     BTN_LEFT   = 1
     BTN_CENTER = 2
     BTN_RIGHT  = 3
 
+    # Singleton's shared state
+    _shared_state = {}
+
     def __init__( self ):
+        """Singletonize a NormalMode object."""
+        self.__dict__ = self._shared_state
+        if self.__dict__: return
         VMState.__init__( self )
         self._flag = 0
         self._time = [ None ] * 4
         self._drag = [ None ] * 4
         self._loc  = vector.Vector3D()
 
-    def keyboard_pressed( self, event ):
-        VM().scene.on_key_down( event )
-        return self
-
-    def keyboard_released( self, event ):
-        VM().scene.on_key_up( event )
-        return self
-
     def mouse_pressed( self, event ):
+        """
+        Receives a mouse pressed from Pygame and activates the
+        flag bits and sets the drag start locations if required.
+        @param event: A Pygame event
+        @type event: Event(Pygame)
+        """
         if event.button == self.BTN_LEFT:
             self._flag |= self.BTN_PRESS_LEFT
             self._drag[ self.BTN_LEFT ] = VM().mouse.location
@@ -349,6 +386,13 @@ class NormalMode( VMState ):
         return self
 
     def mouse_released( self, event ):
+        """
+        Receives a mouse release from Pygame and deactivates the
+        flag bits and resets the clicked timers if required.
+        This method generates on_mouse_double_click events.
+        @param event: A Pygame event
+        @type event: Event(Pygame)
+        """
         if event.button == self.BTN_LEFT:
             # Unset the pressed bit
             self._flag &= ~self.BTN_PRESS_LEFT
@@ -382,7 +426,9 @@ class NormalMode( VMState ):
         return self
 
     def update( self ):
-        """Update method, generates drag, click and doubleclick events"""
+        """Here the flags, timers and start locations are checked 
+        and acted upon their value. This method generates mouse_start_drag, 
+        mouse_end_drag, mouse_click and mouse_motion events."""
         # Current mouse location
         location = VM().mouse.location
         # Different position?
@@ -449,71 +495,93 @@ class NormalMode( VMState ):
 
 class PassiveMode( VMState ):
     """
-    This state of the VM, ignore all PyGame events, it get the events and it does not do anything with them.
-    PassiveMode  is the best VMState option, for game-intros, movie-mode,  and other situations where your scene
-    wanna ignore mouse or keyboard events.
+    This state of the VM, ignores all the PyGame events, it gets the
+    events and does nothing with them.
+    PassiveMode is the best VMState state, for game-intros, movie-modes and
+    other situations where your scene does not require events.
     """
+    # Singleton's shared state
+    _shared_state = {}
+
+    def __init__( self ):
+        """Singletonize a PassiveMode object."""
+        self.__init__ = self._shared_state
+        if self.__init__: return
+        VMState.__init__( self )
 
     def keyboard_pressed( self, event ):
         """
-        PassiveMode ignore all PyGame events.
-        @param event: a PyGame KEYDOWN event
-        @type event: PyGame Event
-        @return: self
+        Ignores this event.
+        @param event: A Pygame KEYDOWN event
+        @type event: Event(Pygame)
+        @return: This object
+        @rtype: PassiveMode
         """
         return self
 
     def keyboard_released( self, event ):
         """
-        PassiveMode ignore all PyGame events.
-        @param event: a PyGame KEYUP event
-        @type event: PyGame Event
-        @return: self
+        Ignores this event.
+        @param event: A Pygame KEYUP event
+        @type event: Event(Pygame)
+        @return: This object
+        @rtype: PassiveMode
         """
         return self
 
     def mouse_pressed( self, event ):
         """
-        PassiveMode ignore all PyGame events.
-        @param event: a PyGame MOUSEBUTTONDOWN event
-        @type event: PyGame Event
-        @return: self
+        Ignores this event.
+        @param event: A Pygame MOUSEBUTTONDOWN event
+        @type event: Event(Pygame)
+        @return: This object
+        @rtype: PassiveMode
         """
         return self
 
     def mouse_released( self, event ):
         """
-        PassiveMode ignore all PyGame events.
-        @param event: a PyGame MOUSEBUTTONUP event
-        @type event: PyGame Event
-        @return: self
+        Ignores this event.
+        @param event: A Pygame MOUSEBUTTONUP event
+        @type event: Event(Pygame)
+        @return: This object
+        @rtype: PassiveMode
         """
         return self
 
 
-class KeyMode( NormalMode ):
+class KeyMode( VMState ):
     """
-    This state of the VM, ignore PyGame mouse events, he get the PyGame Mouse events and it dont do anything with them.
-    if the event come of a keyboard device, it lauch to scene.
+    This state of the VM, ignores all events except when coming from the 
+    keyboard. KeyMode is the best VMState option when your scene needs to 
+    ignore all but the keyboard events.
+    """
+    # Singleton's shared state
+    _shared_state = {}
 
-    KeyMode  is the best VMState option where your scene wanna ignore mouse events.
-    """
+    def __init__( self ):
+        """Singletonize a KeyMode object."""
+        self.__init__ = self._shared_state
+        if self.__init__: return
+        VMState.__init__( self )
 
     def mouse_pressed( self, event ):
         """
-        KeyMode Ignore mouse events.
-        @param event: a PyGame MOUSEBUTTONDOWN event
-        @type event: PyGame Event
-        @return: self
+        Ignore this event.
+        @param event: A Pygame MOUSEBUTTONDOWN event
+        @type event: Event(Pygame)
+        @return: This object
+        @rtype: KeyMode
         """
         return self
 
     def mouse_released( self, event ):
         """
-        KeyMode Ignore mouse events.
-        @param event: a PyGame MOUSEBUTTONUP event
-        @type event: PyGame Event
-        @return: self
+        Ignore this event.
+        @param event: A Pygame MOUSEBUTTONUP event
+        @type event: Event(Pygame)
+        @return: This object
+        @rtype: KeyMode
         """
         return self
 
@@ -521,62 +589,45 @@ class KeyMode( NormalMode ):
 
 class MouseMode( NormalMode ):
     """
-    This mode (state) of the VM, ignore PyGame key events, he get the PyGame key events and it dont do anything with them.
-    if the event come of a mouse device, it lauch to scene.
-
-    MouseMode  is the best VMState option where your scene wanna ignore keyboard events.
+    This mode (state) of the VM, generates mouse events ignoring the 
+    keyboard ones. MouseMode is the best VM state when your 
+    scene requires mouse events only.
     """
+    _shared_state = {}
+
+    def __init__( self ):
+        """Singletonize a MouseMode object.""" 
+        self.__init__ = self._shared_state
+        if self.__init__: return
+        NormalMode.__init__( self )
 
     def keyboard_pressed( self, event ):
         """
-        MouseMode ignore keyboard events.
-        @param event: a PyGame KEYDOWN event
-        @type event: PyGame Event
-        @return: self
+        Ignore this event.
+        @param event: A Pygame KEYDOWN event
+        @type event: Event(Pygame)
+        @return: This object
+        @rtype: MouseMode
         """
         return self
 
     def keyboard_released( self, event ):
         """
-        MouseMode ignore keyboard events.
-        @param event: a PyGame KEYUP event
-        @type event: PyGame Event
-        @return: self
+        Ignore this event.
+        @param event: A PyGame KEYUP event
+        @type event: Event(Pygame)
+        @return: This object
+        @rtype: MouseMode
         """
         return self
 
 
 class DialogMode( MouseMode ):
     """
-    This state of the VM, its a little more different that the rest of pre-made states,
-    this only capture mouse events, but dont launch it to scene instance, if not to the HUD.
-
-    On this state, the mouse only collide with the visual elements of the dialog interface,
-    and ignore collides with actors, objects, etc... only with phrases and other elements of
-    the dialog interface.
-
-    The HUD is the class that handdle the visual interface of the dialogs, (see: HUD class)
-
-    MouseMode  is the best VMState option where your scene wanna ignore keyboard events
-    and the mouse only must be collide with dialog interface and nots in other objects of the scene.
+    On this state, the mouse only collides with the visual elements of the
+    dialog interface (HUD) and ignores all the other objects...
+    The HUD is the class that handdle the visual interface of the dialogs.
+    MouseMode is the best VM state when your scene is undergoing a dialog
+    between actors.
     """
-
-    def mouse_pressed( self, event ):
-        """
-        Detect the pressed mouse button,check if collide with any object of the HUD
-        and send all info to Dialog.
-        @param event: a PyGame MOUSEBUTTONDOWN event
-        @type event: PyGame Event
-        @return: self
-        """
-        return self
-
-    def mouse_released( self, event ):
-        """
-        Detect the released mouse button,check if collide with any object of the HUD
-        and send all info to Dialog.
-        @param event: a PyGame MOUSEBUTTONUP event
-        @type event: PyGame Event
-        @return: self
-        """
-        return self
+    pass
