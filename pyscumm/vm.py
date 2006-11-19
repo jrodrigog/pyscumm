@@ -435,7 +435,7 @@ class NormalMode( VMState ):
         and acted upon their value. This method generates mouse_start_drag, 
         mouse_end_drag, mouse_click, mouse_double_click and mouse_motion
         events."""
-        # Current mouse location
+        # Local variables, reduce call overhead
         location = VM().mouse.location
         d_drag   = VM().mouse.drag_distance
         t_click  = VM().mouse.double_click_time
