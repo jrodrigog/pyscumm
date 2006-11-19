@@ -52,7 +52,7 @@ class Mouse( object ):
 
     def get_time_double_click( self ):
         """
-        Get the current minimal time needed for wait 2 click and consider him a double click.
+        Get the current minimal time needed for a double click, in miliseconds.
         @return: Minimal time
         @rtype: float
         """
@@ -60,7 +60,7 @@ class Mouse( object ):
 
     def set_time_double_click( self, value ):
         """
-        Set the minimal time needed for wait 2 click and consider him a double click.
+        Set the current minimal time needed for a double click, in miliseconds.
         @param value: Minimal time
         @type value: int
         """
@@ -263,7 +263,7 @@ class Clock( object ):
         # Frame count
         self._frame_count = 0
         # Frame rate limit
-        self._limit = 60
+        self.limit = 60
 
     def set_limit( self, fps ):
         """
@@ -273,7 +273,7 @@ class Clock( object ):
         """
         self._limit = fps
         self._tick_interval = self._sec_to_msec / self._limit
-        self._tick_interval *= 2 # double speed
+        self._tick_interval *= 2. # double speed
 
     def get_limit( self ):
         """
@@ -299,7 +299,7 @@ class Clock( object ):
         now = pygame.time.get_ticks()
         if self._next_time <= now:
             self._next_time = now + self._tick_interval
-            return 0
+            return 0.
         return self._next_time - now
 
     def get_time( self ):

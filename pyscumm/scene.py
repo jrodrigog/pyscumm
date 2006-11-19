@@ -93,25 +93,25 @@ class Scene( base.StateMachine, dict ):
         """
         self._state = self._state.on_mouse_double_click( obj, button )
 
-    def on_drag_start( self, obj, button ):
+    def on_mouse_drag_start( self, obj, button ):
         """
-        Call the "on_drag_start" method of the active SceneState.
+        Call the "on_mouse_drag_start" method of the active SceneState.
         This method notify that the mouse did start a drag movement.
         @param obj: A list of objects under the cursor
         @type obj: list
         @param button: The button name that starts the drag
         @type button: String
         """
-        self._state = self._state.on_drag_start( obj, button )
+        self._state = self._state.on_mouse_drag_start( obj, button )
 
-    def on_drag_end( self, button ):
+    def on_mouse_drag_end( self, button ):
         """
-        Call the "on_drag_end" method of the active SceneState.
+        Call the "on_mouse_drag_end" method of the active SceneState.
         This method notify that the mouse did end a drag movement..
         @param button: The button that ends the drag
         @type button: String
         """
-        self._state = self._state.on_drag_end( button )
+        self._state = self._state.on_mouse_drag_end( button )
 
     def on_key_up( self, key ):
         """
@@ -230,22 +230,22 @@ class SceneState( base.StateMachine ):
         base.Logger().info( "on_mouse_out(%s)" % obj )
         return self
 
-    def on_drag_start( self, obj, button ):
+    def on_mouse_drag_start( self, obj, button ):
         """
-        (See: on_drag_start() method on scene.Scene class).
+        (See: on_mouse_drag_start() method on scene.Scene class).
 
         @return: self
         """
-        base.Logger().info( "on_drag_start(%s,%s)" % ( obj, button ) )
+        base.Logger().info( "on_mouse_drag_start(%s,%s)" % ( obj, button ) )
         return self
 
-    def on_drag_end( self, button ):
+    def on_mouse_drag_end( self, button ):
         """
-        (See: on_drag_end() method on scene.Scene class).
+        (See: on_mouse_drag_end() method on scene.Scene class).
 
         @return: self
         """
-        base.Logger().info( "on_drag_end(%s)" % button )
+        base.Logger().info( "on_mouse_drag_end(%s)" % button )
         return self
 
     def on_key_up( self, key ):

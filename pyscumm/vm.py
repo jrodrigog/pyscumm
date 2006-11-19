@@ -347,11 +347,11 @@ class NormalMode( VMState ):
         self._drag = [ None ] * 4
 
     def keyboard_pressed( self, event ):
-        VM().scene.on_key_down( event.key )
+        VM().scene.on_key_down( event )
         return self
 
     def keyboard_released( self, event ):
-        VM().scene.on_key_up( event.key )
+        VM().scene.on_key_up( event )
         return self
 
     def mouse_pressed( self, event ):
@@ -411,13 +411,13 @@ class NormalMode( VMState ):
                 # Start dragging, set the drag bit
                 self._flag |= self.BTN_DRAG_LEFT
                 # ... launch an event
-                VM().scene.on_drag_start( None, self.BTN_LEFT )
+                VM().scene.on_mouse_drag_start( None, self.BTN_LEFT )
         # There is no button pressed, Is the mouse dragging?
         elif ( self._flag & self.BTN_DRAG_LEFT ) == self.BTN_DRAG_LEFT:
             # If it is stop dragging, unset the bit
             self._flag &= ~self.BTN_DRAG_LEFT
             # ... and send an event
-            VM().scene.on_drag_end( self.BTN_LEFT )
+            VM().scene.on_mouse_drag_end( self.BTN_LEFT )
         # There is no button pressed, was the button clicked?
         elif ( ( self._flag & self.BTN_CLICK_LEFT ) == self.BTN_CLICK_LEFT ) and ( ( VM().clock.time - self._time[ self.BTN_LEFT ] ) > VM().mouse.time_double_click ):
             # If it is clicked and the double click timeout expired
@@ -431,10 +431,10 @@ class NormalMode( VMState ):
             if ( ( self._flag & self.BTN_DRAG_CENTER ) != self.BTN_DRAG_CENTER ) \
             and ( ( self._drag[ self.BTN_CENTER ] - VM().mouse.position ).length() > VM().mouse.distance_drag ):
                 self._flag |= self.BTN_DRAG_CENTER
-                VM().scene.on_drag_start( None, self.BTN_CENTER )
+                VM().scene.on_mouse_drag_start( None, self.BTN_CENTER )
         elif ( self._flag & self.BTN_DRAG_CENTER ) == self.BTN_DRAG_CENTER:
             self._flag &= ~self.BTN_DRAG_CENTER
-            VM().scene.on_drag_end( self.BTN_CENTER )
+            VM().scene.on_mouse_drag_end( self.BTN_CENTER )
         elif ( ( self._flag & self.BTN_CLICK_CENTER ) == self.BTN_CLICK_CENTER ) and ( ( VM().clock.time - self._time[ self.BTN_CENTER ] ) > VM().mouse.time_double_click ):
             self._flag &= ~self.BTN_CLICK_CENTER
             VM().scene.on_mouse_click( None, self.BTN_CENTER )
@@ -444,10 +444,10 @@ class NormalMode( VMState ):
             if ( ( self._flag & self.BTN_DRAG_RIGHT ) != self.BTN_DRAG_RIGHT ) \
             and ( ( self._drag[ self.BTN_RIGHT ] - VM().mouse.position ).length() > VM().mouse.distance_drag ):
                 self._flag |= self.BTN_DRAG_RIGHT
-                VM().scene.on_drag_start( None, self.BTN_RIGHT )
+                VM().scene.on_mouse_drag_start( None, self.BTN_RIGHT )
         elif ( self._flag & self.BTN_DRAG_RIGHT ) == self.BTN_DRAG_RIGHT:
             self._flag &= ~self.BTN_DRAG_RIGHT
-            VM().scene.on_drag_end( self.BTN_RIGHT )
+            VM().scene.on_mouse_drag_end( self.BTN_RIGHT )
         elif ( ( self._flag & self.BTN_CLICK_RIGHT ) == self.BTN_CLICK_RIGHT ) and ( ( VM().clock.time - self._time[ self.BTN_RIGHT ] ) > VM().mouse.time_double_click ):
             self._flag &= ~self.BTN_CLICK_RIGHT
             VM().scene.on_mouse_click( None, self.BTN_RIGHT )
