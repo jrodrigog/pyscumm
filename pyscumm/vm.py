@@ -340,15 +340,15 @@ class NormalMode( VMState ):
     BTN_PRESS_LEFT       = 1
     BTN_PRESS_CENTER     = 1<<1
     BTN_PRESS_RIGHT      = 1<<2
-    BTN_CLICK_LEFT       = 1<<3
-    BTN_CLICK_CENTER     = 1<<4
-    BTN_CLICK_RIGHT      = 1<<5
-    BTN_DBL_CLICK_LEFT   = 1<<6
-    BTN_DBL_CLICK_CENTER = 1<<7
-    BTN_DBL_CLICK_RIGHT  = 1<<8
-    BTN_DRAG_LEFT        = 1<<9
-    BTN_DRAG_CENTER      = 1<<10
-    BTN_DRAG_RIGHT       = 1<<11
+    BTN_CLICK_LEFT       = 1<<4
+    BTN_CLICK_CENTER     = 1<<5
+    BTN_CLICK_RIGHT      = 1<<6
+    BTN_DBL_CLICK_LEFT   = 1<<8
+    BTN_DBL_CLICK_CENTER = 1<<9
+    BTN_DBL_CLICK_RIGHT  = 1<<10
+    BTN_DRAG_LEFT        = 1<<12
+    BTN_DRAG_CENTER      = 1<<13
+    BTN_DRAG_RIGHT       = 1<<14
 
     # Button index, numbered as in Pygame's Events
     BTN_LEFT   = 1
@@ -375,8 +375,11 @@ class NormalMode( VMState ):
         @param event: A Pygame event
         @type event: Event(Pygame)
         """
+        # Button pressed?
         if event.button == self.BTN_LEFT:
+            # Set the pressed flag
             self._flag |= self.BTN_PRESS_LEFT
+            # Record the current location of the mouse
             self._drag[ self.BTN_LEFT ] = VM().mouse.location
         elif event.button == self.BTN_CENTER:
             self._flag |= self.BTN_PRESS_CENTER
@@ -402,8 +405,10 @@ class NormalMode( VMState ):
                 self._flag &= ~self.BTN_CLICK_LEFT
                 # ... set the double click flag, update() will take care of it
                 self._flag |= self.BTN_DBL_CLICK_LEFT
+            # The button is not clicked, this is the first click
             elif ( self._flag & self.BTN_DRAG_LEFT ) != self.BTN_DRAG_LEFT:
-                # If it is not, the user has clicked one time
+                # The user has clicked one time
+                # set the flag bit
                 self._flag |= self.BTN_CLICK_LEFT
                 # Start the timer
                 self._time[ self.BTN_LEFT ] = VM().clock.time
@@ -449,17 +454,17 @@ class NormalMode( VMState ):
         # Button pressed?
         elif ( self._flag & self.BTN_PRESS_LEFT ) == self.BTN_PRESS_LEFT:
             # Mouse not dragging?, Start a drag? Only after distance_drag pixels moved
-            if ( ( self._flag & self.BTN_DRAG_LEFT ) != self.BTN_DRAG_LEFT ) \
+            if ( ( self._flag & self.BTN_DRAG_LEFT ) != self.BTN_DRAG_LEFT )\
             and ( ( self._drag[ self.BTN_LEFT ] - location ).length() > VM().mouse.distance_drag ):
                 # Start dragging, set the drag bit
                 self._flag |= self.BTN_DRAG_LEFT
-                # ... launch an event
+                # ... launch the event
                 VM().scene.on_mouse_drag_start( None, self.BTN_LEFT )
         # There is no button pressed, Is the mouse dragging?
         elif ( self._flag & self.BTN_DRAG_LEFT ) == self.BTN_DRAG_LEFT:
             # If it is stop dragging, unset the bit
             self._flag &= ~self.BTN_DRAG_LEFT
-            # ... and send an event
+            # ... and send the event
             VM().scene.on_mouse_drag_end( self.BTN_LEFT )
         # There is no button pressed, was the button clicked?
         elif ( ( self._flag & self.BTN_CLICK_LEFT ) == self.BTN_CLICK_LEFT )\
@@ -467,7 +472,7 @@ class NormalMode( VMState ):
             # If it is clicked and the double click timeout expired
             # unset the clicked bit
             self._flag &= ~self.BTN_CLICK_LEFT
-            # ... and send a clicked event
+            # ... and send the event
             VM().scene.on_mouse_click( None, self.BTN_LEFT )
 
         # Center Button
