@@ -21,8 +21,6 @@
 import pygame, os.path
 import base, vm
 
-import logger
-
 class Scene( base.StateMachine, dict ):
     """
     Scene Machine handles SceneStates
@@ -175,8 +173,8 @@ class SceneState( base.StateMachine ):
 
         @return: self
         """
-        logger.Logger().info( "on_quit(%d)" )
-        return self
+        base.Logger().info( "on_quit()" )
+        raise vm.StopVM()
 
     def on_action_end( self, action ):
         """
@@ -184,7 +182,7 @@ class SceneState( base.StateMachine ):
 
         @return: self
         """
-        logger.Logger().info( "on_action_end(%s)" % action )
+        base.Logger().info( "on_action_end(%s)" % action )
         return self
 
     def on_mouse_motion( self, location ):
@@ -193,7 +191,7 @@ class SceneState( base.StateMachine ):
 
         @return: self
         """
-        logger.Logger().info( "on_mouse_motion(%s)" % location )
+        base.Logger().info( "on_mouse_motion(%s)" % location )
         return self
 
     def on_mouse_click( self, obj, button ):
@@ -202,7 +200,7 @@ class SceneState( base.StateMachine ):
 
         @return: self
         """
-        logger.Logger().info( "on_mouse_motion(%s,%s)" % ( obj, button ) )
+        base.Logger().info( "on_mouse_click(%s,%s)" % ( obj, button ) )
         return self
 
     def on_mouse_double_click( self, obj, button ):
@@ -211,7 +209,7 @@ class SceneState( base.StateMachine ):
 
         @return: self
         """
-        logger.Logger().info( "on_mouse_double_click(%s,%s)" % ( obj, button ) )
+        base.Logger().info( "on_mouse_double_click(%s,%s)" % ( obj, button ) )
         return self
 
     def on_mouse_over( self, obj ):
@@ -220,7 +218,7 @@ class SceneState( base.StateMachine ):
 
         @return: self
         """
-        logger.Logger().info( "on_mouse_over(%s)" % obj )
+        base.Logger().info( "on_mouse_over(%s)" % obj )
         return self
 
     def on_mouse_out( self, obj ):
@@ -229,7 +227,7 @@ class SceneState( base.StateMachine ):
 
         @return: self
         """
-        logger.Logger().info( "on_mouse_out(%s)" % obj )
+        base.Logger().info( "on_mouse_out(%s)" % obj )
         return self
 
     def on_drag_start( self, obj, button ):
@@ -238,7 +236,7 @@ class SceneState( base.StateMachine ):
 
         @return: self
         """
-        logger.Logger().info( "on_drag_start(%s,%s)" % ( obj, button ) )
+        base.Logger().info( "on_drag_start(%s,%s)" % ( obj, button ) )
         return self
 
     def on_drag_end( self, button ):
@@ -247,7 +245,7 @@ class SceneState( base.StateMachine ):
 
         @return: self
         """
-        logger.Logger().info( "on_drag_end(%s)" % button )
+        base.Logger().info( "on_drag_end(%s)" % button )
         return self
 
     def on_key_up( self, key ):
@@ -256,7 +254,7 @@ class SceneState( base.StateMachine ):
 
         @return: self
         """
-        logger.Logger().info( "on_key_up(%s)" % key )
+        base.Logger().info( "on_key_up(%s)" % key )
         return self
 
     def on_key_down( self, key ):
@@ -265,7 +263,7 @@ class SceneState( base.StateMachine ):
 
         @return: self
         """
-        logger.Logger().info( "on_key_down(%s)" % key )
+        base.Logger().info( "on_key_down(%s)" % key )
         return self
 
     def draw( self ):

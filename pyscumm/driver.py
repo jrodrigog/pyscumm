@@ -30,78 +30,71 @@ class Mouse( object ):
 
     def __init__( self ):
         """Build a Mouse object"""
-        self._time_double_click = 0.300
+        self._time_double_click = 150
         self._distance_drag = 8
         self._visible = True
 
     def get_position( self ):
         """
-        Get the current X,Y position of the mouse cursor.
-
-        @return: the cursor position
+        Get the current position of the mouse cursor.
+        @return: Mouse cursor position
         @rtype: pyscumm.vector.Vector3D
         """
         return pyscumm.vector.Vector3D( list( pygame.mouse.get_pos() ) + [0.] )
 
     def set_position( self, pos ):
         """
-        Set a new X,Y position of the mouse cursor.
-
-        @param pos: The new position of mouse cursor
+        Set the position of the mouse cursor.
+        @param pos: Mouse cursor position
         @type pos: pyscumm.vector.Vector3D
-        @return: None
         """
         pygame.mouse.set_pos( position[:2] )
 
     def get_time_double_click( self ):
         """
         Get the current minimal time needed for wait 2 click and consider him a double click.
-
-        @return: The current time for a doubleclick
-        @rtype: Float
+        @return: Minimal time
+        @rtype: float
         """
         return self._time_double_click
 
     def set_time_double_click( self, value ):
         """
         Set the minimal time needed for wait 2 click and consider him a double click.
-
-        @param value: The new minimal time nedeed.
-        @type value: Float
-        @return: None
+        @param value: Minimal time
+        @type value: int
         """
         self._time_double_click = value
 
     def get_distance_drag( self ):
         """
-        Get the minimal distance in pixels to condisider a gragging with the mouse.
-        @return: The distance in pixels
-        @rtype: Integer
+        Get the minimal distance in pixels to start a mouse drag.
+        @return: Distance in pixels
+        @rtype: int
         """
         return self._distance_drag
 
     def set_distance_drag( self, value ):
         """
-        Set the minimal distance in pixel to consider a dragging with the mouse.
-        @param value: The new distance nedeed in pixels
-        @type value: Integer
+        Set the minimal distance in pixels to start a mouse drag.
+        @param value: Distance in pixels
+        @type value: int
         """
         self._distance_drag = value
 
     def get_visible( self ):
         """
-        Get if the mouse its visible.
-        @return: The mouse visible value
-        @rtype: Boolean
+        Set the system mouse cursor visibility.
+        @return: Visibility state
+        @rtype: bool
         """
         return self._visible
 
     def set_visible( self, value ):
         """
-        Set cursor visibility
-        @param value: the visibility state
-        @type value: Boolean
-        @return: None
+        Set the system mouse cursor visibility.
+        @param value: Visibility state
+        @type value: bool
         """
         self._visible = value
 

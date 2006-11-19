@@ -33,8 +33,7 @@ class StateMachine( object ):
     def start( self ):
         """
         Start the state machine, this method need reimplementation
-        on machine subclass, where you can start a machine with a state.if
-
+        on machine subclass, where you can start a machine with a state.
         if call this method without reimplement,
         a NotImplementedError excepcion is launched
         """
@@ -42,8 +41,7 @@ class StateMachine( object ):
 
     def get_state( self ):
         """
-        Get the active state of the machine
-
+        Get the active state of the machine.
         @return: State
         """
         return self._state
@@ -51,26 +49,73 @@ class StateMachine( object ):
     def set_state( self, state ):
         """
         Set a new state in the machine.
-
         @param state: The new state to active.
         @type state: State Object
-        @return: None
         """
         self._state = state
 
-    state    = property( get_state, set_state )
+    state = property( get_state, set_state )
 
 
 class State( object ):
     """
     Abstract state (See: state pattern).
     """
+    pass
 
-    _instance = None
+class Logger( object ):
+    """A Singleton Logger class"""
 
-    def instance( self ):
-        if not self._instance:
-            self._instance = self()
-        return self._instance
+    _shared_state = {}
 
-    instance    = classmethod( instance )
+    def __init__( self ):
+        """Build a Logger object"""
+        self.__dict__ = self._shared_state
+        if self._shared_state: return
+        self._visual = True
+
+    def warn( self, message ):
+        """
+        Log a warn message.
+        @param message: The message to log
+        @type state: String
+        """
+        if not self._visual: return
+        print "[pyscumm] warn : %s" % message
+
+    def info( self, message ):
+        """
+        Log an info message.
+        @param message: The message to log
+        @type state: String
+        """
+        if not self._visual: return
+        print "[pyscumm] info : %s" % message
+
+    def error( self, message ):
+        """
+        Log an error message.
+        @param message: The message to log
+        @type state: String
+        """
+        if not self._visual: return
+        print "[pyscumm] error : %s" % message
+
+    def get_visual( self ):
+        """
+        Get the visual logging output state.
+        @return: Visual logging state
+        @rtype: bool
+        """
+        return self._visual
+
+    def set_visual( self, visual ):
+        """
+        Set the visual logging output state, set this to
+        False and it won't print logging messages.
+        @param visual: Visual logging state
+        @type visual: bool
+        """
+        self._visual = visual
+
+    visual = property( get_visual, set_visual )
