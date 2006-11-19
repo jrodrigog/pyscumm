@@ -44,7 +44,7 @@ class Scene( base.StateMachine, dict ):
         """
         self._state = self._state.on_action_end( action )
 
-    def on_mouse_motion( self, location ):
+    def on_mouse_motion( self, pos ):
         """
         Call the "on_mouse_motion" method of the active SceneState.
 
@@ -53,7 +53,7 @@ class Scene( base.StateMachine, dict ):
         @param vector: The location of the cursor
         @type vector: Vector3D
         """
-        self._state = self._state.on_mouse_motion( location )
+        self._state = self._state.on_mouse_motion( pos )
 
     def on_mouse_over( self, obj ):
         """

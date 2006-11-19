@@ -79,7 +79,7 @@ class VM( base.StateMachine ):
     # Singleton's shared state
     _shared_state = {}
     def __init__( self ):
-        """Singletonize a VM object. Construct a Virtual Machine 
+        """Singletonize a VM object. Construct a Virtual Machine
         with it's default components."""
         self.__dict__ = self._shared_state
         if self._shared_state: return
@@ -162,6 +162,8 @@ class VM( base.StateMachine ):
                         self.mouse_pressed( event )
                     elif event.type == pygame.MOUSEBUTTONUP:
                         self.mouse_released( event )
+                    elif event.type == pygame.MOUSEMOTION:
+                        self._state._process_update_motion( VM().mouse.location )
                 self.update()
                 self.draw()
             except ChangeScene, e:
@@ -264,11 +266,11 @@ class VM( base.StateMachine ):
 
 class VMState( base.State ):
     """
-    This class is a abstract state of the VM, the pre-mades modes of VM inherit from 
+    This class is a abstract state of the VM, the pre-mades modes of VM inherit from
     this class. You can inherit it to write your own modes (states).
     VMState recieves the calls of the VM (Pygame events), transforms and process them to
-    check if was a click, a doubleclick, a key pressed, key released, etc..., check if 
-    the mouse collides with any object, and depending of the VMState setted on VM, 
+    check if was a click, a doubleclick, a key pressed, key released, etc..., check if
+    the mouse collides with any object, and depending of the VMState setted on VM,
     will launch high-level events to the scene instance.
     """
 
@@ -370,12 +372,8 @@ class NormalMode( VMState ):
 
     def _process_update_motion( self, l_mouse ):
         """ """
-        # Different position?
-        if not ( l_mouse == self._loc ):
-            # Send a mouse motion event
-            VM().scene.on_mouse_motion( l_mouse.clone() )
-        # Update the mouse position
-        self._loc = l_mouse
+        # Send a mouse motion event
+        VM().scene.on_mouse_motion( l_mouse.clone() )
 
     def _process_mouse_pressed( self, btn, btn_press ):
         """ """
@@ -486,8 +484,8 @@ class NormalMode( VMState ):
         return self
 
     def update( self ):
-        """Here the flags, timers and start locations are checked 
-        and acted upon their value. This method generates mouse_start_drag, 
+        """Here the flags, timers and start locations are checked
+        and acted upon their value. This method generates mouse_start_drag,
         mouse_end_drag, mouse_click, mouse_double_click and mouse_motion
         events."""
         # Local variables, reduce call overhead
@@ -495,8 +493,6 @@ class NormalMode( VMState ):
         d_drag  = VM().mouse.drag_distance
         t_click = VM().mouse.double_click_time
         t_now   = VM().clock.time
-        # Update the mouse motion
-        self._process_update_motion( l_mouse )
         # Process the left button
         self._process_update_button(
             l_mouse, d_drag, t_click, t_now,
@@ -583,8 +579,8 @@ class PassiveMode( VMState ):
 
 class KeyMode( VMState ):
     """
-    This state of the VM, ignores all events except when coming from the 
-    keyboard. KeyMode is the best VMState option when your scene needs to 
+    This state of the VM, ignores all events except when coming from the
+    keyboard. KeyMode is the best VMState option when your scene needs to
     ignore all but the keyboard events.
     """
     # Singleton's shared state
@@ -620,14 +616,14 @@ class KeyMode( VMState ):
 
 class MouseMode( NormalMode ):
     """
-    This mode (state) of the VM, generates mouse events ignoring the 
-    keyboard ones. MouseMode is the best VM state when your 
+    This mode (state) of the VM, generates mouse events ignoring the
+    keyboard ones. MouseMode is the best VM state when your
     scene requires mouse events only.
     """
     _shared_state = {}
 
     def __init__( self ):
-        """Singletonize a MouseMode object.""" 
+        """Singletonize a MouseMode object."""
         self.__init__ = self._shared_state
         if self.__init__: return
         NormalMode.__init__( self )
