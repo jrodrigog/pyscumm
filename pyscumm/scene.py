@@ -113,23 +113,39 @@ class Scene( base.StateMachine, dict ):
         """
         self._state = self._state.on_mouse_drag_end( button )
 
-    def on_key_up( self, key ):
+    def on_mouse_down( self, event ):
+        """
+        Receives a mouse pressed event and forwards it.
+        @param event: A Pygame event
+        @type event: Event(Pygame)
+        """
+        self._state = self._state.on_mouse_down( event )
+
+    def on_mouse_up( self, event ):
+        """
+        Receives a mouse released event and forwards it.
+        @param event: A Pygame event
+        @type event: Event(Pygame)
+        """
+        self._state = self._state.on_mouse_up( event )
+
+    def on_key_up( self, event ):
         """
         Call the "on_key_up" method of the active SceneState.
         This method notify a released key of keyboard.
-        @param key: The key that has released.
-        @type key: String
+        @param event: Pygame(Event)
+        @type event: String
         """
-        self._state = self._state.on_key_up( key )
+        self._state = self._state.on_key_up( event )
 
-    def on_key_down( self, key ):
+    def on_key_down( self, event ):
         """
         Call the "on_key_down" method of the active SceneState.
         This method notify a pressed key of keyboard.
-        @param key: The key that has pressed.
-        @type key: String
+        @param event: Pygame(Event)
+        @type event: String
         """
-        self._state = self._state.on_key_down( key )
+        self._state = self._state.on_key_down( event )
 
     def draw( self ):
         """
@@ -248,35 +264,49 @@ class SceneState( base.StateMachine ):
         base.Logger().info( "on_mouse_drag_end(%s)" % button )
         return self
 
-    def on_key_up( self, key ):
+    def on_key_up( self, event ):
         """
         (See: on_key_up() method on scene.Scene class).
 
         @return: self
         """
-        base.Logger().info( "on_key_up(%s)" % key )
+        base.Logger().info( "on_key_up(%s)" % event )
         return self
 
-    def on_key_down( self, key ):
+    def on_key_down( self, event ):
         """
         (See: on_key_down() method on scene.Scene class).
 
         @return: self
         """
-        base.Logger().info( "on_key_down(%s)" % key )
+        base.Logger().info( "on_key_down(%s)" % event )
+        return self
+
+    def on_mouse_down( self, event ):
+        """
+        Receives a mouse pressed.
+        @param event: A Pygame event
+        @type event: Event(Pygame)
+        """
+        base.Logger().info( "on_mouse_down(%s)" % event )
+        return self
+
+    def on_mouse_up( self, event ):
+        """
+        Receives a mouse released.
+        @param event: A Pygame event
+        @type event: Event(Pygame)
+        """
+        base.Logger().info( "on_mouse_up(%s)" % event )
         return self
 
     def draw( self ):
-        """
-        Draw all the scene objects.
-        """
+        """Draws all the scene objects."""
         #for obj in self.scene: obj.draw()
         return self
 
     def update( self ):
-        """
-        Update all the Scene objects.
-        """
+        """Updates all the Scene objects."""
         #for obj in self.scene: obj.update()
         return self
 

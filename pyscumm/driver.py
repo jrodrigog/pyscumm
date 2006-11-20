@@ -40,7 +40,9 @@ class Mouse( object ):
         @return: Mouse cursor location
         @rtype: pyscumm.vector.Vector3D
         """
-        return pyscumm.vector.Vector3D( list( pygame.mouse.get_pos() ) + [0.] )
+        pos = pygame.mouse.get_pos()
+        return pyscumm.vector.Vector3D(
+            [ float( pos[0] ), float( pos[1] ), 0. ] )
 
     def set_location( self, pos ):
         """

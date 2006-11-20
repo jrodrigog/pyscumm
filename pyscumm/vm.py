@@ -91,7 +91,7 @@ class VM( base.StateMachine ):
 
     def quit( self ):
         """Report to the active state a quit event."""
-        self._state = self._state.on_quit()
+        self._state = self._state.quit()
 
     def keyboard_pressed( self, event ):
         """
@@ -109,21 +109,29 @@ class VM( base.StateMachine ):
         """
         self._state = self._state.keyboard_released( event )
 
-    def mouse_pressed( self, event ):
+    def mouse_motion( self, event ):
+        """
+        Report a mouse motion event to the state.
+        @param event: A Pygame MOUSEMOTION event
+        @type event: Event(PyGame)
+        """
+        self._state = self._state.mouse_motion( event )
+
+    def mouse_down( self, event ):
         """
         Report to the active state a mouse button pressed.
         @param event: A Pygame MOUSEBUTTONDOWN event
         @type event: Event(Pygame)
         """
-        self._state = self._state.mouse_pressed( event )
+        self._state = self._state.mouse_down( event )
 
-    def mouse_released( self, event ):
+    def mouse_up( self, event ):
         """
         Report to the active state a mouse button released.
         @param event: A Pygame MOUSEBUTTONUP event
         @type event: Event(Pygame)
         """
-        self._state = self._state.mouse_released( event )
+        self._state = self._state.mouse_up( event )
 
     def update( self ):
         """Send an update message to the active scene."""
@@ -159,11 +167,11 @@ class VM( base.StateMachine ):
                     elif event.type == pygame.KEYUP:
                         self.keyboard_released( event )
                     elif event.type == pygame.MOUSEBUTTONDOWN:
-                        self.mouse_pressed( event )
+                        self.mouse_down( event )
                     elif event.type == pygame.MOUSEBUTTONUP:
-                        self.mouse_released( event )
+                        self.mouse_up( event )
                     elif event.type == pygame.MOUSEMOTION:
-                        self._state._process_update_motion( VM().mouse.location )
+                        self.mouse_motion( event )
                 self.update()
                 self.draw()
             except ChangeScene, e:
@@ -278,9 +286,19 @@ class VMState( base.State ):
         """Build a VMState object."""
         base.State.__init__( self )
 
-    def on_quit( self ):
+    def quit( self ):
         """Receives a quit request and forward it to the Scene."""
         VM().scene.on_quit()
+        return self
+
+    def mouse_motion( self, event ):
+        """
+        Report a mouse motion event to the Scene.
+        @param event: A Pygame KEYDOWN event
+        @type event: Event(PyGame)
+        """
+        VM().scene.on_mouse_motion( vector.Vector3D(
+            [ float( event.pos[0] ), float( event.pos[1] ), 0. ] ) )
         return self
 
     def keyboard_pressed( self, event ):
@@ -301,21 +319,21 @@ class VMState( base.State ):
         VM().scene.on_key_up( event )
         return self
 
-    def mouse_pressed( self, event ):
+    def mouse_down( self, event ):
         """
         Receives a mouse pressed event and forwards it.
         @param event: A Pygame event
         @type event: Event(Pygame)
         """
-        raise NotImplementedError
+        VM().scene.on_mouse_down( event )
 
-    def mouse_released( self, event ):
+    def mouse_up( self, event ):
         """
         Receives a mouse released event and forwards it.
         @param event: A Pygame event
         @type event: Event(Pygame)
         """
-        raise NotImplementedError
+        VM().scene.mouse_up( event )
 
     def update( self ):
         """Forward the update event to the Scene."""
@@ -370,19 +388,14 @@ class NormalMode( VMState ):
         self._drag = [ None ] * 4
         self._loc  = vector.Vector3D()
 
-    def _process_update_motion( self, l_mouse ):
-        """ """
-        # Send a mouse motion event
-        VM().scene.on_mouse_motion( l_mouse.clone() )
-
-    def _process_mouse_pressed( self, btn, btn_press ):
+    def _process_mouse_down( self, btn, btn_press ):
         """ """
         # Set the pressed flag
         self._flag |= btn_press
         # Record the current location of the mouse
         self._drag[ btn ] = VM().mouse.location
 
-    def _process_mouse_released( self,
+    def _process_mouse_up( self,
         btn, btn_press, btn_click, btn_dbl_click, btn_drag ):
         """ """
         # Unset the pressed bit
@@ -438,7 +451,7 @@ class NormalMode( VMState ):
             # ... and send the event
             VM().scene.on_mouse_click( None, btn )
 
-    def mouse_pressed( self, event ):
+    def mouse_down( self, event ):
         """
         Receives a mouse pressed from Pygame and activates the
         flag bits and sets the drag start locations if required.
@@ -446,14 +459,14 @@ class NormalMode( VMState ):
         @type event: Event(Pygame)
         """
         if event.button == self.BTN_LEFT:
-            self._process_mouse_pressed( self.BTN_LEFT, self.BTN_PRESS_LEFT )
+            self._process_mouse_down( self.BTN_LEFT, self.BTN_PRESS_LEFT )
         elif event.button == self.BTN_CENTER:
-            self._process_mouse_pressed( self.BTN_CENTER, self.BTN_PRESS_CENTER )
+            self._process_mouse_down( self.BTN_CENTER, self.BTN_PRESS_CENTER )
         elif event.button == self.BTN_RIGHT:
-            self._process_mouse_pressed( self.BTN_RIGHT, self.BTN_PRESS_RIGHT )
+            self._process_mouse_down( self.BTN_RIGHT, self.BTN_PRESS_RIGHT )
         return self
 
-    def mouse_released( self, event ):
+    def mouse_up( self, event ):
         """
         Receives a mouse release from Pygame and deactivates the
         flag bits and resets the clicked timers if required.
@@ -461,21 +474,21 @@ class NormalMode( VMState ):
         @type event: Event(Pygame)
         """
         if event.button == self.BTN_LEFT:
-            self._process_mouse_released(
+            self._process_mouse_up(
                 self.BTN_LEFT,
                 self.BTN_PRESS_LEFT,
                 self.BTN_CLICK_LEFT,
                 self.BTN_DBL_CLICK_LEFT,
                 self.BTN_DRAG_LEFT )
         elif event.button == self.BTN_CENTER:
-            self._process_mouse_released(
+            self._process_mouse_up(
                 self.BTN_CENTER,
                 self.BTN_PRESS_CENTER,
                 self.BTN_CLICK_CENTER,
                 self.BTN_DBL_CLICK_CENTER,
                 self.BTN_DRAG_CENTER )
         elif event.button == self.BTN_RIGHT:
-            self._process_mouse_released(
+            self._process_mouse_up(
                 self.BTN_RIGHT,
                 self.BTN_PRESS_RIGHT,
                 self.BTN_CLICK_RIGHT,
@@ -536,6 +549,16 @@ class PassiveMode( VMState ):
         if self.__init__: return
         VMState.__init__( self )
 
+    def mouse_motion( self, event ):
+        """
+        Ignores this event.
+        @param event: A Pygame MOUSEMOTION event
+        @type event: Event(Pygame)
+        @return: This object
+        @rtype: PassiveMode
+        """
+        return self
+
     def keyboard_pressed( self, event ):
         """
         Ignores this event.
@@ -556,7 +579,7 @@ class PassiveMode( VMState ):
         """
         return self
 
-    def mouse_pressed( self, event ):
+    def mouse_down( self, event ):
         """
         Ignores this event.
         @param event: A Pygame MOUSEBUTTONDOWN event
@@ -566,7 +589,7 @@ class PassiveMode( VMState ):
         """
         return self
 
-    def mouse_released( self, event ):
+    def mouse_up( self, event ):
         """
         Ignores this event.
         @param event: A Pygame MOUSEBUTTONUP event
@@ -592,7 +615,7 @@ class KeyMode( VMState ):
         if self.__init__: return
         VMState.__init__( self )
 
-    def mouse_pressed( self, event ):
+    def mouse_down( self, event ):
         """
         Ignore this event.
         @param event: A Pygame MOUSEBUTTONDOWN event
@@ -602,7 +625,7 @@ class KeyMode( VMState ):
         """
         return self
 
-    def mouse_released( self, event ):
+    def mouse_up( self, event ):
         """
         Ignore this event.
         @param event: A Pygame MOUSEBUTTONUP event
