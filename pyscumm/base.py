@@ -63,6 +63,7 @@ class State( object ):
     """
     pass
 
+
 class Logger( object ):
     """A Singleton Logger class"""
 

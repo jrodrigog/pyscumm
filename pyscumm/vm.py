@@ -24,7 +24,7 @@
 """
 
 from types import NoneType
-import pygame.event, base, driver, vector
+import pygame.event, base, driver, vector, box
 
 class ChangeScene( Exception ):
     """
@@ -76,8 +76,10 @@ class VM( base.StateMachine ):
             - vm.MouseMode: This state launches mouse events (click, double_click, drag, ...).
             - vm.DialogMode: This state only reports object clicked in the HUD.
     """
+
     # Singleton's shared state
     _shared_state = {}
+
     def __init__( self ):
         """Singletonize a VM object. Construct a Virtual Machine
         with it's default components."""
@@ -117,21 +119,21 @@ class VM( base.StateMachine ):
         """
         self._state = self._state.mouse_motion( event )
 
-    def mouse_down( self, event ):
+    def mouse_pressed( self, event ):
         """
         Report to the active state a mouse button pressed.
         @param event: A Pygame MOUSEBUTTONDOWN event
         @type event: Event(Pygame)
         """
-        self._state = self._state.mouse_down( event )
+        self._state = self._state.mouse_pressed( event )
 
-    def mouse_up( self, event ):
+    def mouse_released( self, event ):
         """
         Report to the active state a mouse button released.
         @param event: A Pygame MOUSEBUTTONUP event
         @type event: Event(Pygame)
         """
-        self._state = self._state.mouse_up( event )
+        self._state = self._state.mouse_released( event )
 
     def update( self ):
         """Send an update message to the active scene."""
@@ -167,9 +169,9 @@ class VM( base.StateMachine ):
                     elif event.type == pygame.KEYUP:
                         self.keyboard_released( event )
                     elif event.type == pygame.MOUSEBUTTONDOWN:
-                        self.mouse_down( event )
+                        self.mouse_pressed( event )
                     elif event.type == pygame.MOUSEBUTTONUP:
-                        self.mouse_up( event )
+                        self.mouse_released( event )
                     elif event.type == pygame.MOUSEMOTION:
                         self.mouse_motion( event )
                 self.update()
@@ -319,21 +321,21 @@ class VMState( base.State ):
         VM().scene.on_key_up( event )
         return self
 
-    def mouse_down( self, event ):
+    def mouse_pressed( self, event ):
         """
         Receives a mouse pressed event and forwards it.
         @param event: A Pygame event
         @type event: Event(Pygame)
         """
-        VM().scene.on_mouse_down( event )
+        VM().scene.on_mouse_pressed( event )
 
-    def mouse_up( self, event ):
+    def mouse_released( self, event ):
         """
         Receives a mouse released event and forwards it.
         @param event: A Pygame event
         @type event: Event(Pygame)
         """
-        VM().scene.mouse_up( event )
+        VM().scene.mouse_released( event )
 
     def update( self ):
         """Forward the update event to the Scene."""
@@ -388,14 +390,22 @@ class NormalMode( VMState ):
         self._drag = [ None ] * 4
         self._loc  = vector.Vector3D()
 
-    def _process_mouse_down( self, btn, btn_press ):
+    def _process_mouse_collition( self, location ):
+        p = box.Point( location )
+        list_collides = []
+        for obj in VM().scene:
+            list_collides.append( VM().scene[obj].collides( p ) )
+        return list_collides
+
+
+    def _process_mouse_pressed( self, btn, btn_press ):
         """ """
         # Set the pressed flag
         self._flag |= btn_press
         # Record the current location of the mouse
         self._drag[ btn ] = VM().mouse.location
 
-    def _process_mouse_up( self,
+    def _process_mouse_released( self,
         btn, btn_press, btn_click, btn_dbl_click, btn_drag ):
         """ """
         # Unset the pressed bit
@@ -416,7 +426,7 @@ class NormalMode( VMState ):
             self._time[ btn ] = VM().clock.time
 
     def _process_update_button( self,
-        l_mouse, d_drag, t_click, t_now,
+        l_mouse, d_drag, t_click, t_now, list_collides,
             btn, btn_press, btn_click, btn_dbl_click, btn_drag ):
         """ """
         # Left Button
@@ -425,7 +435,7 @@ class NormalMode( VMState ):
             # Unset the double click flag
             self._flag &= ~btn_dbl_click
             # ... send the event
-            VM().scene.on_mouse_double_click( None, btn )
+            VM().scene.on_mouse_double_click( list_collides, btn )
         # Button pressed?
         elif self._flag & btn_press:
             # Mouse not dragging?, Start a drag?
@@ -435,13 +445,13 @@ class NormalMode( VMState ):
                 # Start dragging, set the drag bit
                 self._flag |= btn_drag
                 # ... launch the event
-                VM().scene.on_mouse_drag_start( None, btn )
+                VM().scene.on_mouse_drag_start( list_collides, btn )
         # There is no button pressed, Is the mouse dragging?
         elif self._flag & btn_drag:
             # If it is stop dragging, unset the bit
             self._flag &= ~btn_drag
             # ... and send the event
-            VM().scene.on_mouse_drag_end( btn )
+            VM().scene.on_mouse_drag_end( list_collides, btn )
         # There is no button pressed, was the button clicked?
         elif self._flag & btn_click \
         and ( t_now - self._time[ btn ] ) > t_click:
@@ -449,9 +459,9 @@ class NormalMode( VMState ):
             # unset the clicked bit
             self._flag &= ~btn_click
             # ... and send the event
-            VM().scene.on_mouse_click( None, btn )
+            VM().scene.on_mouse_click( list_collides, btn )
 
-    def mouse_down( self, event ):
+    def mouse_pressed( self, event ):
         """
         Receives a mouse pressed from Pygame and activates the
         flag bits and sets the drag start locations if required.
@@ -459,14 +469,14 @@ class NormalMode( VMState ):
         @type event: Event(Pygame)
         """
         if event.button == self.BTN_LEFT:
-            self._process_mouse_down( self.BTN_LEFT, self.BTN_PRESS_LEFT )
+            self._process_mouse_pressed( self.BTN_LEFT, self.BTN_PRESS_LEFT )
         elif event.button == self.BTN_CENTER:
-            self._process_mouse_down( self.BTN_CENTER, self.BTN_PRESS_CENTER )
+            self._process_mouse_pressed( self.BTN_CENTER, self.BTN_PRESS_CENTER )
         elif event.button == self.BTN_RIGHT:
-            self._process_mouse_down( self.BTN_RIGHT, self.BTN_PRESS_RIGHT )
+            self._process_mouse_pressed( self.BTN_RIGHT, self.BTN_PRESS_RIGHT )
         return self
 
-    def mouse_up( self, event ):
+    def mouse_released( self, event ):
         """
         Receives a mouse release from Pygame and deactivates the
         flag bits and resets the clicked timers if required.
@@ -474,26 +484,27 @@ class NormalMode( VMState ):
         @type event: Event(Pygame)
         """
         if event.button == self.BTN_LEFT:
-            self._process_mouse_up(
+            self._process_mouse_released(
                 self.BTN_LEFT,
                 self.BTN_PRESS_LEFT,
                 self.BTN_CLICK_LEFT,
                 self.BTN_DBL_CLICK_LEFT,
                 self.BTN_DRAG_LEFT )
         elif event.button == self.BTN_CENTER:
-            self._process_mouse_up(
+            self._process_mouse_released(
                 self.BTN_CENTER,
                 self.BTN_PRESS_CENTER,
                 self.BTN_CLICK_CENTER,
                 self.BTN_DBL_CLICK_CENTER,
                 self.BTN_DRAG_CENTER )
         elif event.button == self.BTN_RIGHT:
-            self._process_mouse_up(
+            self._process_mouse_released(
                 self.BTN_RIGHT,
                 self.BTN_PRESS_RIGHT,
                 self.BTN_CLICK_RIGHT,
                 self.BTN_DBL_CLICK_RIGHT,
                 self.BTN_DRAG_RIGHT )
+        self._process_mouse_collition( VM().mouse.location )
         return self
 
     def update( self ):
@@ -506,9 +517,10 @@ class NormalMode( VMState ):
         d_drag  = VM().mouse.drag_distance
         t_click = VM().mouse.double_click_time
         t_now   = VM().clock.time
+        list_collides = self._process_mouse_collition( l_mouse )
         # Process the left button
         self._process_update_button(
-            l_mouse, d_drag, t_click, t_now,
+            l_mouse, d_drag, t_click, t_now, list_collides,
             self.BTN_LEFT,
             self.BTN_PRESS_LEFT,
             self.BTN_CLICK_LEFT,
@@ -516,7 +528,7 @@ class NormalMode( VMState ):
             self.BTN_DRAG_LEFT )
         # Process the center button
         self._process_update_button(
-            l_mouse, d_drag, t_click, t_now,
+            l_mouse, d_drag, t_click, t_now, list_collides,
             self.BTN_CENTER,
             self.BTN_PRESS_CENTER,
             self.BTN_CLICK_CENTER,
@@ -524,7 +536,7 @@ class NormalMode( VMState ):
             self.BTN_DRAG_CENTER )
         # Process the right button
         self._process_update_button(
-            l_mouse, d_drag, t_click, t_now,
+            l_mouse, d_drag, t_click, t_now, list_collides,
             self.BTN_RIGHT,
             self.BTN_PRESS_RIGHT,
             self.BTN_CLICK_RIGHT,

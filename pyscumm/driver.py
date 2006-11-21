@@ -30,7 +30,7 @@ class Mouse( object ):
 
     def __init__( self ):
         """Build a Mouse object"""
-        self._double_click_time = 250
+        self._double_click_time = 200
         self._drag_distance = 8
         self._visible = True
 

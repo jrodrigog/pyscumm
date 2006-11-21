@@ -84,8 +84,8 @@ class WalkArea( MultiBox ):
             o.append( node )
         if len( self ):
             assert collide
-        return node 
-    
+        return node
+
     def __del( self, x ):
         for o in self: o.remove( x )
 
@@ -157,7 +157,7 @@ class BoxRect( list ):
         return [ point + self._location for point in self ]
 
     def point_inside( self, point, rect=None ):
-        """If dist is negative to all the rects, 
+        """If dist is negative to all the rects,
         point is inside"""
         if isinstance( rect, types.NoneType ):
             rect = self.rect

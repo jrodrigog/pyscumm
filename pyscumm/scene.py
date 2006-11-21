@@ -26,6 +26,12 @@ class Scene( base.StateMachine, dict ):
     Scene Machine handles SceneStates
     """
 
+    def mouse_pressed( self, button ):
+        self._state = self._state.mouse_pressed( button )
+
+    def mouse_released( self, button ):
+        self._state = self._state.mouse_released( button )
+
     def on_quit( self ):
         """
         Call the "on_quit" method of the active SceneState.
@@ -104,14 +110,16 @@ class Scene( base.StateMachine, dict ):
         """
         self._state = self._state.on_mouse_drag_start( obj, button )
 
-    def on_mouse_drag_end( self, button ):
+    def on_mouse_drag_end( self, obj, button ):
         """
         Call the "on_mouse_drag_end" method of the active SceneState.
-        This method notify that the mouse did end a drag movement..
+        This method notify that the mouse did end a drag movement.
+        @param obj: A list of objects under the cursor
+        @type obj: list
         @param button: The button that ends the drag
         @type button: String
         """
-        self._state = self._state.on_mouse_drag_end( button )
+        self._state = self._state.on_mouse_drag_end( obj, button )
 
     def on_mouse_down( self, event ):
         """
@@ -136,7 +144,7 @@ class Scene( base.StateMachine, dict ):
         @param event: Pygame(Event)
         @type event: String
         """
-        self._state = self._state.on_key_up( event )
+        self._state = self._state.on_key_up( event.key )
 
     def on_key_down( self, event ):
         """
@@ -145,7 +153,7 @@ class Scene( base.StateMachine, dict ):
         @param event: Pygame(Event)
         @type event: String
         """
-        self._state = self._state.on_key_down( event )
+        self._state = self._state.on_key_down( event.key )
 
     def draw( self ):
         """
@@ -207,7 +215,7 @@ class SceneState( base.StateMachine ):
 
         @return: self
         """
-        #base.Logger().info( "on_mouse_motion(%s)" % location )
+        base.Logger().info( "on_mouse_motion(%s)" % location )
         return self
 
     def on_mouse_click( self, obj, button ):
@@ -255,13 +263,13 @@ class SceneState( base.StateMachine ):
         base.Logger().info( "on_mouse_drag_start(%s,%s)" % ( obj, button ) )
         return self
 
-    def on_mouse_drag_end( self, button ):
+    def on_mouse_drag_end( self, obj, button ):
         """
         (See: on_mouse_drag_end() method on scene.Scene class).
 
         @return: self
         """
-        base.Logger().info( "on_mouse_drag_end(%s)" % button )
+        base.Logger().info( "on_mouse_drag_end(%s,%s)" % ( obj, button ) )
         return self
 
     def on_key_up( self, event ):
@@ -270,7 +278,7 @@ class SceneState( base.StateMachine ):
 
         @return: self
         """
-        base.Logger().info( "on_key_up(%s)" % event )
+        base.Logger().info( "on_key_up(%s)" % ( event ) )
         return self
 
     def on_key_down( self, event ):
@@ -279,7 +287,7 @@ class SceneState( base.StateMachine ):
 
         @return: self
         """
-        base.Logger().info( "on_key_down(%s)" % event )
+        base.Logger().info( "on_key_down(%s)" % ( event ) )
         return self
 
     def on_mouse_down( self, event ):
@@ -288,7 +296,7 @@ class SceneState( base.StateMachine ):
         @param event: A Pygame event
         @type event: Event(Pygame)
         """
-        base.Logger().info( "on_mouse_down(%s)" % event )
+        base.Logger().info( "on_mouse_down(%s)" % ( event ) )
         return self
 
     def on_mouse_up( self, event ):
