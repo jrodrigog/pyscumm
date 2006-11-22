@@ -4,16 +4,21 @@ import types
 class Collider( object ):
     def collides( self, collider ):
         raise NotImplementedError
+    def update( self ):
+        pass
 
 class Box( Collider ):
     def __init__( self, location=None, shadow=1., depth=1. ):
+        if isinstance( location, types.NoneType ):
+            self._location = pyscumm.vector.Vector3D()
         self._shadow = shadow
         self._depth = depth
         self._box = BoxRect( location, [
-            pyscumm.vector.Vector3D(),
-            pyscumm.vector.Vector3D(),
-            pyscumm.vector.Vector3D(),
-            pyscumm.vector.Vector3D() ] )
+            pyscumm.vector.Vector3D( [ -1., -1., 0. ] ),
+            pyscumm.vector.Vector3D( [  1., -1., 0. ] ),
+            pyscumm.vector.Vector3D( [  1.,  1., 0. ] ),
+            pyscumm.vector.Vector3D( [ -1.,  1., 0. ] ) ] )
+        self._box.update()
     def get_z( self ): return self._box._location[2]
     def set_z( self, z ): self._box._location[2] = z
     def get_shadow( self ): return self._shadow
@@ -38,6 +43,8 @@ class Box( Collider ):
             self._shadow,
             self._depth,
             self._box )
+    def update( self ):
+        self._box.update()
     shadow   = property( get_shadow, set_shadow )
     depth    = property( get_depth, set_depth )
     box      = property( get_box, set_box )
@@ -65,6 +72,8 @@ class MultiBox( Collider, list ):
         list.__init__( self )
     def __str__( self ):
         return "MultiBox( %s )" % list.__str__( self )
+    def update( self ):
+        for box in self: box.update()
     def collides( self, collider ):
         return MultiBox( [ o for o in self if o.collides( collider ) ] )
 
@@ -148,6 +157,52 @@ class BoxRect( list ):
             self._location = pyscumm.vector.Vector3D()
 
     def get_rect( self ):
+        return self._rect
+
+    def get_point( self ):
+        return self._point
+
+    def point_inside( self, point ):
+        #If dist is negative to all the rects, point is inside
+        return self._rect[0].dist_sqr( point ) <= 0 \
+            and self._rect[1].dist_sqr( point ) <= 0 \
+            and self._rect[2].dist_sqr( point ) <= 0 \
+            and self._rect[3].dist_sqr( point ) <= 0
+
+    def update( self ):
+        self._point = [
+            self[0] + self._location,
+            self[1] + self._location,
+            self[2] + self._location,
+            self[3] + self._location ]
+        self._rect = [
+            Rect.from_two_point( self._point[0], self._point[1] ),
+            Rect.from_two_point( self._point[1], self._point[2] ),
+            Rect.from_two_point( self._point[2], self._point[3] ),
+            Rect.from_two_point( self._point[3], self._point[0] ) ]
+
+    def box_inside( self, box ):
+        point = box.point
+        return self.point_inside( point[0] ) \
+            or self.point_inside( point[1] ) \
+            or self.point_inside( point[2] ) \
+            or self.point_inside( point[3] )
+
+    def __str__( self ):
+        return "BoxRect( %s, %s )" % ( self._location, list.__str__( self ) )
+
+    point = property( get_point )
+    rect  = property( get_rect )
+
+"""
+class BoxRect( list ):
+    def __init__( self, location=None, obj=[] ):
+        list.__init__( self, obj )
+        self._location = location
+        if isinstance( self._location, types.NoneType ):
+            self._location = pyscumm.vector.Vector3D()
+
+    def get_rect( self ):
         return [
             Rect.from_two_point(
                 self[i]+self._location, self[(i+1)%4]+self._location )
@@ -157,8 +212,7 @@ class BoxRect( list ):
         return [ point + self._location for point in self ]
 
     def point_inside( self, point, rect=None ):
-        """If dist is negative to all the rects,
-        point is inside"""
+        #If dist is negative to all the rects, point is inside
         if isinstance( rect, types.NoneType ):
             rect = self.rect
         return not bool( reduce(
@@ -178,6 +232,7 @@ class BoxRect( list ):
 
     point = property( get_point )
     rect  = property( get_rect )
+"""
 
 class Rect( pyscumm.vector.Vector3D ):
     def __init__( self, obj=[0.,0.,0.] ):

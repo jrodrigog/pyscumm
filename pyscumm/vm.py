@@ -197,6 +197,11 @@ class VM( base.StateMachine ):
         @param mouse: A Mouse object
         @type mouse: Mouse
         """
+        try:
+            import psyco
+            base.Logger().info("Psyco enabled")
+        except ImportError:
+            pass
         if not isinstance( clock, NoneType ): VM().clock = clock
         if not isinstance( display, NoneType ): VM().display = display
         if not isinstance( mouse, NoneType ): VM().mouse = mouse
@@ -392,12 +397,11 @@ class NormalMode( VMState ):
         self._over = []
 
     def _process_mouse_collision( self, l_mouse ):
-        l_collided = []
-        l_mouse_in = []
+        l_collided  = []
+        l_mouse_in  = []
         l_mouse_out = []
         point = box.Point( l_mouse )
-        for key in VM().scene:
-            obj = VM().scene[ key ]
+        for obj in VM().scene.sorted:
             box_ = obj.collides( point )
             if not isinstance( box_, NoneType ):
                 l_collided.append( obj )
@@ -531,7 +535,7 @@ class NormalMode( VMState ):
         d_drag    = VM().mouse.drag_distance
         t_click   = VM().mouse.double_click_time
         t_now     = VM().clock.time
-        l_collided, l_mouse_in, l_mouse_out = self._process_mouse_collition( l_mouse )
+        l_collided, l_mouse_in, l_mouse_out = self._process_mouse_collision( l_mouse )
         # Send mouse in/out
         if l_mouse_in: VM().scene.on_mouse_over( l_mouse_in )
         if l_mouse_out: VM().scene.on_mouse_out( l_mouse_out )

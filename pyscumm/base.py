@@ -22,6 +22,8 @@
 @since: 9/11/2006
 """
 
+import heapq
+
 class StateMachine( object ):
     """
     Abstract state machine (See: state pattern).
@@ -120,3 +122,15 @@ class Logger( object ):
         self._visual = visual
 
     visual = property( get_visual, set_visual )
+
+class SortedList( list ):
+    """An ordered list."""
+    def __init__( self, obj=[] ):
+        self = heapq.heapify( obj )
+    def insert( self, item ):
+        """Insert an item maintaining the list ordered."""
+        heapq.heappush( self, item )
+        return item
+    def pop( self ):
+        """Pop the first item."""
+        return heapq.heappop( self )

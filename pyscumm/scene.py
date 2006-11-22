@@ -25,6 +25,9 @@ class Scene( base.StateMachine, dict ):
     """
     Scene Machine handles SceneStates
     """
+    def __init__( self ):
+        """Build a Scene object."""
+        self._sorted = base.SortedList()
 
     def mouse_pressed( self, button ):
         self._state = self._state.mouse_pressed( button )
@@ -167,6 +170,28 @@ class Scene( base.StateMachine, dict ):
         """
         self._state = self._state.update()
 
+    def sort( self ):
+        """Sort the object list."""
+        self._sorted.sort()
+
+    def __setitem__( self, key, obj ):
+        if self.has_key( key ):
+            self._sorted.pop( self._sorted.index( self[ key ] ) )
+        dict.__setitem__( self, key, obj )
+        self._sorted.insert( obj )
+
+    def __delitem__( self, key ):
+        obj = self[ key ]
+        dict.__delitem__( self, key )
+        self._sorted.pop( self._sorted.index( obj ) )
+
+    def get_sorted( self ):
+        """Get the sorted list of objects.
+        @return: Sorted list of objects.
+        @rtype: SortedList"""
+        return self._sorted
+
+    sorted = property( get_sorted )
 
 class SceneState( base.StateMachine ):
     """
