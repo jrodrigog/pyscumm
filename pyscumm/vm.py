@@ -389,15 +389,29 @@ class NormalMode( VMState ):
         self._time = [ None ] * 4
         self._drag = [ None ] * 4
         self._loc  = vector.Vector3D()
+        self._mouse_over = []
 
     def _process_mouse_collition( self, l_mouse ):
+        collided = []
+        mouse_in = []
+        mouse_out = []
         point = box.Point( l_mouse )
-        l_collide = []
         for key in VM().scene:
-            b = VM().scene[ key ].collides( point )
-            if not isinstance( b, NoneType ):
-                l_collide.append( b )
-        return l_collide
+            obj = VM().scene[ key ]
+            box_ = obj.collides( point )
+            if not isinstance( box_, NoneType ):
+                collided.append( ( obj, box_ ) )
+                if obj not in self._mouse_over:
+                    mouse_in.append( obj )
+                    self._mouse_over.append( obj )
+            else:
+                try:
+                    idx = self._mouse_over.index( obj )
+                    mouse_out.append( obj )
+                    self._mouse_over.pop( idx )
+                except ValueError:
+                    pass
+        return collided, mouse_in, mouse_out
 
     def _process_mouse_pressed( self, btn, btn_press ):
         """ """
@@ -518,10 +532,10 @@ class NormalMode( VMState ):
         d_drag    = VM().mouse.drag_distance
         t_click   = VM().mouse.double_click_time
         t_now     = VM().clock.time
-        l_collide = self._process_mouse_collition( l_mouse )
+        l_collided, l_mouse_in, l_mouse_out = self._process_mouse_collition( l_mouse )
         # Process the left button
         self._process_update_button(
-            l_mouse, d_drag, t_click, t_now, l_collide,
+            l_mouse, d_drag, t_click, t_now, l_collided,
             self.BTN_LEFT,
             self.BTN_PRESS_LEFT,
             self.BTN_CLICK_LEFT,
@@ -529,7 +543,7 @@ class NormalMode( VMState ):
             self.BTN_DRAG_LEFT )
         # Process the center button
         self._process_update_button(
-            l_mouse, d_drag, t_click, t_now, l_collide,
+            l_mouse, d_drag, t_click, t_now, l_collided,
             self.BTN_CENTER,
             self.BTN_PRESS_CENTER,
             self.BTN_CLICK_CENTER,
@@ -537,12 +551,15 @@ class NormalMode( VMState ):
             self.BTN_DRAG_CENTER )
         # Process the right button
         self._process_update_button(
-            l_mouse, d_drag, t_click, t_now, l_collide,
+            l_mouse, d_drag, t_click, t_now, l_collided,
             self.BTN_RIGHT,
             self.BTN_PRESS_RIGHT,
             self.BTN_CLICK_RIGHT,
             self.BTN_DBL_CLICK_RIGHT,
             self.BTN_DRAG_RIGHT )
+
+        if l_mouse_in: VM().scene.on_mouse_over( l_mouse_in )
+        if l_mouse_out: VM().scene.on_mouse_out( l_mouse_out )
         # Update via the parent
         return VMState.update( self )
 
