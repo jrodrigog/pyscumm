@@ -215,7 +215,7 @@ class SceneState( base.StateMachine ):
 
         @return: self
         """
-        base.Logger().info( "on_mouse_motion(%s)" % location )
+        #base.Logger().info( "on_mouse_motion(%s)" % location )
         return self
 
     def on_mouse_click( self, obj, button ):
