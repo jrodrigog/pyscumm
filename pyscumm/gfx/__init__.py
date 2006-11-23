@@ -3,4 +3,5 @@
 
 __version__ = '0.1D'
 
-import base
+from base import SpeedSolver, Drawable, Cycle, Animation
+import gl

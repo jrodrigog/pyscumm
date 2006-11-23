@@ -28,7 +28,7 @@ import pygame.time, pyscumm.vector
 from types import NoneType
 
 
-class SpeedSolver:
+class SpeedSolver( object ):
     """A Singleton Speed Solver"""
 
     _shared_state = {}
