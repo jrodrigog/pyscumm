@@ -41,7 +41,7 @@ class Display( pyscumm.driver.Display ):
     def __init__( self ):
         """Build a GLDisplay object"""
         pyscumm.driver.Display.__init__( self )
-        self._open_flags = pygame.DOUBLEBUF | pygame.OPENGL
+        self._open_flags |= pygame.OPENGL
 
     def open( self ):
         pyscumm.driver.Display.open( self )

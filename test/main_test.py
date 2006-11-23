@@ -64,6 +64,7 @@ class Taverna( pyscumm.scene.Scene ):
 
 class Taverna1( pyscumm.scene.SceneState ):
     LEFT = 1
+    RIGHT = 3
     _shared_state = {} # Singleton
     def __init__( self ):
         self.__dict__ = self._shared_state
@@ -84,6 +85,9 @@ class Taverna1( pyscumm.scene.SceneState ):
     def on_mouse_drag_end( self, obj, loc, button ):
         self.scene.dragging = None
         return self
+    def on_mouse_click( self, obj, loc, button ):
+        if button != self.RIGHT: return self
+        raise pyscumm.vm.StopVM()
 
 
 pyscumm.vm.VM().state = pyscumm.vm.NormalMode()

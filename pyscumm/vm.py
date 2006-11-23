@@ -408,27 +408,63 @@ class NormalMode( VMState ):
         self._btn_collided = [ [] ] * 4
         # Collided objects list
         self._last_collided = []
+        # Mouse goes into this objects
+        self._mouse_in = []
+        # Mouse goes out of this objects
+        self._mouse_out = []
 
+    def mouse_motion( self, event ):
+        """
+        Report a mouse motion event to the Scene.
+        @param event: A Pygame KEYDOWN event
+        @type event: Event(PyGame)
+        """
+        #VM().scene.on_mouse_motion( vector.Vector3D(
+        #    [ float( event.pos[0] ), float( event.pos[1] ), 0. ] ) )
+        location = VM().mouse.location.clone()
+        self._process_mouse_collision( location )
+        VM().scene.on_mouse_motion( location )
+        return self
+
+    """
     def _process_mouse_collision( self, l_mouse ):
         self._last_collided = []
-        l_mouse_in  = []
-        l_mouse_out = []
+        self._mouse_in      = []
+        self._mouse_out     = []
         point = box.Point( l_mouse )
         for obj in VM().scene.sorted:
             box_ = obj.collides( point )
             if not isinstance( box_, NoneType ):
                 self._last_collided.append( obj )
                 if obj not in self._over:
-                    l_mouse_in.append( obj )
+                    self._mouse_in.append( obj )
                     self._over.append( obj )
             else:
                 try:
                     idx = self._over.index( obj )
-                    l_mouse_out.append( obj )
+                    self._mouse_out.append( obj )
                     self._over.pop( idx )
                 except ValueError:
                     pass
-        return l_mouse_in, l_mouse_out
+    """
+    def _process_mouse_collision( self, l_mouse ):
+        self._last_collided = []
+        #self._mouse_in      = []
+        #self._mouse_out     = []
+        point = box.Point( l_mouse )
+        for i in xrange( len( self._over )-1, -1, -1 ):
+            box_ = self._over[i].collides( point )
+            if not isinstance( box_, NoneType ): continue
+            self._mouse_out.append( self._over.pop( i ) )
+
+        for obj in VM().scene.sorted:
+            if obj in self._over:
+                self._last_collided.append( obj )
+            elif obj not in self._mouse_out:
+                box_ = obj.collides( point )
+                if isinstance( box_, NoneType ): continue
+                self._mouse_in.append( obj )
+                self._over.append( obj )
 
     def _process_mouse_pressed( self, btn, btn_press ):
         """ """
@@ -507,11 +543,14 @@ class NormalMode( VMState ):
         @type event: Event(Pygame)
         """
         if event.button == self.BTN_LEFT:
-            self._process_mouse_pressed( self.BTN_LEFT, self.BTN_PRESS_LEFT )
+            self._process_mouse_pressed(
+                self.BTN_LEFT, self.BTN_PRESS_LEFT )
         elif event.button == self.BTN_CENTER:
-            self._process_mouse_pressed( self.BTN_CENTER, self.BTN_PRESS_CENTER )
+            self._process_mouse_pressed(
+                self.BTN_CENTER, self.BTN_PRESS_CENTER )
         elif event.button == self.BTN_RIGHT:
-            self._process_mouse_pressed( self.BTN_RIGHT, self.BTN_PRESS_RIGHT )
+            self._process_mouse_pressed(
+                self.BTN_RIGHT, self.BTN_PRESS_RIGHT )
         return self
 
     def mouse_released( self, event ):
@@ -554,10 +593,14 @@ class NormalMode( VMState ):
         d_drag    = VM().mouse.drag_distance
         t_click   = VM().mouse.double_click_time
         t_now     = VM().clock.time
-        l_mouse_in, l_mouse_out = self._process_mouse_collision( l_mouse )
+
         # Send mouse in/out
-        if l_mouse_in: VM().scene.on_mouse_over( l_mouse_in, l_mouse )
-        if l_mouse_out: VM().scene.on_mouse_out( l_mouse_out, l_mouse )
+        if self._mouse_in:
+            VM().scene.on_mouse_over( self._mouse_in, l_mouse )
+            self._mouse_in = []
+        if self._mouse_out:
+            VM().scene.on_mouse_out( self._mouse_out, l_mouse )
+            self._mouse_out = []
         # Process the left button
         self._process_update_button(
             l_mouse, d_drag, t_click, t_now,
