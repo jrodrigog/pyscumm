@@ -53,76 +53,88 @@ class Scene( base.StateMachine, dict ):
         """
         self._state = self._state.on_action_end( action )
 
-    def on_mouse_motion( self, pos ):
+    def on_mouse_motion( self, location ):
         """
         Call the "on_mouse_motion" method of the active SceneState.
 
         This method notify a movement in the mouse cursor.
 
-        @param vector: The location of the cursor
-        @type vector: Vector3D
+        @param location: The location of the cursor
+        @type location: Vector3D
         """
-        self._state = self._state.on_mouse_motion( pos )
+        self._state = self._state.on_mouse_motion( location )
 
-    def on_mouse_over( self, obj ):
+    def on_mouse_over( self, obj, location ):
         """
         Call the "on_mouse_over" method of the active SceneState.
         @param obj: A list of objects under the cursor
         @type obj: list
+        @param location: The location of the cursor
+        @type location: Vector3D
         """
-        self._state = self._state.on_mouse_over( obj )
+        self._state = self._state.on_mouse_over( obj, location )
 
-    def on_mouse_out( self, obj ):
+    def on_mouse_out( self, obj, location ):
         """
         Call the "on_mouse_out" method of the active SceneState.
         @param obj: A list of objects under the cursor
         @type obj: list
+        @param location: The location of the cursor
+        @type location: Vector3D
         """
-        self._state = self._state.on_mouse_out( obj )
+        self._state = self._state.on_mouse_out( obj, location )
 
-    def on_mouse_click( self, obj, button ):
+    def on_mouse_click( self, obj, location, button ):
         """
         Call the "on_mouse_click" method of the active SceneState.
         This method notifies a mouse click.
         @param obj: A list of objects under the cursor
         @type obj: list
+        @param location: The location of the cursor
+        @type location: Vector3D
         @param button: The name button that did click
         @type button: String
         """
-        self._state = self._state.on_mouse_click( obj, button )
+        self._state = self._state.on_mouse_click( obj, location, button )
 
-    def on_mouse_double_click( self, obj, button ):
+    def on_mouse_double_click( self, obj, location, button ):
         """
         Call the "on_mouse_double_click" method of the active SceneState.
         This method notify that the mouse did a double click on a object.
         @param obj: A list of objects under the cursor
         @type obj: list
+        @param location: The location of the cursor
+        @type location: Vector3D
         @param button: The name button that did double click
         @type button: String
         """
-        self._state = self._state.on_mouse_double_click( obj, button )
+        self._state = self._state.on_mouse_double_click( obj, location, button )
 
-    def on_mouse_drag_start( self, obj, button ):
+    def on_mouse_drag_start( self, obj, location, button ):
         """
         Call the "on_mouse_drag_start" method of the active SceneState.
         This method notify that the mouse did start a drag movement.
         @param obj: A list of objects under the cursor
         @type obj: list
+        @param location: The location of the cursor
+        @type location: Vector3D
         @param button: The button name that starts the drag
         @type button: String
         """
-        self._state = self._state.on_mouse_drag_start( obj, button )
+        self._state = self._state.on_mouse_drag_start( obj, location, button )
 
-    def on_mouse_drag_end( self, obj, button ):
+    def on_mouse_drag_end( self, obj, location, button ):
         """
         Call the "on_mouse_drag_end" method of the active SceneState.
         This method notify that the mouse did end a drag movement.
         @param obj: A list of objects under the cursor
         @type obj: list
+        @param location: The location of the cursor
+        @type location: Vector3D
         @param button: The button that ends the drag
         @type button: String
         """
-        self._state = self._state.on_mouse_drag_end( obj, button )
+        self._state = self._state.on_mouse_drag_end( obj, location, button )
 
     def on_mouse_down( self, event ):
         """
@@ -243,7 +255,7 @@ class SceneState( base.StateMachine ):
         #base.Logger().info( "on_mouse_motion(%s)" % location )
         return self
 
-    def on_mouse_click( self, obj, button ):
+    def on_mouse_click( self, obj, location, button ):
         """
         (See: on_mouse_click() method on scene.Scene class).
 
@@ -252,7 +264,7 @@ class SceneState( base.StateMachine ):
         base.Logger().info( "on_mouse_click(%s,%s)" % ( obj, button ) )
         return self
 
-    def on_mouse_double_click( self, obj, button ):
+    def on_mouse_double_click( self, obj, location, button ):
         """
         (See: on_mouse_double_click() method on scene.Scene class).
 
@@ -261,7 +273,7 @@ class SceneState( base.StateMachine ):
         base.Logger().info( "on_mouse_double_click(%s,%s)" % ( obj, button ) )
         return self
 
-    def on_mouse_over( self, obj ):
+    def on_mouse_over( self, obj, location ):
         """
         (See: on_mouse_over() method on scene.Scene class).
 
@@ -270,7 +282,7 @@ class SceneState( base.StateMachine ):
         base.Logger().info( "on_mouse_over(%s)" % obj )
         return self
 
-    def on_mouse_out( self, obj ):
+    def on_mouse_out( self, obj, location ):
         """
         (See: on_mouse_out() method on scene.Scene class).
 
@@ -279,7 +291,7 @@ class SceneState( base.StateMachine ):
         base.Logger().info( "on_mouse_out(%s)" % obj )
         return self
 
-    def on_mouse_drag_start( self, obj, button ):
+    def on_mouse_drag_start( self, obj, location, button ):
         """
         (See: on_mouse_drag_start() method on scene.Scene class).
 
@@ -288,7 +300,7 @@ class SceneState( base.StateMachine ):
         base.Logger().info( "on_mouse_drag_start(%s,%s)" % ( obj, button ) )
         return self
 
-    def on_mouse_drag_end( self, obj, button ):
+    def on_mouse_drag_end( self, obj, location, button ):
         """
         (See: on_mouse_drag_end() method on scene.Scene class).
 
@@ -335,12 +347,12 @@ class SceneState( base.StateMachine ):
 
     def draw( self ):
         """Draws all the scene objects."""
-        #for obj in self.scene: obj.draw()
+        for obj in self.scene.sorted: obj.draw()
         return self
 
     def update( self ):
         """Updates all the Scene objects."""
-        #for obj in self.scene: obj.update()
+        for obj in self.scene.sorted: obj.update()
         return self
 
     scene    = property( get_scene )

@@ -177,16 +177,18 @@ class BoxRect( list ):
             and self._rect[3].dist_sqr( point ) <= 0
 
     def update( self ):
+        location = self.box.location
         self._point = [
-            self[0] + self.box.location,
-            self[1] + self.box.location,
-            self[2] + self.box.location,
-            self[3] + self.box.location ]
+            self[0] + location,
+            self[1] + location,
+            self[2] + location,
+            self[3] + location ]
+        p_0, p_1, p_2, p_3 = self._point
         self._rect = [
-            Rect.from_two_point( self._point[0], self._point[1] ),
-            Rect.from_two_point( self._point[1], self._point[2] ),
-            Rect.from_two_point( self._point[2], self._point[3] ),
-            Rect.from_two_point( self._point[3], self._point[0] ) ]
+            Rect.from_two_point( p_0, p_1 ),
+            Rect.from_two_point( p_1, p_2 ),
+            Rect.from_two_point( p_2, p_3 ),
+            Rect.from_two_point( p_3, p_0 ) ]
 
     def box_inside( self, box ):
         point = box.point
@@ -247,7 +249,9 @@ class Rect( pyscumm.vector.Vector3D ):
         pyscumm.vector.Vector3D.__init__( self, obj )
     def dist_sqr( self, p ):
         """d = (Ax1+By1+C)/sqrt(A*A+B*B). (No square root)"""
-        return ((self[0]*p[0])+(self[1]*p[1])+self[2])/((self[0]*self[0])+(self[1]*self[1]))
+        self_0, self_1, self_2 = self
+        p_0, p_1, p_2 = p
+        return ((self_0*p_0)+(self_1*p_1)+self_2)/((self_0*self_0)+(self_1*self_1))
     def from_two_point( self, a, b ):
         """
         (X-x1)(y2-y1) = (Y-y1)(x2-x1)
@@ -255,6 +259,30 @@ class Rect( pyscumm.vector.Vector3D ):
         X(y2-y1) -Y(x2-x1) +(-x1(y2-y1)+y1(x2-x1)) = 0
         Ax + By + C = 0
         """
+        a_0, a_1, a_2 = a
+        b_0, b_1, b_2 = b
+        return Rect([
+            b_1-a_1,                         # A
+            -(b_0-a_0),                      # B
+            (-a_0*(b_1-a_1))+(a_1*(b_0-a_0)) # C
+        ])
+
+    def __str__( self ):
+        return "Rect( %.2fx + %.2fy + %.2f = 0 )" % ( self[0], self[1], self[2] )
+    from_two_point = classmethod( from_two_point )
+
+"""
+class Rect( pyscumm.vector.Vector3D ):
+    def __init__( self, obj=[0.,0.,0.] ):
+        pyscumm.vector.Vector3D.__init__( self, obj )
+    def dist_sqr( self, p ):
+        #d = (Ax1+By1+C)/sqrt(A*A+B*B). (No square root)
+        return ((self[0]*p[0])+(self[1]*p[1])+self[2])/((self[0]*self[0])+(self[1]*self[1]))
+    def from_two_point( self, a, b ):
+        # (X-x1)(y2-y1) = (Y-y1)(x2-x1)
+        # X(y2-y1)-x1(y2-y1) = Y(x2-x1)-y1(x2-x1)
+        # X(y2-y1) -Y(x2-x1) +(-x1(y2-y1)+y1(x2-x1)) = 0
+        # Ax + By + C = 0
         return Rect([
             b[1]-a[1],                             # A
             -(b[0]-a[0]),                          # B
@@ -264,3 +292,4 @@ class Rect( pyscumm.vector.Vector3D ):
     def __str__( self ):
         return "Rect( %.2fx + %.2fy + %.2f = 0 )" % ( self[0], self[1], self[2] )
     from_two_point = classmethod( from_two_point )
+"""

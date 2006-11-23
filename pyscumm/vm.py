@@ -156,7 +156,6 @@ class VM( base.StateMachine ):
         the VM will reset single with the new scene data without close the window.
         """
         self.start()
-        print self._display
         self._display.open()
         self._scene.start()
         leave = False
@@ -307,8 +306,9 @@ class VMState( base.State ):
         @param event: A Pygame KEYDOWN event
         @type event: Event(PyGame)
         """
-        VM().scene.on_mouse_motion( vector.Vector3D(
-            [ float( event.pos[0] ), float( event.pos[1] ), 0. ] ) )
+        #VM().scene.on_mouse_motion( vector.Vector3D(
+        #    [ float( event.pos[0] ), float( event.pos[1] ), 0. ] ) )
+        VM().scene.on_mouse_motion( VM().mouse.location.clone() )
         return self
 
     def keyboard_pressed( self, event ):
@@ -336,6 +336,7 @@ class VMState( base.State ):
         @type event: Event(Pygame)
         """
         VM().scene.on_mouse_pressed( event )
+        return self
 
     def mouse_released( self, event ):
         """
@@ -344,6 +345,7 @@ class VMState( base.State ):
         @type event: Event(Pygame)
         """
         VM().scene.mouse_released( event )
+        return self
 
     def update( self ):
         """Forward the update event to the Scene."""
@@ -393,21 +395,28 @@ class NormalMode( VMState ):
         self.__dict__ = self._shared_state
         if self.__dict__: return
         VMState.__init__( self )
+        # Button flags
         self._flag = 0
+        # Button click time
         self._time = [ None ] * 4
+        # Button drag start position
         self._drag = [ None ] * 4
-        self._loc  = vector.Vector3D()
+        # Mouse is over this objects
         self._over = []
+        # Collided objects by button pressed
+        self._btn_collided = [ [] ] * 4
+        # Collided objects list
+        self._last_collided = []
 
     def _process_mouse_collision( self, l_mouse ):
-        l_collided  = []
+        self._last_collided = []
         l_mouse_in  = []
         l_mouse_out = []
         point = box.Point( l_mouse )
         for obj in VM().scene.sorted:
             box_ = obj.collides( point )
             if not isinstance( box_, NoneType ):
-                l_collided.append( obj )
+                self._last_collided.append( obj )
                 if obj not in self._over:
                     l_mouse_in.append( obj )
                     self._over.append( obj )
@@ -418,7 +427,7 @@ class NormalMode( VMState ):
                     self._over.pop( idx )
                 except ValueError:
                     pass
-        return l_collided, l_mouse_in, l_mouse_out
+        return l_mouse_in, l_mouse_out
 
     def _process_mouse_pressed( self, btn, btn_press ):
         """ """
@@ -426,6 +435,8 @@ class NormalMode( VMState ):
         self._flag |= btn_press
         # Record the current location of the mouse
         self._drag[ btn ] = VM().mouse.location
+        # Record the collided objects right now
+        self._btn_collided[ btn ] = self._last_collided
 
     def _process_mouse_released( self,
         btn, btn_press, btn_click, btn_dbl_click, btn_drag ):
@@ -448,7 +459,7 @@ class NormalMode( VMState ):
             self._time[ btn ] = VM().clock.time
 
     def _process_update_button( self,
-        l_mouse, d_drag, t_click, t_now, l_collide,
+        l_mouse, d_drag, t_click, t_now,
             btn, btn_press, btn_click, btn_dbl_click, btn_drag ):
         """ """
         # Left Button
@@ -457,7 +468,8 @@ class NormalMode( VMState ):
             # Unset the double click flag
             self._flag &= ~btn_dbl_click
             # ... send the event
-            VM().scene.on_mouse_double_click( l_collide, btn )
+            VM().scene.on_mouse_double_click(
+                self._btn_collided[ btn ], self._drag[ btn ], btn )
         # Button pressed?
         elif self._flag & btn_press:
             # Mouse not dragging?, Start a drag?
@@ -467,13 +479,15 @@ class NormalMode( VMState ):
                 # Start dragging, set the drag bit
                 self._flag |= btn_drag
                 # ... launch the event
-                VM().scene.on_mouse_drag_start( l_collide, btn )
+                VM().scene.on_mouse_drag_start(
+                    self._btn_collided[ btn ], self._drag[ btn ], btn )
         # There is no button pressed, Is the mouse dragging?
         elif self._flag & btn_drag:
             # If it is stop dragging, unset the bit
             self._flag &= ~btn_drag
             # ... and send the event
-            VM().scene.on_mouse_drag_end( l_collide, btn )
+            VM().scene.on_mouse_drag_end(
+                self._last_collided[:], l_mouse, btn )
         # There is no button pressed, was the button clicked?
         elif self._flag & btn_click \
         and ( t_now - self._time[ btn ] ) > t_click:
@@ -481,7 +495,8 @@ class NormalMode( VMState ):
             # unset the clicked bit
             self._flag &= ~btn_click
             # ... and send the event
-            VM().scene.on_mouse_click( l_collide, btn )
+            VM().scene.on_mouse_click(
+                self._btn_collided[ btn ], self._drag[ btn ], btn )
 
     def mouse_pressed( self, event ):
         """
@@ -538,13 +553,13 @@ class NormalMode( VMState ):
         d_drag    = VM().mouse.drag_distance
         t_click   = VM().mouse.double_click_time
         t_now     = VM().clock.time
-        l_collided, l_mouse_in, l_mouse_out = self._process_mouse_collision( l_mouse )
+        l_mouse_in, l_mouse_out = self._process_mouse_collision( l_mouse )
         # Send mouse in/out
-        if l_mouse_in: VM().scene.on_mouse_over( l_mouse_in )
-        if l_mouse_out: VM().scene.on_mouse_out( l_mouse_out )
+        if l_mouse_in: VM().scene.on_mouse_over( l_mouse_in, l_mouse )
+        if l_mouse_out: VM().scene.on_mouse_out( l_mouse_out, l_mouse )
         # Process the left button
         self._process_update_button(
-            l_mouse, d_drag, t_click, t_now, l_collided,
+            l_mouse, d_drag, t_click, t_now,
             self.BTN_LEFT,
             self.BTN_PRESS_LEFT,
             self.BTN_CLICK_LEFT,
@@ -552,7 +567,7 @@ class NormalMode( VMState ):
             self.BTN_DRAG_LEFT )
         # Process the center button
         self._process_update_button(
-            l_mouse, d_drag, t_click, t_now, l_collided,
+            l_mouse, d_drag, t_click, t_now,
             self.BTN_CENTER,
             self.BTN_PRESS_CENTER,
             self.BTN_CLICK_CENTER,
@@ -560,7 +575,7 @@ class NormalMode( VMState ):
             self.BTN_DRAG_CENTER )
         # Process the right button
         self._process_update_button(
-            l_mouse, d_drag, t_click, t_now, l_collided,
+            l_mouse, d_drag, t_click, t_now,
             self.BTN_RIGHT,
             self.BTN_PRESS_RIGHT,
             self.BTN_CLICK_RIGHT,

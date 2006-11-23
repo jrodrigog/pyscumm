@@ -23,7 +23,7 @@
 @since: 14/11/2006
 """
 
-import time,  pygame.mouse, pyscumm.vector
+import time,  pygame.mouse, pyscumm.vector, pyscumm.vm
 
 class Mouse( object ):
     """A Mouse Controller Class."""
@@ -42,7 +42,7 @@ class Mouse( object ):
         """
         pos = pygame.mouse.get_pos()
         return pyscumm.vector.Vector3D(
-            [ float( pos[0] ), float( pos[1] ), 0. ] )
+            [ float( pos[0] ), pyscumm.vm.VM().display.size[1] - float( pos[1] ), 0. ] )
 
     def set_location( self, pos ):
         """
