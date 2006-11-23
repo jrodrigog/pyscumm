@@ -1,4 +1,5 @@
-import pyscumm, sys, random, pyscumm.box
+import pyscumm, sys, random
+
 
 """
 class MyObject( pyscumm.object.Object ):
@@ -18,7 +19,7 @@ class MyObject( pyscumm.object.Object ):
 class MyObject( pyscumm.object.Object ):
     count = 0
     def __init__( self ):
-        self._box = pyscumm.box.Box()
+        self._box = pyscumm.gfx.gl.Box()
         self._box.location[0] = 320.; self._box.location[1] = 240.;
         self._box.box[0][0] = -50.; self._box.box[0][1] = -50.
         self._box.box[1][0] =  50.; self._box.box[1][1] = -50.
