@@ -5,28 +5,25 @@ class Collider( object ):
     def collides( self, collider ):
         raise NotImplementedError
     def update( self ):
-        pass
+        raise NotImplementedError
+    def draw( self ):
+        raise NotImplementedError
 
 class Box( Collider ):
-    def __init__( self, location=None, shadow=1., depth=1. ):
-        if isinstance( location, types.NoneType ):
-            self._location = pyscumm.vector.Vector3D()
+    def __init__( self, shadow=1., depth=1. ):
         self._shadow = shadow
         self._depth = depth
-        self._box = BoxRect( location, [
+        self._box = BoxRect( self, [
             pyscumm.vector.Vector3D( [ -1., -1., 0. ] ),
             pyscumm.vector.Vector3D( [  1., -1., 0. ] ),
             pyscumm.vector.Vector3D( [  1.,  1., 0. ] ),
             pyscumm.vector.Vector3D( [ -1.,  1., 0. ] ) ] )
-        self._box.update()
-    def get_z( self ): return self._box._location[2]
-    def set_z( self, z ): self._box._location[2] = z
+    def get_z( self ): return self._location[2]
+    def set_z( self, z ): self._location[2] = z
     def get_shadow( self ): return self._shadow
     def set_shadow( self, shadow ): self._shadow = shadow
     def get_depth( self ): return self._depth
     def set_depth( self, depth ): self._depth = depth
-    def get_location( self ): return self._box._location
-    def set_location( self, location ): self._box._location = location
     def get_box( self ): return self._box
     def set_box( self, box ): self._box = box
     def collides( self, collider ):
@@ -39,7 +36,7 @@ class Box( Collider ):
         return None
     def __str__( self ):
         return "Box( location=%s, shadow=%s, depth=%s, box=%s )" % (
-            self.location,
+            self._location,
             self._shadow,
             self._depth,
             self._box )
@@ -48,11 +45,12 @@ class Box( Collider ):
     shadow   = property( get_shadow, set_shadow )
     depth    = property( get_depth, set_depth )
     box      = property( get_box, set_box )
-    location = property( get_location, set_location )
     z        = property( get_z, set_z )
 
 class Point( Collider ):
-    def __init__( self, location=pyscumm.vector.Vector3D() ):
+    def __init__( self, location=None ):
+        if isinstance( location, NoneType):
+            location = pyscumm.vector.Vector3D()
         self._location = location
     def get_location( self ): return self._location
     def set_location( self, location ): self._location = location
@@ -74,6 +72,8 @@ class MultiBox( Collider, list ):
         return "MultiBox( %s )" % list.__str__( self )
     def update( self ):
         for box in self: box.update()
+    def draw( self ):
+        for box in self: box.draw()
     def collides( self, collider ):
         return MultiBox( [ o for o in self if o.collides( collider ) ] )
 
@@ -133,6 +133,12 @@ class WalkArea( MultiBox ):
         """same as del s[s.index(x)]"""
         self.__delitem__( self.index( x ) )
 
+    def update( self ):
+        for box in self: box.update()
+
+    def draw( self ):
+        for box in self: box.draw()
+
     def __str__( self ):
         return "WalkArea( %s )" % "\n".join( map( str, self ) )
 
@@ -150,11 +156,12 @@ class BoxNode( list ):
 
 
 class BoxRect( list ):
-    def __init__( self, location=None, obj=[] ):
+    def __init__( self, box=None, obj=[] ):
         list.__init__( self, obj )
-        self._location = location
-        if isinstance( self._location, types.NoneType ):
-            self._location = pyscumm.vector.Vector3D()
+        self._box = box
+
+    def get_box( self ): return self._box
+    def set_box( self, box ): self._box = box
 
     def get_rect( self ):
         return self._rect
@@ -171,10 +178,10 @@ class BoxRect( list ):
 
     def update( self ):
         self._point = [
-            self[0] + self._location,
-            self[1] + self._location,
-            self[2] + self._location,
-            self[3] + self._location ]
+            self[0] + self.box.location,
+            self[1] + self.box.location,
+            self[2] + self.box.location,
+            self[3] + self.box.location ]
         self._rect = [
             Rect.from_two_point( self._point[0], self._point[1] ),
             Rect.from_two_point( self._point[1], self._point[2] ),
@@ -191,6 +198,7 @@ class BoxRect( list ):
     def __str__( self ):
         return "BoxRect( %s, %s )" % ( self._location, list.__str__( self ) )
 
+    box   = property( get_box, set_box )
     point = property( get_point )
     rect  = property( get_rect )
 
