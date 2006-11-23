@@ -24,7 +24,7 @@
 """
 
 from types import NoneType
-import pygame.event, base, driver, vector, box
+import pygame.event, base, driver, vector, box, pyscumm.gfx.gl
 
 class ChangeScene( Exception ):
     """
@@ -87,7 +87,7 @@ class VM( base.StateMachine ):
         if self._shared_state: return
         base.StateMachine.__init__( self )
         self._mouse = driver.Mouse()
-        self._display = driver.GLDisplay()
+        self._display = None
         self._clock = driver.Clock()
         self._scene = None
 
@@ -143,6 +143,7 @@ class VM( base.StateMachine ):
         """Send an update message to the active scene."""
         self._state.draw()
 
+
     def start( self ):
         """Reset the VM with the vm.NormalMode state."""
         self._state = NormalMode()
@@ -155,6 +156,7 @@ class VM( base.StateMachine ):
         the VM will reset single with the new scene data without close the window.
         """
         self.start()
+        print self._display
         self._display.open()
         self._scene.start()
         leave = False
@@ -176,6 +178,7 @@ class VM( base.StateMachine ):
                         self.mouse_motion( event )
                 self.update()
                 self.draw()
+                self._display.flip()
             except ChangeScene, e:
                 self._scene.stop()
                 self._scene = e.scene
@@ -184,7 +187,7 @@ class VM( base.StateMachine ):
                 leave = True
         self._display.close()
 
-    def boot( self, scene, clock=None, display=None, mouse=None  ):
+    def boot( self, scene, display, clock=None, mouse=None  ):
         """
         Boot a scene. Prepare a Virtual Machine and
         start running the main loop.
@@ -203,9 +206,9 @@ class VM( base.StateMachine ):
         except ImportError:
             pass
         if not isinstance( clock, NoneType ): VM().clock = clock
-        if not isinstance( display, NoneType ): VM().display = display
         if not isinstance( mouse, NoneType ): VM().mouse = mouse
         VM().scene = scene
+        VM().display = display
         VM().main()
 
     def get_clock( self ):

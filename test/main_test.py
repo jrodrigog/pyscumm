@@ -1,4 +1,4 @@
-import pyscumm, sys, random
+import pyscumm, sys, random, pyscumm.gfx.gl
 
 
 """
@@ -53,4 +53,4 @@ class Taverna1( pyscumm.scene.SceneState ):
     pass
 
 pyscumm.vm.VM().state = pyscumm.vm.NormalMode()
-pyscumm.vm.VM.boot( Taverna() )
+pyscumm.vm.VM.boot( Taverna(), pyscumm.gfx.gl.Display() )

@@ -23,7 +23,7 @@
 @since: 14/11/2006
 """
 
-import time, pygame.display, pygame.mouse, pyscumm.vector
+import time,  pygame.mouse, pyscumm.vector
 
 class Mouse( object ):
     """A Mouse Controller Class."""
@@ -136,6 +136,7 @@ class Display( object ):
         self.title = self._title
         self.size = self._size
 
+
     def close( self ):
         """
         Close que display window.
@@ -237,21 +238,14 @@ class Display( object ):
         self._icon = icon
         if self._opened: pygame.display.set_icon( icon )
 
+    def flip( self ):
+        pygame.display.flip()
+
     open_flags  = property( get_open_flags, get_open_flags )
     title       = property( get_title, set_title )
     size        = property( get_size, set_size )
     icon        = property( get_icon, set_icon )
 
-class GLDisplay( Display ):
-    """OpenGL Display class."""
-    def __init__( self ):
-        """Build a GLDisplay object"""
-        Display.__init__( self )
-        self._open_flags = pygame.DOUBLEBUF | pygame.OPENGL
-
-class SDLDisplay( Display ):
-    """SDL Display class."""
-    pass
 
 class Clock( object ):
     _sec_to_msec = 1000.

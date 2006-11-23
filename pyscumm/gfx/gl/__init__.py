@@ -1,2 +1,2 @@
-from base import Object
+from base import Object, Display
 from box import Box
