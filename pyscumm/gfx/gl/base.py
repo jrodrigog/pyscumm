@@ -1,19 +1,18 @@
-import pyscumm.object
 import types
 import OpenGL.GL
-import pyscumm.gfx
+from pyscumm.gfx import Drawable
 
-class Object( pyscumm.gfx.Drawable ):
+class Object( Drawable ):
     """Abstract GL Object; contains the location, insertion,
     rotation and color of the object"""
 
     def __init__( self ):
-        pyscumm.gfx.Drawable.__init__( self )
+        Drawable.__init__( self )
 
     def clone( self, obj=None, deep=False ):
         """Clone the object"""
         if isinstance( obj, types.NoneType ): obj = Object()
-        pyscumm.gfx.Drawable.clone( self, obj, deep )
+        Drawable.clone( self, obj, deep )
         return obj
 
     def draw( self ):
