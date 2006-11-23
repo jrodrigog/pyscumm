@@ -49,7 +49,7 @@ class Box( Collider ):
 
 class Point( Collider ):
     def __init__( self, location=None ):
-        if isinstance( location, NoneType):
+        if isinstance( location, types.NoneType ):
             location = pyscumm.vector.Vector3D()
         self._location = location
     def get_location( self ): return self._location
