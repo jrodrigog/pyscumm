@@ -17,14 +17,17 @@ class MyObject( pyscumm.object.Object ):
 """
 
 class MyObject( pyscumm.object.Object ):
-    count = 0
+    count  = 0
+    JITTER = 15.
+    WIDTH  = 50.
     def __init__( self ):
+        def jitter( x ):
+            return x + ( ( random.random() * self.JITTER * 2. ) - self.JITTER ) 
         self._box = pyscumm.gfx.gl.Box()
-        self._box.location[0] = 320.; self._box.location[1] = 240.;
-        self._box.box[0][0] = -50.; self._box.box[0][1] = -50.
-        self._box.box[1][0] =  50.; self._box.box[1][1] = -50.
-        self._box.box[2][0] =  50.; self._box.box[2][1] =  50.
-        self._box.box[3][0] = -50.; self._box.box[3][1] =  50.
+        self._box.box[0][0] = jitter( -self.WIDTH ); self._box.box[0][1] = jitter( -self.WIDTH )
+        self._box.box[1][0] = jitter(  self.WIDTH ); self._box.box[1][1] = jitter( -self.WIDTH )
+        self._box.box[2][0] = jitter(  self.WIDTH ); self._box.box[2][1] = jitter(  self.WIDTH )
+        self._box.box[3][0] = jitter( -self.WIDTH ); self._box.box[3][1] = jitter(  self.WIDTH )
         self["id"] = self.__class__.count
         self.__class__.count += 1
     def draw( self ):
@@ -46,8 +49,8 @@ class Taverna( pyscumm.scene.Scene ):
             x = MyObject()
             #x[ 'box' ].location[0] = random.random() * 640
             #x[ 'box' ].location[1] = random.random() * 320
-            x.box.location[0] = random.random() * 640
-            x.box.location[1] = random.random() * 320
+            x.box.location[0] = random.random() * pyscumm.vm.VM().display.size[0]
+            x.box.location[1] = random.random() * pyscumm.vm.VM().display.size[1]
             x.box.location[2] = float( i ) / self.N
             x.box.rgb = [ random.random(), random.random(), random.random() ]
             x.box.update()
@@ -60,8 +63,8 @@ class Taverna( pyscumm.scene.Scene ):
     offset = property( get_offset, set_offset )
 
 class Taverna1( pyscumm.scene.SceneState ):
-    _shared_state = {}
     LEFT = 1
+    _shared_state = {} # Singleton
     def __init__( self ):
         self.__dict__ = self._shared_state
         if self.__dict__: return
@@ -76,6 +79,7 @@ class Taverna1( pyscumm.scene.SceneState ):
         # Use the top object
         self.scene.dragging = obj.pop()
         self.scene.offset = loc - self.scene.dragging.box.location
+        pyscumm.base.Logger().info( "fps: %.2f" % self.vm.clock.fps )
         return self
     def on_mouse_drag_end( self, obj, loc, button ):
         self.scene.dragging = None

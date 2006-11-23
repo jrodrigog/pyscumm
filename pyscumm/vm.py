@@ -201,6 +201,7 @@ class VM( base.StateMachine ):
         """
         try:
             import psyco
+            psyco.full()
             base.Logger().info("Psyco enabled")
         except ImportError:
             pass
