@@ -26,6 +26,7 @@ class Box( Collider ):
     def set_depth( self, depth ): self._depth = depth
     def get_box( self ): return self._box
     def set_box( self, box ): self._box = box
+
     def collides( self, collider ):
         if isinstance( collider, Point )\
         and self._box.point_inside( collider.location ):
