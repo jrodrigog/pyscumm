@@ -23,21 +23,28 @@
 @since: 20/11/2006
 """
 
+
 import pygame.time, pyscumm.vector
 from types import NoneType
 
+
 class SpeedSolver:
     """A Singleton Speed Solver"""
+
     _shared_state = {}
+
     def __init__( self ):
         self.__dict__ = self._shared_state
+
     def solve( self, obj ):
         """Solve the object's location based on its speed."""
         obj.location += obj.speed
 
+
 class Drawable( object ):
-    """Abstract Drawable object; contains the location, 
+    """Abstract Drawable object; contains the location,
     insertion, rotation, color and scale of the object"""
+
     def __init__( self ):
         self._location  = pyscumm.vector.Vector3D( [0.,0.,0.] )
         self._insertion = pyscumm.vector.Vector3D( [0.,0.,0.] )
@@ -79,7 +86,7 @@ class Drawable( object ):
     def get_color( self ): return self._color
     def set_color( self, color ): self._color = color
     def get_rotation( self ): return self._rotation
-    def set_rotation( self, rotation ): self._rotation = rotation        
+    def set_rotation( self, rotation ): self._rotation = rotation
     def get_insertion( self ): return self._insertion
     def set_insertion( self, insertion ): self._insertion = insertion
     def get_location( self ): return self._location
@@ -154,8 +161,10 @@ class Drawable( object ):
     size      = property( get_size, set_size )
     deserialize = classmethod( deserialize )
 
+
 class Cycle( object ):
     """An abstract Cycle"""
+
     def __init__( self ):
         """Build the object"""
         # Start time of the cycle
@@ -179,7 +188,7 @@ class Cycle( object ):
 
     def clone( self, obj=None, deep=False ):
         """Clone this object, create a new one if required"""
-        if isinstance( obj, NoneType ): obj = Cycle() 
+        if isinstance( obj, NoneType ): obj = Cycle()
         obj.started      = self._started
         obj.time         = self._time
         obj.loop         = self._loop
@@ -330,7 +339,7 @@ class Animation( Cycle ):
     def set_ani_speed( self, speed ): self._ani_speed = ani_speed
 
     def get_last_frame( self ): return self._last_frame
-    def set_last_frame( self, speed ): self._last_frame = last_frame    
+    def set_last_frame( self, speed ): self._last_frame = last_frame
 
     def get_reset( self ): return self._reset
     def set_reset( self, reset ):
