@@ -14,7 +14,7 @@ class Box( pyscumm.box.Box, Object ):
         OpenGL.GL.glPushMatrix()
         Object.draw( self )
         OpenGL.GL.glListBase( self._base )
-        OpenGL.GL.glCallLists( 0 )
+        OpenGL.GL.glCallLists( [ 0 ] )
         OpenGL.GL.glPopMatrix()
 
     def update( self ):
