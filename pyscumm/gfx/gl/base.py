@@ -67,5 +67,8 @@ class Display( pyscumm.driver.Display ):
         #OpenGL.GL.glEnable( OpenGL.GL.GL_TEXTURE_2D )
         OpenGL.GL.glBlendFunc( OpenGL.GL.GL_SRC_ALPHA, OpenGL.GL.GL_ONE_MINUS_SRC_ALPHA )
         OpenGL.GL.glAlphaFunc( OpenGL.GL.GL_GREATER, 0.01 )
+
+        OpenGL.GL.glEnable( OpenGL.GL.GL_LINE_SMOOTH )
+        OpenGL.GL.glEnable( OpenGL.GL.GL_POINT_SMOOTH )
         OpenGL.GL.glEnable( OpenGL.GL.GL_BLEND )
         #OpenGL.GL.glEnable( OpenGL.GL.GL_ALPHA_TEST )
