@@ -45,6 +45,7 @@ class Taverna( pyscumm.scene.Scene ):
         self._state = Taverna1()
         self._dragging = None
         self._offset = None
+        self._save_color = None
         for i in xrange( self.N ):
             x = MyObject()
             #x[ 'box' ].location[0] = random.random() * 640
@@ -54,10 +55,14 @@ class Taverna( pyscumm.scene.Scene ):
             x.box.location[2] = float( i ) / self.N
             x.box.update()
             self[ id(x) ] = x
+    def get_save_color( self ): return self._save_color
+    def set_save_color( self, save_color ): self._save_color = save_color
     def get_dragging( self ): return self._dragging
     def set_dragging( self, dragging ): self._dragging = dragging
     def get_offset( self ): return self._offset
     def set_offset( self, offset ): self._offset = offset
+
+    save_color = property( get_save_color, set_save_color )
     dragging = property( get_dragging, set_dragging )
     offset = property( get_offset, set_offset )
 
@@ -75,13 +80,18 @@ class Taverna1( pyscumm.scene.SceneState ):
         self.scene.dragging.box.update()
         return self
     def on_mouse_drag_start( self, obj, loc, button ):
-        if button != self.LEFT or not len( obj ): return self
+        if button != self.LEFT or not obj: return self
         # Use the top object
         self.scene.dragging = obj.pop()
+        self.scene.save_color = self.scene.dragging.box.color
+        self.scene.dragging.box.color = pyscumm.vector.Vector4D([ 1., 0., 0., 0.5 ])
         self.scene.offset = loc - self.scene.dragging.box.location
         pyscumm.base.Logger().info( "fps: %.2f" % self.vm.clock.fps )
         return self
     def on_mouse_drag_end( self, obj, loc, button ):
+        if button != self.LEFT or not self.scene.dragging: return self
+        self.scene.dragging.box.color = self.scene.save_color
+        self.scene.dragging.box.update()
         self.scene.dragging = None
         return self
     def on_mouse_click( self, obj, loc, button ):
