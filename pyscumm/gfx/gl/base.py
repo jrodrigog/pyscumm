@@ -58,7 +58,7 @@ class Display( pyscumm.driver.Display ):
         OpenGL.GL.glViewport( 0, 0, self._size[0], self._size[1] )
         OpenGL.GL.glOrtho( 0, self._size[0], 0, self._size[1], -50, 50 )
         OpenGL.GL.glMatrixMode( OpenGL.GL.GL_MODELVIEW )
-        OpenGL.GL.glClearColor( 0.0, 0.0, 1.0, 1.0 )
+        OpenGL.GL.glClearColor( 0., 0., 0., 1.0 )
         OpenGL.GL.glClear( OpenGL.GL.GL_COLOR_BUFFER_BIT | OpenGL.GL.GL_DEPTH_BUFFER_BIT )
         OpenGL.GL.glLoadIdentity()
         OpenGL.GL.glDisable( OpenGL.GL.GL_LIGHTING )
@@ -71,3 +71,5 @@ class Display( pyscumm.driver.Display ):
         OpenGL.GL.glEnable( OpenGL.GL.GL_POINT_SMOOTH )
         OpenGL.GL.glEnable( OpenGL.GL.GL_BLEND )
         #OpenGL.GL.glEnable( OpenGL.GL.GL_ALPHA_TEST )
+
+

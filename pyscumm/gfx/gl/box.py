@@ -13,7 +13,7 @@ class Box( pyscumm.box.Box, Object ):
         Object.__init__( self )
         pyscumm.box.Box.__init__( self, shadow, depth  )
         self._color = pyscumm.vector.Vector4D( [
-            1., 0.25, 0.25, 0.3 ] )
+            0.3, 0.3, 1., 0.7 ] )
         self._base = None
         self.update()
 
@@ -21,7 +21,7 @@ class Box( pyscumm.box.Box, Object ):
         OpenGL.GL.glPushMatrix()
         Object.draw( self )
         OpenGL.GL.glListBase( self._base )
-        OpenGL.GL.glCallLists( [ 0 ] )
+        OpenGL.GL.glCallList( self._base )
         OpenGL.GL.glPopMatrix()
 
     def update( self ):
@@ -41,7 +41,13 @@ class Box( pyscumm.box.Box, Object ):
         OpenGL.GL.glVertex3f( *self._box[3] )
         OpenGL.GL.glVertex3f( *self._box[0] )
         OpenGL.GL.glEnd()
-        # Draw the box border
+        # Draw the center point
+        OpenGL.GL.glEnable( OpenGL.GL.GL_POINT_SMOOTH )
+        OpenGL.GL.glBegin( OpenGL.GL.GL_POINTS )
+        OpenGL.GL.glVertex3f( 0., 0., 0. )
+        OpenGL.GL.glEnd()
+        OpenGL.GL.glDisable( OpenGL.GL.GL_POINT_SMOOTH )
+        # Draw the border
         OpenGL.GL.glEnable( OpenGL.GL.GL_LINE_SMOOTH )
         OpenGL.GL.glColor( color_border )
         OpenGL.GL.glLineWidth( self.BORDER_SIZE )
@@ -53,13 +59,10 @@ class Box( pyscumm.box.Box, Object ):
         OpenGL.GL.glVertex3f( *self._box[0] )
         OpenGL.GL.glEnd()
         OpenGL.GL.glDisable( OpenGL.GL.GL_LINE_SMOOTH )
-        # Draw the center point
-        OpenGL.GL.glEnable( OpenGL.GL.GL_POINT_SMOOTH )
+
+
+    
         OpenGL.GL.glPointSize( self.POINT_SIZE )
-        OpenGL.GL.glBegin( OpenGL.GL.GL_POINTS )
-        OpenGL.GL.glVertex3f( 0., 0., 0. )
-        OpenGL.GL.glEnd()
-        OpenGL.GL.glDisable( OpenGL.GL.GL_POINT_SMOOTH )
         OpenGL.GL.glEndList()
 
 
