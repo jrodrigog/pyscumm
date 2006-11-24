@@ -5,14 +5,14 @@ from pyscumm.gfx.gl import Object
 
 class Box( pyscumm.box.Box, Object ):
 
-    BORDER_SHADOW = 0.25
+    BORDER_SHADOW = 100.
     BORDER_SIZE = 2.
     POINT_SIZE = 5.
 
     def __init__( self, shadow=1., depth=1. ):
         Object.__init__( self )
         pyscumm.box.Box.__init__( self, shadow, depth  )
-        self._color = pyscumm.vector.Vector4D( [ 1., 0., 0., 0.5 ] )
+        self._color = pyscumm.vector.Vector4D( [ 1., 0., 0., 0.6 ] )
         self._base = None
         self.update()
 
@@ -28,6 +28,7 @@ class Box( pyscumm.box.Box, Object ):
         pyscumm.box.Box.update( self )
         color_border = self._copy.color.scale( self.BORDER_SHADOW )
         color_border[3] = self._copy.color[3]
+        color_border[3] = 1.0
         if self._base: OpenGL.GL.glDeleteLists( self._base, 1 )
         self._base = OpenGL.GL.glGenLists(1)
         OpenGL.GL.glNewList( self._base, OpenGL.GL.GL_COMPILE )
@@ -40,20 +41,24 @@ class Box( pyscumm.box.Box, Object ):
         OpenGL.GL.glVertex3f( *self._box[0] )
         OpenGL.GL.glEnd()
         # Draw the box border
+        OpenGL.GL.glEnable( OpenGL.GL.GL_LINE_SMOOTH )
+        OpenGL.GL.glColor( color_border )
         OpenGL.GL.glLineWidth( self.BORDER_SIZE )
         OpenGL.GL.glBegin( OpenGL.GL.GL_LINE_STRIP )
-        OpenGL.GL.glColor( color_border )
         OpenGL.GL.glVertex3f( *self._box[0] )
         OpenGL.GL.glVertex3f( *self._box[1] )
         OpenGL.GL.glVertex3f( *self._box[2] )
         OpenGL.GL.glVertex3f( *self._box[3] )
         OpenGL.GL.glVertex3f( *self._box[0] )
         OpenGL.GL.glEnd()
+        OpenGL.GL.glDisable( OpenGL.GL.GL_LINE_SMOOTH )
         # Draw the center point
+        OpenGL.GL.glEnable( OpenGL.GL.GL_POINT_SMOOTH )
         OpenGL.GL.glPointSize( self.POINT_SIZE )
         OpenGL.GL.glBegin( OpenGL.GL.GL_POINTS )
         OpenGL.GL.glVertex3f( 0., 0., 0. )
         OpenGL.GL.glEnd()
+        OpenGL.GL.glDisable( OpenGL.GL.GL_POINT_SMOOTH )
         OpenGL.GL.glEndList()
 
 
