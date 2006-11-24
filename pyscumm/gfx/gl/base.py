@@ -21,11 +21,12 @@ class Object( Drawable ):
     def draw( self ):
         """Draw the abstract object, position and colorize it"""
         o = self.copy
-        OpenGL.GL.glTranslatef( o.location[0], o.location[1], o.location[2] )
-        OpenGL.GL.glRotatef( o.rotation[0], o.rotation[1], o.rotation[2], o.rotation[3] )
-        OpenGL.GL.glScalef( o.scale[0], o.scale[1], o.scale[2] )
-        OpenGL.GL.glTranslatef( -o.insertion[0], -o.insertion[1], -o.insertion[2] )
-        OpenGL.GL.glColor4f( o.color[0], o.color[1], o.color[2], o.color[3] )
+        OpenGL.GL.glTranslatef( *o.location )
+        OpenGL.GL.glRotatef( *o.rotation )
+        OpenGL.GL.glScalef( *o.scale )
+        #OpenGL.GL.glTranslatef( -o.insertion[0], -o.insertion[1], -o.insertion[2] )
+        OpenGL.GL.glTranslatef( *o.insertion )
+        OpenGL.GL.glColor4f( *o.color )
         for child in self.child: child.draw()
 
     def deserialize( self, element, obj=None ):
