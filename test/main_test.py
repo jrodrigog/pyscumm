@@ -1,4 +1,7 @@
-import pyscumm, sys, random, pyscumm.gfx.gl
+import sys
+sys.path[len(sys.path):len(sys.path)+1] = ('.', '..')
+
+import pyscumm, random, pyscumm.gfx.gl
 
 
 """
