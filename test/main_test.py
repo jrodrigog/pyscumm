@@ -22,7 +22,7 @@ class MyObject( pyscumm.object.Object ):
     WIDTH  = 50.
     def __init__( self ):
         def jitter( x ):
-            return x + ( ( random.random() * self.JITTER * 2. ) - self.JITTER ) 
+            return x + ( ( random.random() * self.JITTER * 2. ) - self.JITTER )
         self._box = pyscumm.gfx.gl.Box()
         self._box.box[0][0] = jitter( -self.WIDTH ); self._box.box[0][1] = jitter( -self.WIDTH )
         self._box.box[1][0] = jitter(  self.WIDTH ); self._box.box[1][1] = jitter( -self.WIDTH )
@@ -52,7 +52,6 @@ class Taverna( pyscumm.scene.Scene ):
             x.box.location[0] = random.random() * pyscumm.vm.VM().display.size[0]
             x.box.location[1] = random.random() * pyscumm.vm.VM().display.size[1]
             x.box.location[2] = float( i ) / self.N
-            x.box.rgb = [ random.random(), random.random(), random.random() ]
             x.box.update()
             self[ id(x) ] = x
     def get_dragging( self ): return self._dragging
