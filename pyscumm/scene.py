@@ -205,6 +205,7 @@ class Scene( base.StateMachine, dict ):
 
     sorted = property( get_sorted )
 
+
 class SceneState( base.StateMachine ):
     """
     Abstract SceneState.
