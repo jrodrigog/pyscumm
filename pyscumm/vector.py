@@ -51,6 +51,17 @@ class Vector2D( list ):
         return Vector2D( [
             self[0] * scale,
             self[1] * scale ] )
+    def rotate( self, alpha ):
+        return self.rotate_z( alpha )
+    def rotate_z( self, alpha ):
+        """
+        x2 = x1*cos(alpha)-y1*sin(alpha)
+        y2 = y1*cos(alpha)+x1*sin(alpha)
+        """
+        x1, y1 = self
+        return Vector2D( [
+            x1 * math.cos( alpha ) - y1 * math.sin( alpha ),
+            y1 * math.cos( alpha ) + x1 * math.sin( alpha ) ] )
     deserialize = classmethod( deserialize )
 
 class Vector3D( list ):
@@ -117,6 +128,19 @@ class Vector3D( list ):
             self[0] * scale,
             self[1] * scale,
             self[2] * scale ] )
+    def rotate( self, alpha ):
+        return self.rotate_z( alpha )
+    def rotate_z( self, alpha ):
+        """
+        x2 = x1*cos(alpha)-y1*sin(alpha)
+        y2 = y1*cos(alpha)+x1*sin(alpha)
+        z2 = z1
+        """
+        x1, y1, z1 = self
+        return Vector3D( [
+            x1 * math.cos( alpha ) - y1 * math.sin( alpha ),
+            y1 * math.cos( alpha ) + x1 * math.sin( alpha ),
+            z1 ] )
     deserialize = classmethod( deserialize )
         
 class Vector4D( list ):
@@ -195,4 +219,8 @@ class Vector4D( list ):
             self[1] * scale,
             self[2] * scale,
             self[3] * scale ] )
+    def rotate( self, alpha ):
+        raise NotImplementedError
+    def rotate_z( self, alpha ):
+        raise NotImplementedError
     deserialize = classmethod( deserialize )

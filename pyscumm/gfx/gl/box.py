@@ -5,14 +5,14 @@ from pyscumm.gfx.gl import Object
 
 class Box( pyscumm.box.Box, Object ):
 
-    BORDER_SHADOW = 5.
-    BORDER_SIZE = 4.
+    BORDER_SHADOW = 0.25
+    BORDER_SIZE = 2.
     POINT_SIZE = 5.
 
     def __init__( self, shadow=1., depth=1. ):
         Object.__init__( self )
         pyscumm.box.Box.__init__( self, shadow, depth  )
-        self._color = pyscumm.vector.Vector4D( [ 1., 0., 0., 0.7 ] )
+        self._color = pyscumm.vector.Vector4D( [ 1., 0., 0., 0.25 ] )
         self._base = None
         self.update()
 
@@ -26,11 +26,9 @@ class Box( pyscumm.box.Box, Object ):
     def update( self ):
         Object.update( self )
         pyscumm.box.Box.update( self )
-        color = self.copy.color.clone()
-        color[3] = self._copy.color[3]
-        color_border = color.scale( self.BORDER_SHADOW )
-        if self._base:
-            OpenGL.GL.glDeleteLists( self._base, 1 )
+        color_border = self._copy.color.scale( self.BORDER_SHADOW )
+        color_border[3] = self._copy.color[3]
+        if self._base: OpenGL.GL.glDeleteLists( self._base, 1 )
         self._base = OpenGL.GL.glGenLists(1)
         OpenGL.GL.glNewList( self._base, OpenGL.GL.GL_COMPILE )
         # Draw the box
@@ -42,9 +40,9 @@ class Box( pyscumm.box.Box, Object ):
         OpenGL.GL.glVertex3f( *self._box[0] )
         OpenGL.GL.glEnd()
         # Draw the box border
-        OpenGL.GL.glColor( color_border )
         OpenGL.GL.glLineWidth( self.BORDER_SIZE )
         OpenGL.GL.glBegin( OpenGL.GL.GL_LINE_STRIP )
+        OpenGL.GL.glColor( color_border )
         OpenGL.GL.glVertex3f( *self._box[0] )
         OpenGL.GL.glVertex3f( *self._box[1] )
         OpenGL.GL.glVertex3f( *self._box[2] )
