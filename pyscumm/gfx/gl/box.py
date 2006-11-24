@@ -5,14 +5,15 @@ from pyscumm.gfx.gl import Object
 
 class Box( pyscumm.box.Box, Object ):
 
-    BORDER_SHADOW = 100.
-    BORDER_SIZE = 2.
+    BORDER_LIGHT = 1.5
+    BORDER_SIZE = 1.
     POINT_SIZE = 5.
 
     def __init__( self, shadow=1., depth=1. ):
         Object.__init__( self )
         pyscumm.box.Box.__init__( self, shadow, depth  )
-        self._color = pyscumm.vector.Vector4D( [ 1., 0., 0., 0.6 ] )
+        self._color = pyscumm.vector.Vector4D( [
+            1., 0.25, 0.25, 0.3 ] )
         self._base = None
         self.update()
 
@@ -26,11 +27,11 @@ class Box( pyscumm.box.Box, Object ):
     def update( self ):
         Object.update( self )
         pyscumm.box.Box.update( self )
-        color_border = self._copy.color.scale( self.BORDER_SHADOW )
-        color_border[3] = self._copy.color[3]
+        color_border = self._copy.color.scale( self.BORDER_LIGHT )
         color_border[3] = 1.0
         if self._base: OpenGL.GL.glDeleteLists( self._base, 1 )
         self._base = OpenGL.GL.glGenLists(1)
+
         OpenGL.GL.glNewList( self._base, OpenGL.GL.GL_COMPILE )
         # Draw the box
         OpenGL.GL.glBegin( OpenGL.GL.GL_QUADS )
