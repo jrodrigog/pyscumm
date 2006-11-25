@@ -48,8 +48,8 @@ class Box( pyscumm.box.Box, Object ):
         OpenGL.GL.glEnable( OpenGL.GL.GL_POINT_SMOOTH )
         OpenGL.GL.glBegin( OpenGL.GL.GL_POINTS )
         OpenGL.GL.glVertex2f( 0., 0. )
+        OpenGL.GL.glVertex2f( *self._insertion[:2] )
         OpenGL.GL.glEnd()
-        OpenGL.GL.glDisable( OpenGL.GL.GL_POINT_SMOOTH )
         # Draw the border
         OpenGL.GL.glEnable( OpenGL.GL.GL_LINE_SMOOTH )
         OpenGL.GL.glColor( color_border )
