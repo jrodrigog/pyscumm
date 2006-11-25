@@ -97,6 +97,7 @@ class Taverna1( pyscumm.scene.SceneState ):
         return self
 
     def on_mouse_button_up( self, event ):
+        if not self.scene.colored: return self
         self.scene.colored.box.color = self.scene.save_color
         self.scene.colored.box.update()
         return self
