@@ -26,6 +26,16 @@ class Box( pyscumm.box.Box, Object ):
         #OpenGL.GL.glListBase( self._base )
         OpenGL.GL.glCallList( self._base )
         OpenGL.GL.glPopMatrix()
+        OpenGL.GL.glColor( [1.,1.,1.,1.] )
+        OpenGL.GL.glPushMatrix()
+        OpenGL.GL.glBegin( OpenGL.GL.GL_LINE_STRIP )
+        OpenGL.GL.glVertex2f( *self._box.point[0][:2] )
+        OpenGL.GL.glVertex2f( *self._box.point[1][:2] )
+        OpenGL.GL.glVertex2f( *self._box.point[2][:2] )
+        OpenGL.GL.glVertex2f( *self._box.point[3][:2] )
+        OpenGL.GL.glVertex2f( *self._box.point[0][:2] )
+        OpenGL.GL.glEnd()
+        OpenGL.GL.glPopMatrix()
 
     def update( self ):
         Object.update( self )
@@ -63,8 +73,6 @@ class Box( pyscumm.box.Box, Object ):
         OpenGL.GL.glEnd()
         OpenGL.GL.glDisable( OpenGL.GL.GL_LINE_SMOOTH )
 
-
-    
         OpenGL.GL.glPointSize( self.POINT_SIZE )
         OpenGL.GL.glEndList()
 

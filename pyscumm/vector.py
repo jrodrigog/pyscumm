@@ -254,8 +254,9 @@ class RotateVectorZ( VectorRotation ):
         @param alpha: Rotation angle in degrees
         @type alpha: float
         """
-        cos = math.cos( alpha )
-        sin = math.sin( alpha )
+        rad = math.radians( alpha )
+        cos = math.cos( rad )
+        sin = math.sin( rad )
         VectorRotation.__init__( self,
             [[ cos, -sin, 0. ],
              [ sin,  cos, 0. ],
@@ -273,8 +274,9 @@ class RotateVectorX( VectorRotation ):
         @param alpha: Rotation angle in degrees
         @type alpha: float
         """
-        cos = math.cos( alpha )
-        sin = math.sin( alpha )
+        rad = math.radians( alpha )
+        cos = math.cos( rad )
+        sin = math.sin( rad )
         VectorRotation.__init__( self,
             [[  1.,  0.,   0. ],
              [  0., cos, -sin ],
@@ -292,8 +294,9 @@ class RotateVectorY( VectorRotation ):
         @param alpha: Rotation angle in degrees
         @type alpha: float
         """
-        cos = math.cos( alpha )
-        sin = math.sin( alpha )
+        rad = math.radians( alpha )
+        cos = math.cos( rad )
+        sin = math.sin( rad )
         VectorRotation.__init__( self,
             [[  cos, 0., sin ],
              [   0., 1., 0.  ],
@@ -311,8 +314,9 @@ class RotateAxisZ( VectorRotation ):
         @param alpha: Rotation angle in degrees
         @type alpha: float
         """
-        cos = math.cos( alpha )
-        sin = math.sin( alpha )
+        rad = math.radians( alpha )
+        cos = math.cos( rad )
+        sin = math.sin( rad )
         VectorRotation.__init__( self,
             [[  cos, sin, 0. ],
              [ -sin, cos, 0. ],
@@ -330,8 +334,9 @@ class RotateAxisX( VectorRotation ):
         @param alpha: Rotation angle in degrees
         @type alpha: float
         """
-        cos = math.cos( alpha )
-        sin = math.sin( alpha )
+        rad = math.radians( alpha )
+        cos = math.cos( rad )
+        sin = math.sin( rad )
         VectorRotation.__init__( self,
             [[ 1.,  0.,  0. ],
              [ 0., cos, sin ],
@@ -349,8 +354,9 @@ class RotateAxisY( VectorRotation ):
         @param alpha: Rotation angle in degrees
         @type alpha: float
         """
-        cos = math.cos( alpha )
-        sin = math.sin( alpha )
+        rad = math.radians( alpha )
+        cos = math.cos( rad )
+        sin = math.sin( rad )
         VectorRotation.__init__( self,
             [[ cos, 0., -sin ],
              [  0., 1.,   0. ],

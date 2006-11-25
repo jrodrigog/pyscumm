@@ -1,4 +1,4 @@
-import sys
+import sys, math
 sys.path[len(sys.path):len(sys.path)+1] = ('.', '..')
 
 import pyscumm, random, pyscumm.gfx.gl
@@ -65,7 +65,9 @@ class Taverna( pyscumm.scene.Scene ):
 
 class Taverna1( pyscumm.scene.SceneState ):
     _shared_state = {} # Singleton
-    SPEED = 1.
+    ROT_SPEED = 1.
+    MAX_INSERTION = 30.
+    MAX_SCALE = 1.
     def __init__( self ):
         self.__dict__ = self._shared_state
         if self.__dict__: return
@@ -112,8 +114,21 @@ class Taverna1( pyscumm.scene.SceneState ):
         return self
 
     def update( self ):
+        t = self.vm.clock.time / 1000.
+        cos = math.cos( t )
+        sin = math.sin( t )
+        insertion = pyscumm.vector.Vector3D( [
+            cos * self.MAX_INSERTION,
+            sin * self.MAX_INSERTION,
+            0. ] )
+        scale = pyscumm.vector.Vector3D( [
+            (((cos+1.)/2.)+1.) * self.MAX_SCALE,
+            (((sin+1.)/2.)+1.) * self.MAX_SCALE,
+            0. ] )
         for obj in self.scene.sorted:
-            obj.box.rotation[0] += self.SPEED
+            obj.box.insertion = insertion
+            obj.box.scale = scale
+            obj.box.rotation[0] += self.ROT_SPEED
             obj.box.update()
         #pyscumm.scene.SceneState.update( self )
         return self

@@ -29,7 +29,7 @@ class Box( Collider ):
 
     def collides( self, collider ):
         if isinstance( collider, Point )\
-        and self._box.point_inside( collider.location ):
+        and self._box.point_inside( collider ):
             return self
         elif isinstance( collider, Box )\
         and self._box.box_inside( collider.box ):
@@ -48,23 +48,16 @@ class Box( Collider ):
     box      = property( get_box, set_box )
     z        = property( get_z, set_z )
 
-class Point( Collider ):
-    def __init__( self, location=None ):
-        if isinstance( location, types.NoneType ):
-            location = pyscumm.vector.Vector3D()
-        self._location = location
-    def get_location( self ): return self._location
-    def set_location( self, location ): self._location = location
+class Point( Collider, pyscumm.vector.Vector3D ):
+    def __init__( self, v=[0.,0.,0.] ):
+        pyscumm.vector.Vector3D.__init__( self, v )
     def collides( self, collider ):
         if isinstance( collider, Point ):
             raise NotImplementedError
         elif isinstance( collider, Box )\
-        and collider.box.point_inside( self._location ):
+        and collider.box.point_inside( self ):
             return self
         return None
-    def __str__( self ):
-        return "Point( %s )" % self._location
-    location = property( get_location, set_location )
 
 class MultiBox( Collider, list ):
     def __init__( self, obj=[] ):
@@ -179,7 +172,7 @@ class BoxRect( list ):
 
     def update( self ):
         location  = self._box.copy.location
-        rotation  = pyscumm.vector.RotateVectorZ( self._box.copy.rotation[2] )
+        rotation  = pyscumm.vector.RotateVectorZ( self._box.copy.rotation[0] )
         scale     = self._box.copy.scale
         insertion = self._box.copy.insertion * scale
         location  = self._box.copy.location
@@ -201,7 +194,7 @@ class BoxRect( list ):
             or self.point_inside( point[3] )
 
     def __str__( self ):
-        return "BoxRect( %s, %s )" % ( self._location, list.__str__( self ) )
+        return "BoxRect( %s, %s )" % ( self._box, list.__str__( self ) )
 
     box   = property( get_box, set_box )
     point = property( get_point )
