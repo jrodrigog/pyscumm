@@ -49,6 +49,7 @@ class Taverna( pyscumm.scene.Scene ):
         self._dragging = None
         self._offset = None
         self._save_color = None
+        self._colored = None
         for i in xrange( self.N ):
             x = MyObject()
             #x[ 'box' ].location[0] = random.random() * 640
@@ -64,43 +65,61 @@ class Taverna( pyscumm.scene.Scene ):
     def set_dragging( self, dragging ): self._dragging = dragging
     def get_offset( self ): return self._offset
     def set_offset( self, offset ): self._offset = offset
+    def get_colored( self ): return self._colored
+    def set_colored( self, colored ): self._colored = colored
 
     save_color = property( get_save_color, set_save_color )
     dragging = property( get_dragging, set_dragging )
     offset = property( get_offset, set_offset )
+    colored = property( get_colored, set_colored )
 
 class Taverna1( pyscumm.scene.SceneState ):
-    LEFT = 1
-    RIGHT = 3
     _shared_state = {} # Singleton
+
     def __init__( self ):
         self.__dict__ = self._shared_state
         if self.__dict__: return
         pyscumm.scene.SceneState.__init__( self )
-    def on_mouse_motion( self, loc ):
+
+    def on_mouse_motion( self, event ):
         if not self.scene.dragging: return self
-        self.scene.dragging.box.location = loc - self.scene.offset
+        self.scene.dragging.box.location = event.location - self.scene.offset
         self.scene.dragging.box.update()
         return self
-    def on_mouse_drag_start( self, obj, loc, button ):
-        if button != self.LEFT or not obj: return self
+
+    def on_mouse_button_down( self, event ):
+        if event.button != pyscumm.vm.Mouse.BTN_LEFT \
+            or not event.object: return self
+        self.scene.colored = event.object.pop()
+        self.scene.save_color = self.scene.colored.box.color
+        self.scene.colored.box.color = pyscumm.vector.Vector4D([ 1., 0., 0., 0.5 ])
+        self.scene.colored.box.update()
+        return self
+
+    def on_mouse_button_up( self, event ):
+        self.scene.colored.box.color = self.scene.save_color
+        self.scene.colored.box.update()
+        return self
+
+    def on_mouse_drag_start( self, event ):
+        if event.button != pyscumm.vm.Mouse.BTN_LEFT \
+            or not event.object: return self
         # Use the top object
-        self.scene.dragging = obj.pop()
-        self.scene.save_color = self.scene.dragging.box.color
-        self.scene.dragging.box.color = pyscumm.vector.Vector4D([ 1., 0., 0., 0.5 ])
-        self.scene.offset = loc - self.scene.dragging.box.location
-        pyscumm.base.Logger().info( "fps: %.2f" % self.vm.clock.fps )
+        self.scene.dragging = event.object.pop()
+        self.scene.offset = event.location - self.scene.dragging.box.location
+        #pyscumm.base.Logger().info( "fps: %.2f" % self.vm.clock.fps )
         return self
-    def on_mouse_drag_end( self, obj, loc, button ):
-        if button != self.LEFT or not self.scene.dragging: return self
-        self.scene.dragging.box.color = self.scene.save_color
-        self.scene.dragging.box.update()
+
+    def on_mouse_drag_end( self, event ):
+        if event.button != pyscumm.vm.Mouse.BTN_LEFT \
+            or not self.scene.dragging: return self
         self.scene.dragging = None
         return self
-    def on_mouse_click( self, obj, loc, button ):
-        if button != self.RIGHT: return self
+
+    def on_mouse_click( self, event ):
+        if event.button != pyscumm.vm.Mouse.BTN_RIGHT: return self
         raise pyscumm.vm.StopVM()
+        return self
 
 
-pyscumm.vm.VM().state = pyscumm.vm.NormalMode()
 pyscumm.vm.VM.boot( Taverna(), pyscumm.gfx.gl.Display() )
