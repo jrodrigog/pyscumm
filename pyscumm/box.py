@@ -178,12 +178,14 @@ class BoxRect( list ):
             and self._rect[3].dist_sqr( point ) <= 0
 
     def update( self ):
-        location = self.box.location
+        location  = self._box.copy.location
+        rotation  = pyscumm.vector.RotateVectorZ( self._box.copy.rotation[2] )
+        scale     = self._box.copy.scale
+        insertion = self._box.copy.insertion * scale
+        location  = self._box.copy.location
         self._point = [
-            self[0] + location,
-            self[1] + location,
-            self[2] + location,
-            self[3] + location ]
+            ( ( ( point * scale ) + insertion ).rotate( rotation ) ) + location
+            for point in self ]
         p_0, p_1, p_2, p_3 = self._point
         self._rect = [
             Rect.from_two_point( p_0, p_1 ),

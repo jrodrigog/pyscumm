@@ -1,10 +1,12 @@
 from types import NoneType
 import math
 
-class Vector2D( list ):
+class Vector( list ): pass
+
+class Vector2D( Vector ):
     """2D Vector class"""
     def __init__( self, v = [0.,0.] ):
-        list.__init__( self, v )
+        Vector.__init__( self, v )
     def clone( self, obj=None, deep=False ):
         if isinstance( obj, NoneType ): obj = Vector2D()
         obj[0] = self[0]
@@ -34,13 +36,13 @@ class Vector2D( list ):
         self[0] -= o[0]
         self[1] -= o[1]
         return self
-    def __mult__( self, k ):
-        return Vector3D( [
-            self[0] * k,
-            self[1] * k ] )
-    def __imult__( self, k ):
-        self[0] *= k
-        self[1] *= k
+    def __mul__( self, o ):
+        return Vector2D( [
+            self[0] * o[0],
+            self[1] * o[1] ] )
+    def __imul__( self, o ):
+        self[0] *= o[0]
+        self[1] *= o[1]
         return self
     def __eq__( self, o ):
         return self[0] == o[0] and self[1] == o[1]
@@ -59,10 +61,10 @@ class Vector2D( list ):
         return "Vector2D([%.2f,%.2f])" % ( self[0], self[1] )
     deserialize = classmethod( deserialize )
 
-class Vector3D( list ):
+class Vector3D( Vector ):
     """3D Vector class"""
     def __init__( self, v = [0.,0.,0.] ):
-        list.__init__( self, v )
+        Vector.__init__( self, v )
     def clone( self, obj=None, deep=False ):
         if isinstance( obj, NoneType ): obj = Vector3D()
         obj[0] = self[0]
@@ -99,15 +101,15 @@ class Vector3D( list ):
         self[1] -= o[1]
         self[2] -= o[2]
         return self
-    def __mult__( self, k ):
+    def __mul__( self, o ):
         return Vector3D( [
-            self[0] * k,
-            self[1] * k,
-            self[2] * k ] )
-    def __imult__( self, k ):
-        self[0] *= k
-        self[1] *= k
-        self[2] *= k
+            self[0] * o[0],
+            self[1] * o[1],
+            self[2] * o[2] ] )
+    def __imul__( self, o ):
+        self[0] *= o[0]
+        self[1] *= o[1]
+        self[2] *= o[2]
         return self
     def __eq__( self, o ):
         return self[0] == o[0]\
@@ -131,10 +133,10 @@ class Vector3D( list ):
         return "Vector3D([%.2f,%.2f,%.2f])" % ( self[0], self[1], self[2] )
     deserialize = classmethod( deserialize )
 
-class Vector4D( list ):
+class Vector4D( Vector ):
     """4D Vector class"""
     def __init__( self, v = [0.,0.,0.,0.] ):
-        list.__init__( self, v )
+        Vector.__init__( self, v )
     def clone( self, obj=None, deep=False ):
         if isinstance( obj, NoneType ): obj = Vector4D()
         obj[0] = self[0]
@@ -155,7 +157,7 @@ class Vector4D( list ):
         if tmp != None: obj[3] = float( tmp )
         return obj
     def __add__( self, o ):
-        return Vector3D( [
+        return Vector4D( [
             self[0] + o[0],
             self[1] + o[1],
             self[2] + o[2],
@@ -167,7 +169,7 @@ class Vector4D( list ):
         self[3] += o[3]
         return self
     def __sub__( self, o ):
-        return Vector3D( [
+        return Vector4D( [
             self[0] - o[0],
             self[1] - o[1],
             self[2] - o[2],
@@ -178,17 +180,17 @@ class Vector4D( list ):
         self[2] -= o[2]
         self[3] -= o[3]
         return self
-    def __mult__( self, k ):
-        return Vector3D( [
-            self[0] * k,
-            self[1] * k,
-            self[2] * k,
-            self[3] * k ] )
-    def __imult__( self, k ):
-        self[0] *= k
-        self[1] *= k
-        self[2] *= k
-        self[3] *= k
+    def __mul__( self, o ):
+        return Vector4D( [
+            self[0] * o[0],
+            self[1] * o[1],
+            self[2] * o[2],
+            self[3] * o[3] ] )
+    def __imul__( self, o ):
+        self[0] *= o[0]
+        self[1] *= o[1]
+        self[2] *= o[2]
+        self[3] *= o[3]
         return self
     def __eq__( self, o ):
         return self[0] == o[0]\

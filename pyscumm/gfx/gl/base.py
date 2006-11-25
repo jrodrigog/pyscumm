@@ -23,7 +23,6 @@ class Object( Drawable ):
         OpenGL.GL.glTranslatef( *self._copy.location )
         OpenGL.GL.glRotatef( *self._copy.rotation )
         OpenGL.GL.glScalef( *self._copy.scale )
-        #OpenGL.GL.glTranslatef( -o.insertion[0], -o.insertion[1], -o.insertion[2] )
         OpenGL.GL.glTranslatef( *self._copy.insertion )
         OpenGL.GL.glColor4f( *self._copy.color )
         for child in self.child: child.draw()

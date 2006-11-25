@@ -3,6 +3,11 @@ import pyscumm
 
 v = pyscumm.vector.Vector2D( [ 1., 0. ] )
 
+v1 = pyscumm.vector.Vector2D( [ 1., 0. ] )
+v2 = pyscumm.vector.Vector2D( [ 1., 0. ] )
+
+print v1 * v2
+
 print v.rotate( math.pi / 2. )
 print v.rotate( pyscumm.vector.RotateAxisZ( math.pi / 2. ) )
 
