@@ -3,7 +3,7 @@ import OpenGL.GL
 import pyscumm.vector
 import pygame, cStringIO, base64
 
-class Texture:
+class GLTexture:
     _src = re.compile("^((?P<file>file)|(?P<https>https)|(?P<http>http)):(?P<res>.*)",re.I)
     def __init__( self, file = None, name = None ):
         self._id = None
@@ -45,7 +45,7 @@ class Texture:
     def get_size( self ): return self._size
     def set_size( self, size ): self._size = size
     def deserialize( self, element, obj=None ):
-        if obj == None: obj = Texture()
+        if obj == None: obj = GLTexture()
         obj.name = element.getAttribute("name")
         tmp = element.getAttribute("src")
         if tmp:

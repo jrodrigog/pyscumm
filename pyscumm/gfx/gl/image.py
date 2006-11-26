@@ -1,16 +1,16 @@
 import types
 import OpenGL.GL
 import pyscumm.vector
-from pyscumm.gfx.gl import Object
-from pyscumm.gfx.gl import Texture
+from pyscumm.gfx.gl import GLObject
+from pyscumm.gfx.gl import GLTexture
 
-class Image( Object ):
+class GLImage( GLObject ):
     """A Image encapsulates a Texture and
     texturizes it in a quad"""
     def __init__( self, texture = None ):
-        Object.__init__( self )
+        GLObject.__init__( self )
         self._texture = texture
-        self._collider = pyscumm.gfx.gl.Box()
+        self._collider = pyscumm.gfx.gl.GLBox()
         self._collider.copy = self
         self._tc = [
             [ 0.0, 0.0 ],
@@ -20,8 +20,8 @@ class Image( Object ):
         self._init_collider()
 
     def clone( self, obj=None, deep=False ):
-        if isinstance( obj, types.NoneType ): obj = Image()
-        Object.clone( self, obj, deep )
+        if isinstance( obj, types.NoneType ): obj = GLImage()
+        GLObject.clone( self, obj, deep )
         if self._texture:
             obj.texture = self._texture.clone( deep )
         return obj
@@ -49,7 +49,8 @@ class Image( Object ):
         """Texturize the Image in a quad"""
         t_size = self._texture.size
         OpenGL.GL.glPushMatrix()
-        Object.draw( self )
+        self._collider.draw()
+        GLObject.draw( self )
         OpenGL.GL.glEnable( OpenGL.GL.GL_TEXTURE_2D )
         OpenGL.GL.glBindTexture( OpenGL.GL.GL_TEXTURE_2D, self._texture.id )
         OpenGL.GL.glBegin( OpenGL.GL.GL_QUADS )
@@ -60,19 +61,19 @@ class Image( Object ):
         OpenGL.GL.glEnd()
         OpenGL.GL.glDisable( OpenGL.GL.GL_TEXTURE_2D )
         OpenGL.GL.glPopMatrix()
-        self._collider.draw()
+
 
     def update( self ):
         """Update the Image and the collider"""
-        Object.update( self )
+        GLObject.update( self )
         self._collider.update()
 
     def deserialize( self, element, obj = None ):
         """Deserialize from XML"""
-        if obj == None: obj = Image()
+        if obj == None: obj = GLImage()
         GLObject.deserialize( element, obj )
         obj.texture = Texture.deserialize(
-            element.getElementsByTagName("Texture").item( 0 ) )
+            element.getElementsByTagName("GLTexture").item( 0 ) )
         obj.size = obj.texture.size
         return obj
 

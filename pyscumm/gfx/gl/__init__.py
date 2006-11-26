@@ -1,4 +1,4 @@
-from base import Object, Display
-from box import Box
-from texture import Texture
-from image import Image
+from base import GLObject, GLDisplay
+from box import GLBox
+from texture import GLTexture
+from image import GLImage

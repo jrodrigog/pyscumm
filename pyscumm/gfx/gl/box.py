@@ -2,16 +2,16 @@ import OpenGL.GL
 import pyscumm.box
 import pyscumm.vector
 import types
-from pyscumm.gfx.gl import Object
+from pyscumm.gfx.gl import GLObject
 
-class Box( pyscumm.box.Box, Object ):
+class GLBox( pyscumm.box.Box, GLObject ):
 
     BORDER_LIGHT = 1.5
     BORDER_SIZE = 1.
     POINT_SIZE = 5.
 
     def __init__( self, shadow=1., depth=1. ):
-        Object.__init__( self )
+        GLObject.__init__( self )
         pyscumm.box.Box.__init__( self, shadow, depth  )
         self._color = pyscumm.vector.Vector4D( [
             0.2, 0.2, 1., 0.2 ] )
@@ -19,9 +19,9 @@ class Box( pyscumm.box.Box, Object ):
         self.update()
 
     def clone( self, obj=None, deep=False ):
-        if isinstance( obj, types.NoneType ): obj = Box()
+        if isinstance( obj, types.NoneType ): obj = GLBox()
         pyscumm.box.Box.clone( self, obj, deep )
-        Object.clone( self, obj, deep )
+        GLObject.clone( self, obj, deep )
         return obj
 
     def draw( self ):

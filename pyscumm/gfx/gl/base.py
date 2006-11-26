@@ -5,7 +5,7 @@ import pyscumm.driver
 from pyscumm.gfx import Drawable
 
 
-class Object( Drawable ):
+class GLObject( Drawable ):
     """Abstract GL Object; contains the location, insertion,
     rotation and color of the object"""
 
@@ -14,7 +14,7 @@ class Object( Drawable ):
 
     def clone( self, obj=None, deep=False ):
         """Clone the object"""
-        if isinstance( obj, types.NoneType ): obj = Object()
+        if isinstance( obj, types.NoneType ): obj = GLObject()
         Drawable.clone( self, obj, deep )
         return obj
 
@@ -35,7 +35,7 @@ class Object( Drawable ):
     deserialize = classmethod( deserialize )
 
 
-class Display( pyscumm.driver.Display ):
+class GLDisplay( pyscumm.driver.Display ):
     """OpenGL Display class."""
     def __init__( self ):
         """Build a GLDisplay object"""
@@ -70,6 +70,13 @@ class Display( pyscumm.driver.Display ):
         OpenGL.GL.glEnable( OpenGL.GL.GL_POINT_SMOOTH )
         OpenGL.GL.glEnable( OpenGL.GL.GL_BLEND )
         #OpenGL.GL.glEnable( OpenGL.GL.GL_ALPHA_TEST )
+
+    def set_icon( self, file, colorkey ):
+        self._icon = file
+        image = pygame.image.load(file)
+        colorkey = image.get_at(colorkey)
+        image.set_colorkey(colorkey, pygame.RLEACCEL)
+        if self._opened: pygame.display.set_icon( image )
 
 
 
