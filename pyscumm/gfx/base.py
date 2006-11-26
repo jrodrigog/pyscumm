@@ -52,6 +52,7 @@ class Drawable( object ):
         self._color     = pyscumm.vector.Vector4D( [1.,1.,1.,1.] )
         self._scale     = pyscumm.vector.Vector3D( [1.,1.,1.] )
         self._speed     = pyscumm.vector.Vector3D( [0.,0.,0.] )
+        self._size      = None
         self._collider  = None
         self._copy      = self
         self._name      = None
@@ -68,8 +69,11 @@ class Drawable( object ):
         self._color.clone( obj.color, deep )
         self._scale.clone( obj.scale, deep )
         self._speed.clone( obj.speed, deep )
+        if not isinstance( self._size, NoneType ):
+            self._size.clone( obj.size, deep )
         if not isinstance( self._collider, NoneType ):
-            self._collider.clone( deep=deep )
+            obj.collider = self._collider.clone( deep=deep )
+            obj.collider.copy = obj
         # Set
         obj.visible   = self._visible
         if self._copy != self: obj.copy = self._copy
@@ -100,6 +104,8 @@ class Drawable( object ):
     def set_solver( self, solver ): self._solver = solver
     def get_collider( self ): return self._collider
     def set_collider( self, collider ): self._collider = collider
+    def get_size( self ): return self._size
+    def set_size( self, size ): self._size = size
 
     def set_child( self, child ): self._child = child
     def get_child( self ): return self._child
@@ -133,10 +139,14 @@ class Drawable( object ):
         if len( tmp ): obj.scale = pyscumm.vector.Vector3D.deserialize( tmp.item( 0 ) )
         tmp = element.getElementsByTagName( "Speed" )
         if len( tmp ): obj.speed = pyscumm.vector.Vector3D.deserialize( tmp.item( 0 ) )
+        tmp = element.getElementsByTagName( "Size" )
+        if len( tmp ): obj.size = pyscumm.vector.Vector3D.deserialize( tmp.item( 0 ) )
         return obj
 
     def collides( self, obj ):
-        if self._collider:
+        if isinstance( obj, pyscumm.box.Collider ):
+            return self._collider.collides( obj )
+        elif self._collider:
             return self._collider.collides( obj.collider )
         return None
 
@@ -163,6 +173,7 @@ class Drawable( object ):
     visible   = property( get_visible, set_visible )
     solver    = property( get_solver, set_solver )
     collider  = property( get_collider, set_collider )
+    size      = property( get_size, set_size )
     deserialize = classmethod( deserialize )
 
 

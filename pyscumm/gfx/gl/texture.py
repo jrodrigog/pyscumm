@@ -12,16 +12,18 @@ class Texture:
     def get_id( self ):
         return self._id
     def __del__( self ):
-        if self._id:
-            pass
-            #glDeleteTextures( self._id ) FIXME
+        if not self._id: return
+        OpenGL.GL.glDeleteTextures( self._id )
+
+    def clone( self, obj=None, deep=False ):
+        return self
 
     def get_name( self ): return self._name
     def set_name( self, name ): self._name = name
 
     def load( self, file ):
         img         = pygame.image.load( file )
-        self._size  = pyscumm.vector.Vector2D( [ float( img.get_width() ), float( img.get_height() ) ] )
+        self._size  = pyscumm.vector.Vector3D( [ float( img.get_width() ), float( img.get_height() ), 0. ] )
         img_buf     = pygame.image.tostring( img, "RGBA", 1 )
 
         self._id    = OpenGL.GL.glGenTextures( 1 )

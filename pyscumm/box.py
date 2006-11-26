@@ -1,5 +1,4 @@
-import pyscumm.vector
-import types
+import types, pyscumm
 
 class Collider( object ):
     def clone( self, obj=None, deep=False ):
@@ -21,9 +20,9 @@ class Box( Collider ):
             pyscumm.vector.Vector3D( [  1.,  1., 0. ] ),
             pyscumm.vector.Vector3D( [ -1.,  1., 0. ] ) ] )
     def clone( self, obj=None, deep=False ):
-        if isinstance( obj, NoneType ): obj = Box()
-        obj.shadow = shadow
-        obj.depth = depth
+        if isinstance( obj, types.NoneType ): obj = Box()
+        obj.shadow = self._shadow
+        obj.depth = self._depth
         self._box.clone( obj.box, deep )
         return obj
     def get_z( self ): return self._location[2]
@@ -60,7 +59,7 @@ class Point( Collider, pyscumm.vector.Vector3D ):
     def __init__( self, v=[0.,0.,0.] ):
         pyscumm.vector.Vector3D.__init__( self, v )
     def clone( self, obj=None, deep=False ):
-        if isinstance( obj, NoneType ): obj = Point()
+        if isinstance( obj, types.NoneType ): obj = Point()
         return pyscumm.vector.Vector3D.clone( self, obj, deep )
     def collides( self, collider ):
         if isinstance( collider, Point ):
@@ -74,7 +73,7 @@ class MultiBox( Collider, list ):
     def __init__( self, obj=[] ):
         list.__init__( self )
     def clone( self, obj=None, deep=False ):
-        if isinstance( obj, NoneType ): obj = MultiBox()
+        if isinstance( obj, types.NoneType ): obj = MultiBox()
         for o in self: obj.append( o.clone( deep=deep ) )
         return obj
     def __str__( self ):
@@ -93,7 +92,7 @@ class WalkArea( MultiBox ):
         for x in box: self.append( x )
 
     def clone( self, obj=None, deep=False ):
-        if isinstance( obj, NoneType ): obj = WalkArea()
+        if isinstance( obj, types.NoneType ): obj = WalkArea()
         return MultiBox.clone( self, obj, deep=deep )
 
     def __add( self, x ):
@@ -162,7 +161,7 @@ class BoxNode( list ):
         list.__init__( self, next )
         self._box = box
     def clone( self, obj=None, deep=False ):
-        if isinstance( obj, NoneType ): obj = BoxNode()
+        if isinstance( obj, types.NoneType ): obj = BoxNode()
         for o in self: obj.append( o.clone( deep=deep ) )
         return obj
     def get_box( self ): return self._box
@@ -178,11 +177,11 @@ class BoxRect( list ):
         self._box = box
 
     def clone( self, obj=None, deep=False ):
-        if isinstance( obj, NoneType ): obj = BoxRect()
-        self[0].clone( obj.box[0], deep )
-        self[1].clone( obj.box[1], deep )
-        self[2].clone( obj.box[2], deep )
-        self[3].clone( obj.box[3], deep )
+        if isinstance( obj, types.NoneType ): obj = BoxRect()
+        self[0].clone( obj[0], deep )
+        self[1].clone( obj[1], deep )
+        self[2].clone( obj[2], deep )
+        self[3].clone( obj[3], deep )
         return obj
 
     def get_box( self ): return self._box
@@ -225,7 +224,7 @@ class BoxRect( list ):
             or self.point_inside( point[3] )
 
     def __str__( self ):
-        return "BoxRect( %s, %s )" % ( self._box, list.__str__( self ) )
+        return "BoxRect( %s )" % ( list.__str__( self ) )
 
     box   = property( get_box, set_box )
     point = property( get_point )
@@ -236,7 +235,7 @@ class BoxRect( list ):
     def __init__( self, location=None, obj=[] ):
         list.__init__( self, obj )
         self._location = location
-        if isinstance( self._location, types.NoneType ):
+        if isinstance( self._location, types.types.NoneType ):
             self._location = pyscumm.vector.Vector3D()
 
     def get_rect( self ):
@@ -250,7 +249,7 @@ class BoxRect( list ):
 
     def point_inside( self, point, rect=None ):
         #If dist is negative to all the rects, point is inside
-        if isinstance( rect, types.NoneType ):
+        if isinstance( rect, types.types.NoneType ):
             rect = self.rect
         return not bool( reduce(
             lambda x,y: x+y,
@@ -275,7 +274,7 @@ class Rect( pyscumm.vector.Vector3D ):
     def __init__( self, obj=[0.,0.,0.] ):
         pyscumm.vector.Vector3D.__init__( self, obj )
     def clone( self, obj=None, deep=False ):
-        if isinstance( obj, NoneType ): obj = Rect()
+        if isinstance( obj, types.NoneType ): obj = Rect()
         return pyscumm.vector.Vector3D.clone( self, obj, deep )
     def dist_sqr( self, p ):
         """d = (Ax1+By1+C)/sqrt(A*A+B*B). (No square root)"""
