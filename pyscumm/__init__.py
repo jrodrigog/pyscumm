@@ -12,3 +12,5 @@ import driver
 import object
 import gfx
 
+from constant import *
+

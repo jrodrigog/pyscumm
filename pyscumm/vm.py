@@ -569,9 +569,7 @@ class Mouse( VMState ):
     BTN_DRAG_RIGHT       = 1<<14
 
     # Button index, numbered as in Pygame's Events
-    BTN_LEFT   = 1
-    BTN_CENTER = 2
-    BTN_RIGHT  = 3
+
 
     # Singleton's shared state
     _shared_state = {}
@@ -620,15 +618,15 @@ class Mouse( VMState ):
         @type event: Event(Pygame)
         """
         VM().scene.mouse_button_down( event )
-        if event.button == self.BTN_LEFT:
+        if event.button == pyscumm.B_LEFT:
             self._process_mouse_button_down(
-                self.BTN_LEFT, self.BTN_PRESS_LEFT )
-        elif event.button == self.BTN_CENTER:
+                pyscumm.B_LEFT, self.BTN_PRESS_LEFT )
+        elif event.button == pyscumm.B_CENTER:
             self._process_mouse_button_down(
-                self.BTN_CENTER, self.BTN_PRESS_CENTER )
-        elif event.button == self.BTN_RIGHT:
+                pyscumm.B_CENTER, self.BTN_PRESS_CENTER )
+        elif event.button == pyscumm.B_RIGHT:
             self._process_mouse_button_down(
-                self.BTN_RIGHT, self.BTN_PRESS_RIGHT )
+                pyscumm.B_RIGHT, self.BTN_PRESS_RIGHT )
         return self
 
     def mouse_button_up( self, event ):
@@ -639,23 +637,23 @@ class Mouse( VMState ):
         @type event: Event(Pygame)
         """
         VM().scene.mouse_button_up( event )
-        if event.button == self.BTN_LEFT:
+        if event.button == pyscumm.B_LEFT:
             self._process_mouse_button_up(
-                self.BTN_LEFT,
+                pyscumm.B_LEFT,
                 self.BTN_PRESS_LEFT,
                 self.BTN_CLICK_LEFT,
                 self.BTN_DBL_CLICK_LEFT,
                 self.BTN_DRAG_LEFT )
-        elif event.button == self.BTN_CENTER:
+        elif event.button == pyscumm.B_CENTER:
             self._process_mouse_button_up(
-                self.BTN_CENTER,
+                pyscumm.B_CENTER,
                 self.BTN_PRESS_CENTER,
                 self.BTN_CLICK_CENTER,
                 self.BTN_DBL_CLICK_CENTER,
                 self.BTN_DRAG_CENTER )
-        elif event.button == self.BTN_RIGHT:
+        elif event.button == pyscumm.B_RIGHT:
             self._process_mouse_button_up(
-                self.BTN_RIGHT,
+                pyscumm.B_RIGHT,
                 self.BTN_PRESS_RIGHT,
                 self.BTN_CLICK_RIGHT,
                 self.BTN_DBL_CLICK_RIGHT,
@@ -818,7 +816,7 @@ class Mouse( VMState ):
         # Process the left button
         self._process_update_button(
             l_mouse, d_drag, t_click, t_now,
-            self.BTN_LEFT,
+            pyscumm.B_LEFT,
             self.BTN_PRESS_LEFT,
             self.BTN_CLICK_LEFT,
             self.BTN_DBL_CLICK_LEFT,
@@ -826,7 +824,7 @@ class Mouse( VMState ):
         # Process the center button
         self._process_update_button(
             l_mouse, d_drag, t_click, t_now,
-            self.BTN_CENTER,
+            pyscumm.B_CENTER,
             self.BTN_PRESS_CENTER,
             self.BTN_CLICK_CENTER,
             self.BTN_DBL_CLICK_CENTER,
@@ -834,7 +832,7 @@ class Mouse( VMState ):
         # Process the right button
         self._process_update_button(
             l_mouse, d_drag, t_click, t_now,
-            self.BTN_RIGHT,
+            pyscumm.B_RIGHT,
             self.BTN_PRESS_RIGHT,
             self.BTN_CLICK_RIGHT,
             self.BTN_DBL_CLICK_RIGHT,
