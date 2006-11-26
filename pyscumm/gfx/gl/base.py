@@ -72,3 +72,4 @@ class Display( pyscumm.driver.Display ):
         #OpenGL.GL.glEnable( OpenGL.GL.GL_ALPHA_TEST )
 
 
+
