@@ -223,7 +223,7 @@ class Display( object ):
         """
         return self._icon
 
-    def set_icon( self, icon ):
+    def set_icon( self, file ):
         """
         Sets the runtime icon that your system uses to decorate the program window.
         It is also used when the application is iconified and in the window frame.
@@ -235,7 +235,7 @@ class Display( object ):
         @type image: Image
         @return: None
         """
-        self._icon = icon
+        self._icon = file
         if self._opened: pygame.display.set_icon( icon )
 
     def flip( self ):

@@ -1,7 +1,7 @@
 import sys
 sys.path[len(sys.path):len(sys.path)+1] = ('.', '..')
 
-import pyscumm, random, pyscumm.gfx.gl
+import pyscumm, random#, pyscumm.gfx.gl
 
 
 """
@@ -26,7 +26,7 @@ class MyObject( pyscumm.object.Object ):
     def __init__( self ):
         def jitter( x ):
             return x + ( ( random.random() * self.JITTER * 2. ) - self.JITTER )
-        self._box = pyscumm.gfx.gl.Box()
+        self._box = pyscumm.gfx.gl.GLBox()
         self._box.box[0][0] = jitter( -self.WIDTH ); self._box.box[0][1] = jitter( -self.WIDTH )
         self._box.box[1][0] = jitter(  self.WIDTH ); self._box.box[1][1] = jitter( -self.WIDTH )
         self._box.box[2][0] = jitter(  self.WIDTH ); self._box.box[2][1] = jitter(  self.WIDTH )
@@ -123,4 +123,4 @@ class Taverna1( pyscumm.scene.SceneState ):
         return self
 
 
-pyscumm.vm.VM.boot( Taverna(), pyscumm.gfx.gl.Display() )
+pyscumm.vm.VM.boot( Taverna(), pyscumm.gfx.gl.GLDisplay() )

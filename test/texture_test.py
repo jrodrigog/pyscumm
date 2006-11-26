@@ -4,17 +4,23 @@ sys.path[len(sys.path):len(sys.path)+1] = ('.', '..')
 import pyscumm, random, pyscumm.gfx.gl
 
 class Taverna( pyscumm.scene.Scene ):
-    N = 8
+    N = 3
     def start( self ):
+        pyscumm.vm.VM().display.set_icon("icon.png", (5,75) )
         self._state = Taverna1()
         self._dragging = None
         self._offset = None
         self._save_color = None
         self._colored = None
-        self[ "wally" ] = pyscumm.gfx.gl.Image(
-            pyscumm.gfx.gl.Texture( "wally.png") )
+        self[ "logo" ] = pyscumm.gfx.gl.GLImage(
+            pyscumm.gfx.gl.GLTexture( "logo.png") )
+        self[ "logo" ].scale = ( pyscumm.vector.Vector3D([0.5,0.5,0.5]) )
+        self[ "logo" ].location[2] = 1
         for i in xrange( self.N ):
-            self[ "wally%d" % i ] = self[ "wally" ].clone()
+            self[ "logo%d" % i ] = self[ "logo" ].clone()
+            self[ "logo%d" % i ].scale = ( pyscumm.vector.Vector3D([0.5,0.5,0.5]) )
+        self[ "logobig" ] = self[ "logo" ].clone()
+        self[ "logobig" ].scale = ( pyscumm.vector.Vector3D([1.,1.,1.]) )
 
     def get_save_color( self ): return self._save_color
     def set_save_color( self, save_color ): self._save_color = save_color
@@ -77,4 +83,4 @@ class Taverna1( pyscumm.scene.SceneState ):
         raise pyscumm.vm.StopVM()
         return self
 
-pyscumm.vm.VM.boot( Taverna(), pyscumm.gfx.gl.Display() )
+pyscumm.vm.VM.boot( Taverna(), pyscumm.gfx.gl.GLDisplay() )

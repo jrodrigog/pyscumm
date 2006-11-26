@@ -1,5 +1,8 @@
+import sys
+sys.path[len(sys.path):len(sys.path)+1] = ('.', '..')
 import math
 import pyscumm
+
 
 v = pyscumm.vector.Vector2D( [ 1., 0. ] )
 
