@@ -2,6 +2,8 @@ import pyscumm.vector
 import types
 
 class Collider( object ):
+    def clone( self, obj=None, deep=False ):
+        raise NotImplementedError
     def collides( self, collider ):
         raise NotImplementedError
     def update( self ):
@@ -18,6 +20,12 @@ class Box( Collider ):
             pyscumm.vector.Vector3D( [  1., -1., 0. ] ),
             pyscumm.vector.Vector3D( [  1.,  1., 0. ] ),
             pyscumm.vector.Vector3D( [ -1.,  1., 0. ] ) ] )
+    def clone( self, obj=None, deep=False ):
+        if isinstance( obj, NoneType ): obj = Box()
+        obj.shadow = shadow
+        obj.depth = depth
+        self._box.clone( obj.box, deep )
+        return obj
     def get_z( self ): return self._location[2]
     def set_z( self, z ): self._location[2] = z
     def get_shadow( self ): return self._shadow
@@ -51,6 +59,9 @@ class Box( Collider ):
 class Point( Collider, pyscumm.vector.Vector3D ):
     def __init__( self, v=[0.,0.,0.] ):
         pyscumm.vector.Vector3D.__init__( self, v )
+    def clone( self, obj=None, deep=False ):
+        if isinstance( obj, NoneType ): obj = Point()
+        return pyscumm.vector.Vector3D.clone( self, obj, deep )
     def collides( self, collider ):
         if isinstance( collider, Point ):
             raise NotImplementedError
@@ -62,6 +73,10 @@ class Point( Collider, pyscumm.vector.Vector3D ):
 class MultiBox( Collider, list ):
     def __init__( self, obj=[] ):
         list.__init__( self )
+    def clone( self, obj=None, deep=False ):
+        if isinstance( obj, NoneType ): obj = MultiBox()
+        for o in self: obj.append( o.clone( deep=deep ) )
+        return obj
     def __str__( self ):
         return "MultiBox( %s )" % list.__str__( self )
     def update( self ):
@@ -76,6 +91,10 @@ class WalkArea( MultiBox ):
     def __init__( self, box=[] ):
         MultiBox.__init__( self )
         for x in box: self.append( x )
+
+    def clone( self, obj=None, deep=False ):
+        if isinstance( obj, NoneType ): obj = WalkArea()
+        return MultiBox.clone( self, obj, deep=deep )
 
     def __add( self, x ):
         node = BoxNode( x )
@@ -142,6 +161,10 @@ class BoxNode( list ):
     def __init__( self, box=None, next=[] ):
         list.__init__( self, next )
         self._box = box
+    def clone( self, obj=None, deep=False ):
+        if isinstance( obj, NoneType ): obj = BoxNode()
+        for o in self: obj.append( o.clone( deep=deep ) )
+        return obj
     def get_box( self ): return self._box
     def set_box( self, box ): self._box = box
     def __str__( self ):
@@ -153,6 +176,14 @@ class BoxRect( list ):
     def __init__( self, box=None, obj=[] ):
         list.__init__( self, obj )
         self._box = box
+
+    def clone( self, obj=None, deep=False ):
+        if isinstance( obj, NoneType ): obj = BoxRect()
+        self[0].clone( obj.box[0], deep )
+        self[1].clone( obj.box[1], deep )
+        self[2].clone( obj.box[2], deep )
+        self[3].clone( obj.box[3], deep )
+        return obj
 
     def get_box( self ): return self._box
     def set_box( self, box ): self._box = box
@@ -243,12 +274,16 @@ class BoxRect( list ):
 class Rect( pyscumm.vector.Vector3D ):
     def __init__( self, obj=[0.,0.,0.] ):
         pyscumm.vector.Vector3D.__init__( self, obj )
+    def clone( self, obj=None, deep=False ):
+        if isinstance( obj, NoneType ): obj = Rect()
+        return pyscumm.vector.Vector3D.clone( self, obj, deep )
     def dist_sqr( self, p ):
         """d = (Ax1+By1+C)/sqrt(A*A+B*B). (No square root)"""
         self_0, self_1, self_2 = self
         p_0, p_1, p_2 = p
         return ((self_0*p_0)+(self_1*p_1)+self_2)/((self_0*self_0)+(self_1*self_1))
-    def from_two_point( self, a, b ):
+    @classmethod
+    def from_two_point( cls, a, b ):
         """
         (X-x1)(y2-y1) = (Y-y1)(x2-x1)
         X(y2-y1)-x1(y2-y1) = Y(x2-x1)-y1(x2-x1)
@@ -265,7 +300,6 @@ class Rect( pyscumm.vector.Vector3D ):
 
     def __str__( self ):
         return "Rect( %.2fx + %.2fy + %.2f = 0 )" % ( self[0], self[1], self[2] )
-    from_two_point = classmethod( from_two_point )
 
 """
 class Rect( pyscumm.vector.Vector3D ):
