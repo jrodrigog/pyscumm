@@ -80,7 +80,7 @@ class Taverna1( pyscumm.scene.SceneState ):
         return self
 
     def on_mouse_button_down( self, event ):
-        if event.button != pyscumm.vm.Mouse.BTN_LEFT \
+        if event.button != pyscumm.B_LEFT \
             or not event.object: return self
         self.scene.colored = event.object.pop()
         self.scene.save_color = self.scene.colored.box.color
@@ -89,13 +89,13 @@ class Taverna1( pyscumm.scene.SceneState ):
         return self
 
     def on_mouse_button_up( self, event ):
-        if not self.scene.colored: return self 
+        if not self.scene.colored: return self
         self.scene.colored.box.color = self.scene.save_color
         self.scene.colored.box.update()
         return self
 
     def on_mouse_drag_start( self, event ):
-        if event.button != pyscumm.vm.Mouse.BTN_LEFT \
+        if event.button != pyscumm.B_LEFT \
             or not event.object: return self
         # Use the top object
         self.scene.dragging = event.object.pop()
@@ -104,13 +104,13 @@ class Taverna1( pyscumm.scene.SceneState ):
         return self
 
     def on_mouse_drag_end( self, event ):
-        if event.button != pyscumm.vm.Mouse.BTN_LEFT \
+        if event.button != pyscumm.B_LEFT \
             or not self.scene.dragging: return self
         self.scene.dragging = None
         return self
 
     def on_mouse_click( self, event ):
-        if event.button != pyscumm.vm.Mouse.BTN_RIGHT: return self
+        if event.button != pyscumm.B_RIGHT: return self
         raise pyscumm.vm.StopVM()
         return self
 
