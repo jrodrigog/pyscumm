@@ -84,8 +84,9 @@ class Taverna1( pyscumm.scene.SceneState ):
         return self
 
     def update( self ):
+        pyscumm.scene.SceneState.update(self)
         for obj in self.scene:
-            self.scene[obj].rotation[0] = 10
+            self.scene[obj].rotation[0] += 0.5
         return self
 
 pyscumm.vm.VM.boot( Taverna(), pyscumm.gfx.gl.Display() )
