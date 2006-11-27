@@ -12,17 +12,13 @@ class Taverna( pyscumm.scene.Scene ):
         self._offset = None
         self._save_color = None
         self._colored = None
-        self[ "logo" ] = pyscumm.gfx.gl.Image(
-            pyscumm.gfx.gl.Texture( "logo_quad.png") )
-        self[ "logo" ].scale = pyscumm.vector.Vector3D( [
-            229. / self[ "logo" ].size[0],
-            180. / self[ "logo" ].size[1],
-            1. ])
-        self[ "logo" ].location[2] = 1.
+        self[ "logobig" ] = pyscumm.gfx.gl.Image( pyscumm.gfx.gl.Texture("logo_quad.png", pyscumm.Vector2D([229.,180.]) ))
+        self[ "logobig" ].location[0] = pyscumm.vm.VM().display.size[0]/2
+        self[ "logobig" ].location[1] = pyscumm.vm.VM().display.size[1]/2
+        print pyscumm.vm.VM().display.size[0]
         for i in xrange( self.N ):
-            self[ "logo%d" % i ] = self[ "logo" ].clone()
+            self[ "logo%d" % i ] = self[ "logobig" ].clone()
             self[ "logo%d" % i ].scale *= pyscumm.vector.Vector3D([0.5,0.5,1.])
-        self[ "logobig" ] = self[ "logo" ].clone()
 
 
     def get_save_color( self ): return self._save_color
@@ -56,6 +52,7 @@ class Taverna1( pyscumm.scene.SceneState ):
     def on_mouse_button_down( self, event ):
         if event.button != pyscumm.B_LEFT \
             or not event.object: return self
+        print pyscumm.vm.VM().clock.fps
         self.scene.colored = event.object.pop()
         self.scene.save_color = self.scene.colored.collider.color
         self.scene.colored.collider.color = pyscumm.vector.Vector4D([ 1., 0., 0., 0.5 ])
@@ -84,6 +81,11 @@ class Taverna1( pyscumm.scene.SceneState ):
     def on_mouse_click( self, event ):
         if event.button != pyscumm.B_RIGHT: return self
         raise pyscumm.vm.StopVM()
+        return self
+
+    def update( self ):
+        for obj in self.scene:
+            self.scene[obj].rotation[0] = 10
         return self
 
 pyscumm.vm.VM.boot( Taverna(), pyscumm.gfx.gl.Display() )
