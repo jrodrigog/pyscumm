@@ -84,6 +84,10 @@ class Drawable( object ):
             i.clone( deep = True ) for i in self._child ]
         return obj
 
+    def rotate(self, angle):
+        self._rotation[0] += angle
+    #def flip( self, axis): self.
+
     def get_visible( self ): return self._visible
     def set_visible( self, visible ): self._visible = visible
     def get_name( self ): return self._name

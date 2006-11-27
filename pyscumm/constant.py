@@ -1,4 +1,5 @@
-import pygame.constants
+from pygame.constants import *
+
 
 B_LEFT   = 1
 B_CENTER = 2

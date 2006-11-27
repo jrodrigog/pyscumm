@@ -78,5 +78,15 @@ class Display( pyscumm.driver.Display ):
         image.set_colorkey(colorkey, pygame.RLEACCEL)
         if self._opened: pygame.display.set_icon( image )
 
+    def set_size(self, size ):
+        pyscumm.driver.Display.set_size( self, size )
+        self.reshape()
+
+
+    def get_size(self):
+        return pyscumm.driver.Display.get_size(self)
+
+    size = property( get_size, set_size )
+
 
 

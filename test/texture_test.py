@@ -20,7 +20,6 @@ class Taverna( pyscumm.scene.Scene ):
             self[ "logo%d" % i ] = self[ "logobig" ].clone()
             self[ "logo%d" % i ].scale *= pyscumm.vector.Vector3D([0.5,0.5,1.])
 
-
     def get_save_color( self ): return self._save_color
     def set_save_color( self, save_color ): self._save_color = save_color
     def get_dragging( self ): return self._dragging
@@ -83,10 +82,14 @@ class Taverna1( pyscumm.scene.SceneState ):
         raise pyscumm.vm.StopVM()
         return self
 
+    def key_down( self, event ):
+        if event.key == pyscumm.K_SPACE: pyscumm.vm.VM().display.toggle_full_screen()
+        return self
+
     def update( self ):
         pyscumm.scene.SceneState.update(self)
         for obj in self.scene:
-            self.scene[obj].rotation[0] += 0.5
+            self.scene[obj].rotate( 0.1 )
         return self
 
 pyscumm.vm.VM.boot( Taverna(), pyscumm.gfx.gl.Display() )

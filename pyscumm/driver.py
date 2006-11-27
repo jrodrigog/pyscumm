@@ -177,8 +177,8 @@ class Display( object ):
         @return: None
         """
         self._size = size
-        if not self._opened: return
-        pygame.display.set_mode( self._size[:2], self._open_flags )
+        if self._opened:
+            pygame.display.set_mode( self._size[:2], self._open_flags )
 
     def get_title( self ):
         """
