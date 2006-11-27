@@ -5,7 +5,7 @@ import pyscumm.driver
 from pyscumm.gfx import Drawable
 
 
-class GLObject( Drawable ):
+class Object( Drawable ):
     """Abstract GL Object; contains the location, insertion,
     rotation and color of the object"""
 
@@ -14,7 +14,7 @@ class GLObject( Drawable ):
 
     def clone( self, obj=None, deep=False ):
         """Clone the object"""
-        if isinstance( obj, types.NoneType ): obj = GLObject()
+        if isinstance( obj, types.NoneType ): obj = Object()
         Drawable.clone( self, obj, deep )
         return obj
 
@@ -35,7 +35,7 @@ class GLObject( Drawable ):
     deserialize = classmethod( deserialize )
 
 
-class GLDisplay( pyscumm.driver.Display ):
+class Display( pyscumm.driver.Display ):
     """OpenGL Display class."""
     def __init__( self ):
         """Build a GLDisplay object"""
@@ -67,7 +67,7 @@ class GLDisplay( pyscumm.driver.Display ):
         OpenGL.GL.glAlphaFunc( OpenGL.GL.GL_GREATER, 0.01 )
 
         OpenGL.GL.glEnable( OpenGL.GL.GL_LINE_SMOOTH )
-        OpenGL.GL.glEnable( OpenGL.GL.GL_POINT_SMOOTH )
+        #OpenGL.GL.glEnable( OpenGL.GL.GL_POINT_SMOOTH )
         OpenGL.GL.glEnable( OpenGL.GL.GL_BLEND )
         #OpenGL.GL.glEnable( OpenGL.GL.GL_ALPHA_TEST )
 

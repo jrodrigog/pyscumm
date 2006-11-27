@@ -2,16 +2,16 @@ import OpenGL.GL
 import pyscumm.box
 import pyscumm.vector
 import types
-from pyscumm.gfx.gl import GLObject
+from pyscumm.gfx.gl import Object
 
-class GLBox( pyscumm.box.Box, GLObject ):
+class Box( pyscumm.box.Box, Object ):
 
     BORDER_LIGHT = 1.5
     BORDER_SIZE = 1.
     POINT_SIZE = 5.
 
     def __init__( self, shadow=1., depth=1. ):
-        GLObject.__init__( self )
+        Object.__init__( self )
         pyscumm.box.Box.__init__( self, shadow, depth  )
         self._color = pyscumm.vector.Vector4D( [
             0.2, 0.2, 1., 0.2 ] )
@@ -19,9 +19,9 @@ class GLBox( pyscumm.box.Box, GLObject ):
         self.update()
 
     def clone( self, obj=None, deep=False ):
-        if isinstance( obj, types.NoneType ): obj = GLBox()
+        if isinstance( obj, types.NoneType ): obj = Box()
         pyscumm.box.Box.clone( self, obj, deep )
-        GLObject.clone( self, obj, deep )
+        Object.clone( self, obj, deep )
         return obj
 
     def draw( self ):
@@ -43,12 +43,15 @@ class GLBox( pyscumm.box.Box, GLObject ):
         OpenGL.GL.glVertex2f( *self._box[3][:2] )
         OpenGL.GL.glEnd()
         # Draw the center point
+        OpenGL.GL.glEnable( OpenGL.GL.GL_POINT_SMOOTH )
         OpenGL.GL.glPointSize( self.POINT_SIZE )
         OpenGL.GL.glBegin( OpenGL.GL.GL_POINTS )
         OpenGL.GL.glVertex2f( 0., 0. )
         OpenGL.GL.glVertex2f( *self._insertion[:2] )
         OpenGL.GL.glEnd()
+        OpenGL.GL.glDisable( OpenGL.GL.GL_POINT_SMOOTH )
         # Draw the border
+        OpenGL.GL.glEnable( OpenGL.GL.GL_LINE_SMOOTH )
         OpenGL.GL.glColor( color_border )
         OpenGL.GL.glLineWidth( self.BORDER_SIZE )
         OpenGL.GL.glBegin( OpenGL.GL.GL_LINE_STRIP )
@@ -58,6 +61,7 @@ class GLBox( pyscumm.box.Box, GLObject ):
         OpenGL.GL.glVertex2f( *self._box[3][:2] )
         OpenGL.GL.glVertex2f( *self._box[0][:2] )
         OpenGL.GL.glEnd()
+        OpenGL.GL.glDisable( OpenGL.GL.GL_LINE_SMOOTH )
         OpenGL.GL.glPopMatrix()
 
 

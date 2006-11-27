@@ -1,16 +1,16 @@
 import types
 import OpenGL.GL
 import pyscumm.vector
-from pyscumm.gfx.gl import GLObject
-from pyscumm.gfx.gl import GLTexture
+from pyscumm.gfx.gl import Object
+from pyscumm.gfx.gl import Texture
 
-class GLImage( GLObject ):
+class Image( Object ):
     """A Image encapsulates a Texture and
     texturizes it in a quad"""
     def __init__( self, texture = None ):
-        GLObject.__init__( self )
+        Object.__init__( self )
         self._texture = texture
-        self._collider = pyscumm.gfx.gl.GLBox()
+        self._collider = pyscumm.gfx.gl.Box()
         self._collider.copy = self
         self._tc = [
             [ 0.0, 0.0 ],
@@ -20,8 +20,8 @@ class GLImage( GLObject ):
         self._init_collider()
 
     def clone( self, obj=None, deep=False ):
-        if isinstance( obj, types.NoneType ): obj = GLImage()
-        GLObject.clone( self, obj, deep )
+        if isinstance( obj, types.NoneType ): obj = Image()
+        Object.clone( self, obj, deep )
         if self._texture:
             obj.texture = self._texture.clone( deep )
         return obj
@@ -50,7 +50,7 @@ class GLImage( GLObject ):
         t_size = self._texture.size
         OpenGL.GL.glPushMatrix()
         self._collider.draw()
-        GLObject.draw( self )
+        Object.draw( self )
         OpenGL.GL.glEnable( OpenGL.GL.GL_TEXTURE_2D )
         OpenGL.GL.glBindTexture( OpenGL.GL.GL_TEXTURE_2D, self._texture.id )
         OpenGL.GL.glBegin( OpenGL.GL.GL_QUADS )
@@ -65,15 +65,15 @@ class GLImage( GLObject ):
 
     def update( self ):
         """Update the Image and the collider"""
-        GLObject.update( self )
+        Object.update( self )
         self._collider.update()
 
     def deserialize( self, element, obj = None ):
         """Deserialize from XML"""
-        if obj == None: obj = GLImage()
-        GLObject.deserialize( element, obj )
+        if obj == None: obj = Image()
+        Object.deserialize( element, obj )
         obj.texture = Texture.deserialize(
-            element.getElementsByTagName("GLTexture").item( 0 ) )
+            element.getElementsByTagName("Texture").item( 0 ) )
         obj.size = obj.texture.size
         return obj
 

@@ -12,8 +12,8 @@ class Taverna( pyscumm.scene.Scene ):
         self._offset = None
         self._save_color = None
         self._colored = None
-        self[ "logo" ] = pyscumm.gfx.gl.GLImage(
-            pyscumm.gfx.gl.GLTexture( "logo.png") )
+        self[ "logo" ] = pyscumm.gfx.gl.Image(
+            pyscumm.gfx.gl.Texture( "logo.png") )
         self[ "logo" ].scale = ( pyscumm.vector.Vector3D([0.5,0.5,0.5]) )
         self[ "logo" ].location[2] = 1
         for i in xrange( self.N ):
@@ -83,4 +83,4 @@ class Taverna1( pyscumm.scene.SceneState ):
         raise pyscumm.vm.StopVM()
         return self
 
-pyscumm.vm.VM.boot( Taverna(), pyscumm.gfx.gl.GLDisplay() )
+pyscumm.vm.VM.boot( Taverna(), pyscumm.gfx.gl.Display() )
