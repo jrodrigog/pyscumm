@@ -13,14 +13,17 @@ class Taverna( pyscumm.scene.Scene ):
         self._save_color = None
         self._colored = None
         self[ "logo" ] = pyscumm.gfx.gl.Image(
-            pyscumm.gfx.gl.Texture( "logo.png") )
-        self[ "logo" ].scale = ( pyscumm.vector.Vector3D([0.5,0.5,0.5]) )
-        self[ "logo" ].location[2] = 1
+            pyscumm.gfx.gl.Texture( "logo_quad.png") )
+        self[ "logo" ].scale = pyscumm.vector.Vector3D( [
+            229. / self[ "logo" ].size[0],
+            180. / self[ "logo" ].size[1],
+            1. ])
+        self[ "logo" ].location[2] = 1.
         for i in xrange( self.N ):
             self[ "logo%d" % i ] = self[ "logo" ].clone()
-            self[ "logo%d" % i ].scale = ( pyscumm.vector.Vector3D([0.5,0.5,0.5]) )
+            self[ "logo%d" % i ].scale *= pyscumm.vector.Vector3D([0.5,0.5,1.])
         self[ "logobig" ] = self[ "logo" ].clone()
-        self[ "logobig" ].scale = ( pyscumm.vector.Vector3D([1.,1.,1.]) )
+
 
     def get_save_color( self ): return self._save_color
     def set_save_color( self, save_color ): self._save_color = save_color
