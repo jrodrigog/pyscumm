@@ -195,7 +195,7 @@ class Clock( object ):
         # Frame count
         self.frame_count = 0
         # Frame rate limit
-        self._limit = 60
+        self.limit = 60
 
     def set_limit( self, fps ):
         """
