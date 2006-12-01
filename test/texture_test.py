@@ -18,12 +18,16 @@ class Taverna( Scene ):
         self.offset = None
         self.save_color = None
         self.colored = None
-        self[ "logobig" ] = Image( Texture("logo_quad.png", Vector2D([229.,180.]) ))
+        self[ "logobig" ] = Image( Texture("logo_quad.png" ), Vector3D( [229.,180.,0.] ) )
+        self[ "logobig" ].collider.visible = True
         self[ "logobig" ].location[0] = VM().display.size[0]/2
         self[ "logobig" ].location[1] = VM().display.size[1]/2
         for i in xrange( self.N ):
-            self[ "logo%d" % i ] = self[ "logobig" ].clone()
-            self[ "logo%d" % i ].scale *= Vector3D([0.5,0.5,1.])
+            n = "logo%d" % i
+            self[ n ] = self[ "logobig" ].clone()
+            #self[ n ].collider.visible = False
+            self[ n ].scale[0] *= 0.5
+            self[ n ].scale[1] *= 0.5
 
 class Taverna1( SceneState ):
     _shared_state = {} # Singleton

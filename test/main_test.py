@@ -27,42 +27,42 @@ class MyObject( pyscumm.object.Object ):
 """
 
 class MyObject( Object ):
-    count  = 0
     JITTER = 15.
     WIDTH  = 50.
-    def __init__( self ):
+    def __init__( self, img ):
         def jitter( x ):
             return x + ( ( random.random() * self.JITTER * 2. ) - self.JITTER )
-        self.box = Box()
-        self.box.box[0][0] = jitter( -self.WIDTH ); self.box.box[0][1] = jitter( -self.WIDTH )
-        self.box.box[1][0] = jitter(  self.WIDTH ); self.box.box[1][1] = jitter( -self.WIDTH )
-        self.box.box[2][0] = jitter(  self.WIDTH ); self.box.box[2][1] = jitter(  self.WIDTH )
-        self.box.box[3][0] = jitter( -self.WIDTH ); self.box.box[3][1] = jitter(  self.WIDTH )
-        self["id"] = self.__class__.count
-        self.__class__.count += 1
-    def draw( self ):
-        self.box.draw()
+        self.img = img
+        img.collider.visible = True
+        img.collider.box[0][0] = jitter( -self.WIDTH ); img.collider.box[0][1] = jitter( -self.WIDTH )
+        img.collider.box[1][0] = jitter(  self.WIDTH ); img.collider.box[1][1] = jitter( -self.WIDTH )
+        img.collider.box[2][0] = jitter(  self.WIDTH ); img.collider.box[2][1] = jitter(  self.WIDTH )
+        img.collider.box[3][0] = jitter( -self.WIDTH ); img.collider.box[3][1] = jitter(  self.WIDTH )
     def collides( self, obj ):
-        return self.box.collides( obj )
+        return self.img.collides( obj )
     def __cmp__( self, obj ):
-        return cmp( self.box.location[2], obj.box.location[2] )
+        return cmp( self.img.location[2], obj.img.location[2] )
+    def update( self ):
+        self.img.update()
+    def draw( self ):
+        self.img.draw()
 
 class Taverna( Scene ):
-    N = 16
+    N = 4
     def start( self ):
         self.state = Taverna1()
         self.dragging = None
         self.offset = None
         self.save_color = None
         self.colored = None
+        img = Image( Texture("logo_quad.png" ), Vector3D( [229.,180.,0.] ) )
         for i in xrange( self.N ):
-            x = MyObject()
-            #x[ 'box' ].location[0] = random.random() * 640
-            #x[ 'box' ].location[1] = random.random() * 320
-            x.box.location[0] = random.random() * VM().display.size[0]
-            x.box.location[1] = random.random() * VM().display.size[1]
-            x.box.location[2] = float( i ) / self.N
-            x.box.update()
+            x = MyObject( img.clone() )
+            #x[ 'img' ].location[0] = random.random() * 640
+            #x[ 'img' ].location[1] = random.random() * 320
+            x.img.location[0] = random.random() * VM().display.size[0]
+            x.img.location[1] = random.random() * VM().display.size[1]
+            x.img.location[2] = float( i ) / self.N
             self[ id(x) ] = x
 
 class Taverna1( SceneState ):
@@ -75,23 +75,20 @@ class Taverna1( SceneState ):
 
     def on_mouse_motion( self, event ):
         if not self.scene.dragging: return self
-        self.scene.dragging.box.location = event.location - self.scene.offset
-        self.scene.dragging.box.update()
+        self.scene.dragging.img.location = event.location - self.scene.offset
         return self
 
     def on_mouse_button_down( self, event ):
         if event.button != B_LEFT \
             or not event.object: return self
         self.scene.colored = event.object.pop()
-        self.scene.save_color = self.scene.colored.box.color
-        self.scene.colored.box.color = Vector4D([ 1., 0., 0., 0.5 ])
-        self.scene.colored.box.update()
+        self.scene.save_color = self.scene.colored.img.color
+        self.scene.colored.img.color = Vector4D([ 1., 0., 0., 0.5 ])
         return self
 
     def on_mouse_button_up( self, event ):
         if not self.scene.colored: return self
-        self.scene.colored.box.color = self.scene.save_color
-        self.scene.colored.box.update()
+        self.scene.colored.img.color = self.scene.save_color
         return self
 
     def on_mouse_drag_start( self, event ):
@@ -99,7 +96,7 @@ class Taverna1( SceneState ):
             or not event.object: return self
         # Use the top object
         self.scene.dragging = event.object.pop()
-        self.scene.offset = event.location - self.scene.dragging.box.location
+        self.scene.offset = event.location - self.scene.dragging.img.location
         return self
 
     def on_mouse_drag_end( self, event ):

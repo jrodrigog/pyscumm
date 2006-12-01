@@ -27,3 +27,46 @@ from pygame.constants import *
 B_LEFT   = 1
 B_CENTER = 2
 B_RIGHT  = 3
+
+UPDATED     = 1
+UPDATE_MASK = {
+    "location"  : 1<<1,
+    "insertion" : 1<<2,
+    "rotation"  : 1<<3,
+    "scale"     : 1<<4,
+    #..................
+    "size"      : 1<<5,
+    "color"     : 1<<6,
+    "speed"     : 1<<7,
+    #..................
+    "collider"  : 1<<8,
+    "copy"      : 1<<9,
+    #..................
+    "name"      : 1<<10,
+    "visible"   : 1<<11,
+    "frozen"    : 1<<12,
+    "solver"    : 1<<13,
+    "child"     : 1<<14,
+}
+
+LOCATION_UPDATED  = UPDATE_MASK["location"]
+INSERTION_UPDATED = UPDATE_MASK["insertion"]
+ROTATION_UPDATED  = UPDATE_MASK["rotation"]
+SCALE_UPDATED     = UPDATE_MASK["scale"]
+SIZE_UPDATED      = UPDATE_MASK["size"]
+COLOR_UPDATED     = UPDATE_MASK["color"]
+SPEED_UPDATED     = UPDATE_MASK["speed"]
+COLLIDER_UPDATED  = UPDATE_MASK["collider"]
+COPY_UPDATED      = UPDATE_MASK["copy"]
+NAME_UPDATED      = UPDATE_MASK["name"]
+VISIBLE_UPDATED   = UPDATE_MASK["visible"]
+FROZEN_UPDATED    = UPDATE_MASK["frozen"]
+SOLVER_UPDATED    = UPDATE_MASK["solver"]
+CHILD_UPDATED     = UPDATE_MASK["child"]
+
+TRANSFORMED = \
+      UPDATE_MASK["location"] \
+    | UPDATE_MASK["insertion"] \
+    | UPDATE_MASK["rotation"] \
+    | UPDATE_MASK["scale"]
+

@@ -22,7 +22,15 @@
 """
 
 from types import NoneType
-from vector import Vector3D, RotateVectorZ
+from vector import Vector3D, ProxyVector3D, RotateVectorZ
+from constant import COLLIDER_UPDATED
+import constant
+
+BOX_UPDATED = \
+      constant.TRANSFORMED \
+    | constant.SIZE_UPDATED \
+    | constant.COLLIDER_UPDATED \
+    | constant.UPDATED
 
 class Collider( object ):
     def clone( self, obj=None, deep=False ):
@@ -39,10 +47,10 @@ class Box( Collider ):
         self.shadow = shadow
         self.depth = depth
         self.box = BoxRect( self, [
-            Vector3D( [ -1., -1., 0. ] ),
-            Vector3D( [  1., -1., 0. ] ),
-            Vector3D( [  1.,  1., 0. ] ),
-            Vector3D( [ -1.,  1., 0. ] ) ] )
+            ProxyVector3D( [ -1., -1., 0. ], self.copy, COLLIDER_UPDATED ),
+            ProxyVector3D( [  1., -1., 0. ], self.copy, COLLIDER_UPDATED ),
+            ProxyVector3D( [  1.,  1., 0. ], self.copy, COLLIDER_UPDATED ),
+            ProxyVector3D( [ -1.,  1., 0. ], self.copy, COLLIDER_UPDATED ) ] )
 
     def clone( self, obj=None, deep=False ):
         if isinstance( obj, NoneType ): obj = Box()
@@ -68,7 +76,9 @@ class Box( Collider ):
             self.box )
 
     def update( self ):
-        self.box.update()
+        if ( self.copy.updated & BOX_UPDATED ) \
+        or ( self.updated & COPY_UPDATED):
+            self.box.update()
 
 
 class Point( Collider, Vector3D ):
@@ -189,6 +199,12 @@ class BoxRect( list ):
     def __init__( self, box=None, obj=[] ):
         list.__init__( self, obj )
         self.box = box
+
+    def __setitem__( self, i, value ):
+        self.box.copy.updated |= COLLIDER_UPDATED
+        try: value = value.proxy( self.box.copy, COLLIDER_UPDATED )
+        except AttributeError: pass
+        list.__setitem__( self, i, value )
 
     def clone( self, obj=None, deep=False ):
         if isinstance( obj, NoneType ): obj = BoxRect()

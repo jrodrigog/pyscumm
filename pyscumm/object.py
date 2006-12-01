@@ -33,17 +33,16 @@ class Object( dict, StateMachine ):
         raise NotImplemented
 
     def action( self, cmd ):
-        self._state = self._state.action( cmd )
+        self.state = self.state.action( cmd )
 
     def collides( self, obj ):
-        self._state = self._state.collides( obj )
+        self.state = self.state.collides( obj )
 
     def update( self ):
-        #self._state = self._state.update()
-        pass
+        self.state = self.state.update()
 
     def draw( self ):
-        self._state = self._state.draw()
+        self.state = self.state.draw()
 
 
 class ObjectState( State ):
@@ -52,16 +51,16 @@ class ObjectState( State ):
         State.__init__( self )
 
     def action( self, cmd ):
-        raise NotImplemented
+        return self
 
     def collides( self, obj ):
-        raise NotImplemented
+        return self
 
     def update( self ):
-        raise NotImplemented
+        return self
 
     def draw( self ):
-        raise NotImplemented
+        return self
 
 
 class Cursor( Object ):

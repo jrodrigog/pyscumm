@@ -498,12 +498,12 @@ class SceneState( StateMachine, object ):
 
     def draw( self ):
         """Receives a draw event and draws all the scene objects."""
-        for obj in self.scene.sorted: obj.draw()
+        [ obj.draw() for obj in self.scene.sorted ]
         return self
 
     def update( self ):
         """Receives and update event and updates all the Scene objects."""
-        for obj in self.scene.sorted: obj.update()
+        [ obj.update() for obj in self.scene.sorted ]
         return self
 
     scene    = property( get_scene )

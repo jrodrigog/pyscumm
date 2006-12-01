@@ -23,10 +23,12 @@
 
 from types import NoneType
 import pygame.time
-from pyscumm.vector import Vector3D, Vector4D
-from pyscumm.box import Collider
+from pyscumm.vector import *
+from pyscumm.constant import UPDATE_MASK, UPDATED
 
-class SpeedSolver( object ):
+class Solver( object ): pass
+
+class SpeedSolver( Solver ):
     """A Singleton Speed Solver"""
 
     _shared_state = {}
@@ -36,27 +38,44 @@ class SpeedSolver( object ):
 
     def solve( self, obj ):
         """Solve the object's location based on its speed."""
+        if obj.speed.is_cero(): return
         obj.location += obj.speed
-
 
 class Drawable( object ):
     """Abstract Drawable object; contains the location,
     insertion, rotation, color and scale of the object"""
 
     def __init__( self ):
-        self.location  = Vector3D( [0.,0.,0.] )
-        self.insertion = Vector3D( [0.,0.,0.] )
-        self.rotation  = Vector4D( [0.,0.,0.,1.] )
-        self.color     = Vector4D( [1.,1.,1.,1.] )
-        self.scale     = Vector3D( [1.,1.,1.] )
-        self.speed     = Vector3D( [0.,0.,0.] )
-        self.size      = None
+        self.updated   = UPDATED
+
+        self.location  = ProxyVector3D( [0.,0.,0.]    )
+        self.insertion = ProxyVector3D( [0.,0.,0.]    )
+        self.rotation  = ProxyVector4D( [0.,0.,0.,1.] )
+        self.scale     = ProxyVector3D( [1.,1.,1.]    )
+        self.size      = ProxyVector3D( [0.,0.,0.]    )
+        self.color     = ProxyVector4D( [1.,1.,1.,1.] )
+        self.speed     = ProxyVector3D( [0.,0.,0.]    )
+
         self.collider  = None
         self.copy      = self
+
         self.name      = None
         self.visible   = True
+        self.frozen    = False
         self.solver    = SpeedSolver()
         self.child     = []
+
+    def __setattr__( self, attr, value ):
+        mask = None
+        try:
+            mask = UPDATE_MASK[ attr ]
+            value = value.proxy( self, mask )
+            self.updated |= mask
+        except KeyError:
+            pass
+        except AttributeError:
+            self.updated |= mask
+        object.__setattr__( self, attr, value )
 
     def clone( self, obj=None, deep=False ):
         if isinstance( obj, NoneType ): obj = Drawable()
@@ -74,8 +93,12 @@ class Drawable( object ):
             obj.collider.copy = obj
         # Set
         obj.visible   = self.visible
+        obj.frozen    = self.frozen
         if self.copy != self: obj.copy = self.copy
         obj.name      = self.name
+
+        obj.updated = UPDATED
+
         # Deep cloning
         if not deep: obj.child = self.child[:]
         else: obj.child = [
@@ -123,10 +146,12 @@ class Drawable( object ):
         return obj
 
     def collides( self, obj ):
-        if isinstance( obj, Collider ):
-            return self.collider.collides( obj )
-        elif self.collider:
-            return self.collider.collides( obj.collider )
+        try:
+            try:
+                return self.collider.collides( obj.collider )
+            except AttributeError:
+                return self.collider.collides( obj )
+        except AttributeError: pass
         return None
 
     def draw( self ):
@@ -135,8 +160,9 @@ class Drawable( object ):
 
     def update( self ):
         """Update the object"""
-        self.solver.solve( self )
+        if self.solver: self.solver.solve( self )
         for child in self.child: child.update()
+        self.updated = 0
 
     rgb       = property( get_rgb, set_rgb )
     alpha     = property( get_alpha, set_alpha )

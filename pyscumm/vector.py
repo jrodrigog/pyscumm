@@ -35,6 +35,8 @@ class Vector2D( Vector ):
         obj[0] = self[0]
         obj[1] = self[1]
         return obj
+    def proxy( self, obj, mask ):
+        return ProxyVector2D( self, obj, mask )
     @classmethod
     def deserialize( cls, element, obj=None ):
         """Deserialize from XML"""
@@ -68,6 +70,14 @@ class Vector2D( Vector ):
         self[0] *= o[0]
         self[1] *= o[1]
         return self
+    def __div__( self, o ):
+        return Vector2D( [
+            self[0] / o[0],
+            self[1] / o[1] ] )
+    def __idiv__( self, o ):
+        self[0] /= o[0]
+        self[1] /= o[1]
+        return self
     def __eq__( self, o ):
         return self[0] == o[0] and self[1] == o[1]
     def length( self ):
@@ -81,8 +91,11 @@ class Vector2D( Vector ):
         if not isinstance( rotation, VectorRotation ):
             rotation = RotateVector( rotation )
         return rotation.rotate( self )
+    def is_cero( self ):
+        return ( self[0] + self[1] ) == 0.
     def __repr__( self ):
         return "Vector2D([%.2f,%.2f])" % ( self[0], self[1] )
+
 
 class Vector3D( Vector ):
     """3D Vector class"""
@@ -105,6 +118,8 @@ class Vector3D( Vector ):
         tmp = element.getAttribute("z")
         if tmp != None: obj[2] = float( tmp )
         return obj
+    def proxy( self, obj, mask ):
+        return ProxyVector3D( self, obj, mask )
     def __add__( self, o ):
         return Vector3D( [
             self[0] + o[0],
@@ -135,6 +150,16 @@ class Vector3D( Vector ):
         self[1] *= o[1]
         self[2] *= o[2]
         return self
+    def __div__( self, o ):
+        return Vector3D( [
+            self[0] / o[0],
+            self[1] / o[1],
+            self[2] / o[2] ] )
+    def __idiv__( self, o ):
+        self[0] /= o[0]
+        self[1] /= o[1]
+        self[2] /= o[2]
+        return self
     def __eq__( self, o ):
         return self[0] == o[0]\
             and self[1] == o[1]\
@@ -153,6 +178,8 @@ class Vector3D( Vector ):
         if not isinstance( rotation, VectorRotation ):
             rotation = RotateVector( rotation )
         return rotation.rotate( self )
+    def is_cero( self ):
+        return ( self[0] + self[1] + self[2] ) == 0.
     def __repr__( self ):
         return "Vector3D([%.2f,%.2f,%.2f])" % ( self[0], self[1], self[2] )
 
@@ -167,6 +194,8 @@ class Vector4D( Vector ):
         obj[2] = self[2]
         obj[3] = self[3]
         return obj
+    def proxy( self, obj, mask ):
+        return ProxyVector4D( self, obj, mask )
     @classmethod
     def deserialize( cls, element, obj=None ):
         """Deserialize from XML"""
@@ -235,8 +264,11 @@ class Vector4D( Vector ):
             self[3] * scale ] )
     def rotate( self, rotation ):
         raise NotImplementedError
+    def is_cero( self ):
+        return ( self[0] + self[1] + self[2] + self[3] ) == 0.
     def __repr__( self ):
         return "Vector4D([%.2f,%.2f,%.2f,%.2f])" % ( self[0], self[1], self[2], self[3] )
+
 
 class VectorRotation( list ):
     """This abstract class implements a common rotation for
@@ -392,3 +424,85 @@ class RotateVector( RotateVectorZ ):
 class RotateAxis( RotateAxisZ ):
     """This is a default 2D Axis rotation (In the Z axis)."""
     pass
+
+
+################################################################
+# Proxies for updating                                         #
+################################################################
+
+def proxy_vector( method ):
+    def wrap( *args ):
+        o = args[0]
+        o.object.updated |= o.mask
+        return method( *args )
+    return wrap
+
+class ProxyVector:
+    def __init__( self, object=None, mask=None ):
+        self.object = object
+        self.mask = mask
+    def clone( self, obj=None, deep=False ):
+        if isinstance( obj, NoneType ): obj = ProxyVector()
+        obj.object = self.object
+        obj.mask = self.mask
+        return obj
+
+class ProxyVector2D( Vector2D, ProxyVector ):
+    def __init__( self, vector=[0.,0.], object=None, mask=None ):
+        Vector2D.__init__( self, vector )
+        ProxyVector.__init__( self, object, mask )
+    def clone( self, obj=None, deep=False ):
+        if isinstance( obj, NoneType ): obj = ProxyVector2D()
+        ProxyVector.clone( self, obj, deep )
+        Vector2D.clone( self, obj, deep )
+        return obj
+    @proxy_vector
+    def __setitem__( self, i, o ): Vector2D.__setitem__( self, i, o )
+    @proxy_vector
+    def __iadd__( self, o ): Vector2D.__iadd__( self, o )
+    @proxy_vector
+    def __isum__( self, o ): Vector2D.__isum__( self, o )
+    @proxy_vector
+    def __imul__( self, o ): Vector2D.__imul__( self, o )
+    @proxy_vector
+    def __idiv__( self, o ): Vector2D.__idiv__( self, o )
+
+class ProxyVector3D( Vector3D, ProxyVector ):
+    def __init__( self, vector=[0.,0.,0.], object=None, mask=None ):
+        Vector3D.__init__( self, vector )
+        ProxyVector.__init__( self, object, mask )
+    def clone( self, obj=None, deep=False ):
+        if isinstance( obj, NoneType ): obj = ProxyVector3D()
+        ProxyVector.clone( self, obj, deep )
+        Vector3D.clone( self, obj, deep )
+        return obj
+    @proxy_vector
+    def __setitem__( self, i, o ): Vector3D.__setitem__( self, i, o )
+    @proxy_vector
+    def __iadd__( self, o ): Vector3D.__iadd__( self, o )
+    @proxy_vector
+    def __isum__( self, o ): Vector3D.__isum__( self, o )
+    @proxy_vector
+    def __imul__( self, o ): Vector3D.__imul__( self, o )
+    @proxy_vector
+    def __idiv__( self, o ): Vector3D.__idiv__( self, o )
+
+class ProxyVector4D( Vector4D, ProxyVector ):
+    def __init__( self, vector=[0.,0.,0.,0.], object=None, mask=None ):
+        Vector4D.__init__( self, vector )
+        ProxyVector.__init__( self, object, mask )
+    def clone( self, obj=None, deep=False ):
+        if isinstance( obj, NoneType ): obj = ProxyVector4D()
+        ProxyVector.clone( self, obj, deep )
+        Vector4D.clone( self, obj, deep )
+        return obj
+    @proxy_vector
+    def __setitem__( self, i, o ): Vector4D.__setitem__( self, i, o )
+    @proxy_vector
+    def __iadd__( self, o ): Vector4D.__iadd__( self, o )
+    @proxy_vector
+    def __isum__( self, o ): Vector4D.__isum__( self, o )
+    @proxy_vector
+    def __imul__( self, o ): Vector4D.__imul__( self, o )
+    @proxy_vector
+    def __idiv__( self, o ): Vector4D.__idiv__( self, o )

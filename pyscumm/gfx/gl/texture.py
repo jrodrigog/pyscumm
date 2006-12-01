@@ -28,10 +28,12 @@ from pyscumm.vector import Vector3D
 
 METHOD = re.compile("^((?P<file>file)|(?P<https>https)|(?P<http>http)):(?P<res>.*)",re.I)
 class Texture:
-    def __init__( self, file = None, size = None, name = None ):
+    def __init__( self, file = None, name = None ):
         self.id = None
         self.name = name
-        if file: self.load( file, size )
+        self.size = Vector3D()
+        if file: self.load( file )
+
     def __del__( self ):
         if not self.id: return
         glDeleteTextures( self.id )
@@ -39,14 +41,12 @@ class Texture:
     def clone( self, obj=None, deep=False ):
         return self
 
-    def load( self, file, size = None ):
-        img         = pygame.image.load( file )
-        img_buf     = pygame.image.tostring( img, "RGBA", 1 )
-        self.id    = glGenTextures( 1 )
-        if isinstance( size, NoneType ):
-            self.size  = Vector3D( [ float( img.get_width() ), float( img.get_height() ), 0. ] )
-        else:
-            self.size = size
+    def load( self, file ):
+        img          = pygame.image.load( file )
+        img_buf      = pygame.image.tostring( img, "RGBA", 1 )
+        self.id      = glGenTextures( 1 )
+        self.size[0] = float( img.get_width() )
+        self.size[1] = float( img.get_height() )
 
         glBindTexture( GL_TEXTURE_2D, self.id )
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR )

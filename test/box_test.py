@@ -18,6 +18,7 @@ class MyObject( Object ):
         def jitter( x ):
             return x + ( ( random.random() * self.JITTER * 2. ) - self.JITTER )
         self.box = Box()
+        self.box.visible = True
         self.box.box[0][0] = jitter( -self.WIDTH ); self.box.box[0][1] = jitter( -self.WIDTH )
         self.box.box[1][0] = jitter(  self.WIDTH ); self.box.box[1][1] = jitter( -self.WIDTH )
         self.box.box[2][0] = jitter(  self.WIDTH ); self.box.box[2][1] = jitter(  self.WIDTH )
@@ -30,6 +31,8 @@ class MyObject( Object ):
         return self.box.collides( obj )
     def __cmp__( self, obj ):
         return cmp( self.box.location[2], obj.box.location[2] )
+    def update( self ):
+        self.box.update()
 
 class Taverna( Scene ):
     def __init__( self ):
@@ -49,7 +52,6 @@ class Taverna( Scene ):
             x.box.location[0] = random.random() * VM().display.size[0]
             x.box.location[1] = random.random() * VM().display.size[1]
             x.box.location[2] = float( i ) / self.N
-            x.box.update()
             self[ id(x) ] = x
 
 ROT_SPEED = 1.

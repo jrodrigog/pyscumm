@@ -21,74 +21,82 @@
 @since: 20/11/2006
 """
 
-import types
+from types import NoneType
 from OpenGL.GL import *
-from pyscumm.vector import Vector2D, Vector3D
+from pyscumm.vector import ProxyVector2D
 from pyscumm.gfx.gl import Object, Texture, Box
+from pyscumm.constant import SIZE_UPDATED, UPDATED
+
+SELF_UPDATED = \
+      SIZE_UPDATED \
+    | UPDATED
 
 class Image( Object ):
     """A Image encapsulates a Texture and
     texturizes it in a quad"""
-    def __init__( self, texture = None ):
+    def __init__( self, texture = None, size = None ):
         Object.__init__( self )
-        self._texture = texture
+        self._texture = None
+        self._base = None
         self.collider = Box()
         self.collider.copy = self
         self._tc = [
-            Vector2D( [ 0.0, 0.0 ] ),
-            Vector2D( [ 1.0, 0.0 ] ),
-            Vector2D( [ 1.0, 1.0 ] ),
-            Vector2D( [ 0.0, 1.0 ] ) ]
-        self._init_collider()
+            ProxyVector2D( [ 0.0, 0.0 ], self, UPDATED ),
+            ProxyVector2D( [ 1.0, 0.0 ], self, UPDATED ),
+            ProxyVector2D( [ 1.0, 1.0 ], self, UPDATED ),
+            ProxyVector2D( [ 0.0, 1.0 ], self, UPDATED ) ]
+
+        if not isinstance( size, NoneType ):
+            self.size = size
+        if not isinstance( texture, NoneType ):
+            self.texture = texture
+
+    def __del__( self ):
+        if not isinstance( self._base, NoneType ):
+            glDeleteLists( self._base, 1 )
 
     def clone( self, obj=None, deep=False ):
-        if isinstance( obj, types.NoneType ): obj = Image()
+        if isinstance( obj, NoneType ): obj = Image()
         Object.clone( self, obj, deep )
         if self._texture:
             obj.texture = self._texture.clone( deep )
         return obj
 
-    def _init_collider( self ):
-        if not self._texture: return
-        t_size = self._texture.size
-        self.collider.box[0] = Vector3D([0.,0.,0.])
-        self.collider.box[1] = Vector3D([t_size[0],0.,0.])
-        self.collider.box[2] = Vector3D([t_size[0],t_size[1],0.])
-        self.collider.box[3] = Vector3D([0.,t_size[1],0.])
-
-    def get_size( self ):
-        try: return self._texture.size
-        except AttributeError: return None
-    def set_size( self, size ):
-        try: self._texture.size
-        except AttributeError: pass
-
     def get_texture( self ): return self._texture
     def set_texture( self, texture ):
         self._texture = texture
-        self._init_collider()
+        if not isinstance( texture, NoneType ) and self.size.is_cero():
+            self.size = texture.size.clone()
 
-    def draw( self ):
-        """Texturize the Image in a quad"""
-        t_size = self._texture.size
-        glPushMatrix()
-        self.collider.draw()
-        Object.draw( self )
+    def update( self ):
+        if self.collider: self.collider.update()
+        if self.copy.frozen \
+        or not ( self.copy.updated & SELF_UPDATED ): return
+        Object.update( self )
+        print "pyscumm.gfx.gl.Image.update()"
+        if not isinstance( self._base, NoneType ):
+            glDeleteLists( self._base, 1 )
+        self._base = glGenLists( 1 )
+        glNewList( self._base, GL_COMPILE )
         glEnable( GL_TEXTURE_2D )
         glBindTexture( GL_TEXTURE_2D, self._texture.id )
         glBegin( GL_QUADS )
-        glTexCoord2f( *self._tc[0] ); glVertex2f( 0        , 0         )
-        glTexCoord2f( *self._tc[1] ); glVertex2f( t_size[0], 0         )
-        glTexCoord2f( *self._tc[2] ); glVertex2f( t_size[0], t_size[1] )
-        glTexCoord2f( *self._tc[3] ); glVertex2f( 0        , t_size[1] )
+        glTexCoord2f( *self._tc[0] ); glVertex2f( 0.          , 0.           )
+        glTexCoord2f( *self._tc[1] ); glVertex2f( self.size[0], 0.           )
+        glTexCoord2f( *self._tc[2] ); glVertex2f( self.size[0], self.size[1] )
+        glTexCoord2f( *self._tc[3] ); glVertex2f( 0.          , self.size[1] )
         glEnd()
         glDisable( GL_TEXTURE_2D )
-        glPopMatrix()
+        glEndList()
 
-    def update( self ):
-        """Update the Image and the collider"""
-        Object.update( self )
-        self.collider.update()
+    def draw( self ):
+        """Texturize the Image in a quad"""
+        self.collider.draw()
+        if not self.copy.visible: return
+        glPushMatrix()
+        Object.draw( self )
+        glCallList( self._base )
+        glPopMatrix()
 
     @classmethod
     def deserialize( cls, element, obj = None ):
@@ -100,6 +108,5 @@ class Image( Object ):
         obj.size = obj.texture.size
         return obj
 
-    size    = property( get_size, set_size )
     texture = property( get_texture, set_texture )
 

@@ -255,6 +255,7 @@ class VM( StateMachine ):
         self.start()
         self.display.open()
         self.scene.start()
+        self.scene.update()
         leave = False
         while not leave:
             try:
@@ -268,6 +269,7 @@ class VM( StateMachine ):
                 self.scene.stop()
                 self.scene = e.scene
                 self.scene.start()
+                self.scene.update()
             except StopVM:
                 leave = True
         self.display.close()
