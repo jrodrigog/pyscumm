@@ -105,8 +105,24 @@ class VM( base.StateMachine ):
         self._display = None
         self._clock = driver.Clock()
         self._scene = None
+        self._event = {
+            pygame.QUIT            : self.quit,
+            pygame.ACTIVEEVENT     : self.active_event,
+            pygame.KEYDOWN         : self.key_down,
+            pygame.KEYUP           : self.key_up,
+            pygame.MOUSEMOTION     : self.mouse_motion,
+            pygame.MOUSEBUTTONDOWN : self.mouse_button_down,
+            pygame.MOUSEBUTTONUP   : self.mouse_button_up,
+            pygame.JOYAXISMOTION   : self.joy_axis_motion,
+            pygame.JOYBALLMOTION   : self.joy_ball_motion,
+            pygame.JOYHATMOTION    : self.joy_hat_motion,
+            pygame.JOYBUTTONDOWN   : self.joy_button_up,
+            pygame.JOYBUTTONDOWN   : self.joy_button_up,
+            pygame.VIDEORESIZE     : self.video_resize,
+            pygame.VIDEOEXPOSE     : self.video_expose,
+            pygame.USEREVENT       : self.user_event }
 
-    def quit( self ):
+    def quit( self, event=None ):
         """Reports a Pygame's quit event to the active state."""
         self._state = self._state.quit()
 
@@ -250,36 +266,7 @@ class VM( base.StateMachine ):
             try:
                 self._clock.tick()
                 for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        self._state.quit()
-                    elif event.type == pygame.ACTIVEEVENT:
-                        self._state.active_event( event )
-                    elif event.type == pygame.KEYDOWN:
-                        self._state.key_down( event )
-                    elif event.type == pygame.KEYUP:
-                        self._state.key_up( event )
-                    elif event.type == pygame.MOUSEMOTION:
-                        self._state.mouse_motion( event )
-                    elif event.type == pygame.MOUSEBUTTONDOWN:
-                        self._state.mouse_button_down( event )
-                    elif event.type == pygame.MOUSEBUTTONUP:
-                        self._state.mouse_button_up( event )
-                    elif event.type == pygame.JOYAXISMOTION:
-                        self._state.joy_axis_motion( event )
-                    elif event.type == pygame.JOYBALLMOTION:
-                        self._state.joy_ball_motion( event )
-                    elif event.type == pygame.JOYHATMOTION:
-                        self._state.joy_hat_motion( event )
-                    elif event.type == pygame.JOYBUTTONDOWN:
-                        self._state.joy_button_up( event )
-                    elif event.type == pygame.JOYBUTTONDOWN:
-                        self._state.joy_button_up( event )
-                    elif event.type == pygame.VIDEORESIZE:
-                        self._state.video_resize( event )
-                    elif event.type == pygame.VIDEOEXPOSE:
-                        self._state.video_expose( event )
-                    elif event.type == pygame.USEREVENT:
-                        self._state.user_event( event )
+                    self._event[ event.type ]( event )
                 self._state.update()
                 self._state.draw()
                 self._display.flip()
