@@ -29,9 +29,8 @@ class Taverna( Scene ):
             n = "logo%d" % i
             self[ n ] = self[ "logobig" ].clone()
             self[ n ].collider.visible = True
-            print self[ n ].collider.box
-            #self[ n ].scale[0] *= 0.5
-            #self[ n ].scale[1] *= 0.5
+            self[ n ].scale[0] *= 0.5
+            self[ n ].scale[1] *= 0.5
 
 class Taverna1( SceneState ):
     _shared_state = {} # Singleton

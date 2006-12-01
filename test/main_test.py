@@ -34,10 +34,12 @@ class MyObject:
             return x + ( ( random.random() * self.JITTER * 2. ) - self.JITTER )
         self.img = img
         img.collider.visible = True
+        """
         img.collider.box[0][0] = jitter( -self.WIDTH ); img.collider.box[0][1] = jitter( -self.WIDTH )
         img.collider.box[1][0] = jitter(  self.WIDTH ); img.collider.box[1][1] = jitter( -self.WIDTH )
         img.collider.box[2][0] = jitter(  self.WIDTH ); img.collider.box[2][1] = jitter(  self.WIDTH )
         img.collider.box[3][0] = jitter( -self.WIDTH ); img.collider.box[3][1] = jitter(  self.WIDTH )
+        """
     def collides( self, obj ):
         return self.img.collides( obj )
     def __cmp__( self, obj ):
@@ -56,11 +58,11 @@ class Taverna( Scene ):
         self.save_color = None
         self.colored = None
         img = Image( Texture("logo_quad.png" ), Vector3D( [229.,180.,0.] ) )
-        img.insertion[0] = img.size[0] / 2.
-        img.insertion[1] = img.size[1] / 2.
+        #img.insertion[0] = -img.size[0] / 2.
+        #img.insertion[1] = -img.size[1] / 2.
         for i in xrange( self.N ):
             x = MyObject( img.clone() )
-            x.img.updated &= ~pyscumm.constant.SIZE_UPDATED
+            #x.img.updated &= ~pyscumm.constant.SIZE_UPDATED
             #x[ 'img' ].location[0] = random.random() * 640
             #x[ 'img' ].location[1] = random.random() * 320
             x.img.location[0] = random.random() * VM().display.size[0]
