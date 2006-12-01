@@ -26,7 +26,7 @@ class MyObject( pyscumm.object.Object ):
         return self['box'].collides( obj )
 """
 
-class MyObject( Object ):
+class MyObject:
     JITTER = 15.
     WIDTH  = 50.
     def __init__( self, img ):
@@ -56,6 +56,8 @@ class Taverna( Scene ):
         self.save_color = None
         self.colored = None
         img = Image( Texture("logo_quad.png" ), Vector3D( [229.,180.,0.] ) )
+        img.insertion[0] = img.size[0] / 2.
+        img.insertion[1] = img.size[1] / 2.
         for i in xrange( self.N ):
             x = MyObject( img.clone() )
             #x[ 'img' ].location[0] = random.random() * 640

@@ -71,9 +71,11 @@ class Image( Object ):
     def update( self ):
         if self.collider: self.collider.update()
         if self.copy.frozen \
-        or not ( self.copy.updated & SELF_UPDATED ): return
+        or not ( self.copy.updated & SELF_UPDATED ):
+            self.updated = 0
+            return
         Object.update( self )
-        print "pyscumm.gfx.gl.Image.update()"
+        #print "pyscumm.gfx.gl.Image.update()"
         if not isinstance( self._base, NoneType ):
             glDeleteLists( self._base, 1 )
         self._base = glGenLists( 1 )
@@ -91,7 +93,7 @@ class Image( Object ):
 
     def draw( self ):
         """Texturize the Image in a quad"""
-        self.collider.draw()
+        self.copy.collider.draw()
         if not self.copy.visible: return
         glPushMatrix()
         Object.draw( self )

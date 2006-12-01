@@ -10,7 +10,7 @@ from pyscumm.constant import B_LEFT, B_CENTER, B_RIGHT
 from pyscumm.gfx.gl import Display, Image, Texture, Mouse
 
 class Taverna( Scene ):
-    N = 3
+    N = 4
     def start( self ):
         VM().display.set_icon("icon.png", (5,75) )
         self.state = Taverna1()
@@ -20,14 +20,16 @@ class Taverna( Scene ):
         self.colored = None
         self[ "logobig" ] = Image( Texture("logo_quad.png" ), Vector3D( [229.,180.,0.] ) )
         self[ "logobig" ].collider.visible = True
-        self[ "logobig" ].location[0] = VM().display.size[0]/2
-        self[ "logobig" ].location[1] = VM().display.size[1]/2
+        self[ "logobig" ].location[0] = VM().display.size[0]/2.
+        self[ "logobig" ].location[1] = VM().display.size[1]/2.
+        self[ "logobig" ].insertion[0] = -self[ "logobig" ].size[0]/2.
+        self[ "logobig" ].insertion[1] = -self[ "logobig" ].size[1]/2.
         for i in xrange( self.N ):
             n = "logo%d" % i
             self[ n ] = self[ "logobig" ].clone()
-            #self[ n ].collider.visible = False
-            self[ n ].scale[0] *= 0.5
-            self[ n ].scale[1] *= 0.5
+            self[ n ].collider.visible = True
+            #self[ n ].scale[0] *= 0.5
+            #self[ n ].scale[1] *= 0.5
 
 class Taverna1( SceneState ):
     _shared_state = {} # Singleton

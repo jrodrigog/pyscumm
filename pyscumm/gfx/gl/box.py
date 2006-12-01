@@ -62,15 +62,17 @@ class Box( AbstractBox, Object ):
     def update( self ):
         if self.copy.frozen \
         or not ( self.copy.updated & BOX_UPDATED \
-        or self.updated & SELF_UPDATED ): return
-        print "pyscumm.gfx.gl.Box.update()"
+        or self.updated & SELF_UPDATED ):
+            self.updated = 0
+            return
+        #print "pyscumm.gfx.gl.Box.update()"
         if ( self.copy.updated & SIZE_UPDATED ) and not self.copy.size.is_cero():
             self.box[0] = Vector3D([0.,0.,0.])
             self.box[1] = Vector3D([self.copy.size[0],0.,0.])
             self.box[2] = Vector3D([self.copy.size[0],self.copy.size[1],0.])
             self.box[3] = Vector3D([0.,self.copy.size[1],0.])
-        Object.update( self )
         self.box.update()
+        Object.update( self )
         if not isinstance( self._base, NoneType ):
             glDeleteLists( self._base, 1 )
         color_border = self.color.scale( BORDER_LIGHT )
