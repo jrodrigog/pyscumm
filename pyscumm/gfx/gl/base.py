@@ -1,9 +1,33 @@
+#    PySCUMM Engine. SCUMM based engine for Python
+#    Copyright (C) 2006  PySCUMM Engine. http://pyscumm.org
+#
+#    This library is free software; you can redistribute it and/or
+#    modify it under the terms of the GNU Lesser General Public
+#    License as published by the Free Software Foundation; either
+#    version 2.1 of the License, or any later version.
+#
+#    This library is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#    Lesser General Public License for more details.
+#
+#    You should have received a copy of the GNU Lesser General Public
+#    License along with this library; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+"""
+@author: Juan Jose Alonso Lara (KarlsBerg, jjalonso@pyscumm.org)
+@author: Juan Carlos Rodrigo Garcia (Brainsucker, jrodrigo@pyscumm.org)
+@since: 20/11/2006
+"""
+
 from types import NoneType
 from OpenGL.GL import *
 import pygame
 from pyscumm.driver import Display as AbstractDisplay
+from pyscumm.driver import Mouse as AbstractMouse
 from pyscumm.gfx import Drawable
-
+from pyscumm.vector import Vector3D
 
 class Object( Drawable ):
     """Abstract GL Object; contains the location, insertion,
@@ -33,6 +57,33 @@ class Object( Drawable ):
         if obj == None: obj = Object()
         return Drawable.deserialize( element, obj )
 
+class Mouse( AbstractMouse ):
+    """A GL Mouse, taking care of the axis conversions."""
+    def __init__( self, display=None ):
+        AbstractMouse.__init__( self, display )
+
+    def get_location( self ):
+        return self._location
+
+    def set_location( self, location ):
+        """
+        Set the location of the mouse cursor.
+        @param location: Mouse cursor location
+        @type location: Vector3D
+        """
+        self._location = location
+        pygame.mouse.set_pos(
+            [ round( int( location[0] ) ), round( int( self.display.size[1] + location[1] ) ) ] )
+
+    def update( self ):
+        """
+        Updates the mouse location for this frame
+        based on the display.
+        """
+        AbstractMouse.update( self )
+        self._location[1] = self.display.size[1] - self._location[1]
+
+    location = property( get_location, set_location )
 
 class Display( AbstractDisplay ):
     """OpenGL Display class."""

@@ -4,12 +4,11 @@ sys.path[len(sys.path):len(sys.path)+1] = ('.', '..')
 import random
 import pyscumm
 from pyscumm.scene import Scene, SceneState
-from pyscumm.gfx.gl import Display, Image, Texture
 from pyscumm.vm import VM
 from pyscumm.vector import *
 from pyscumm.constant import B_LEFT, B_CENTER, B_RIGHT
 from pyscumm.object import Object
-from pyscumm.gfx.gl import Box
+from pyscumm.gfx.gl import Display, Image, Texture, Box, Mouse
 
 
 """
@@ -116,4 +115,4 @@ class Taverna1( SceneState ):
         return self
 
 
-pyscumm.vm.boot( Taverna(), Display() )
+pyscumm.vm.boot( Taverna(), Display(), Mouse() )

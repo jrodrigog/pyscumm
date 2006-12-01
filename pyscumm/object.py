@@ -15,9 +15,12 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#!/usr/bin/env python
+"""
+@author: Juan Jose Alonso Lara (KarlsBerg, jjalonso@pyscumm.org)
+@author: Juan Carlos Rodrigo Garcia (Brainsucker, jrodrigo@pyscumm.org)
+@since: 20/11/2006
+"""
 
-import box
 from base import StateMachine, State
 
 class Object( dict, StateMachine ):

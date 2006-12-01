@@ -15,12 +15,15 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#!/usr/bin/env python
+"""
+@author: Juan Jose Alonso Lara (KarlsBerg, jjalonso@pyscumm.org)
+@author: Juan Carlos Rodrigo Garcia (Brainsucker, jrodrigo@pyscumm.org)
+@since: 20/11/2006
+"""
 
-
-import pygame, os.path
-import base, vm
-from base import StateMachine
+import pygame
+import vm
+from base import StateMachine, SortedList
 
 class Scene( StateMachine, dict ):
     """This is a Scene. It is an state machine so it only
@@ -30,7 +33,7 @@ class Scene( StateMachine, dict ):
 
     def __init__( self ):
         """Build a Scene object."""
-        self.sorted = base.SortedList()
+        self.sorted = SortedList()
 
     def quit( self ):
         """Reports a Pygame's quit event to the active state."""

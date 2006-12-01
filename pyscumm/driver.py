@@ -15,8 +15,6 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#!/usr/bin/env python
-
 """
 @author: Juan Jose Alonso Lara (KarlsBerg, jjalonso@pyscumm.org)
 @author: Juan Carlos Rodrigo Garcia (Brainsucker, jrodrigo@pyscumm.org)
@@ -26,16 +24,17 @@
 import time
 import pygame.mouse
 from vector import Vector3D
-import vm
 
 class Mouse( object ):
     """A Mouse Controller Class."""
 
-    def __init__( self ):
+    def __init__( self, display=None ):
         """Build a Mouse object"""
         self.double_click_time = 200
         self.drag_distance = 0
         self.visible = True
+        self._location = Vector3D()
+        self.display = display
 
     def get_location( self ):
         """
@@ -43,20 +42,28 @@ class Mouse( object ):
         @return: Mouse cursor location
         @rtype: Vector3D
         """
-        pos = pygame.mouse.get_pos()
-        return Vector3D(
-            [ float( pos[0] ), vm.VM().display.size[1] - float( pos[1] ), 0. ] )
+        return self._location
 
-    def set_location( self, pos ):
+    def set_location( self, location ):
         """
         Set the location of the mouse cursor.
-        @param pos: Mouse cursor location
-        @type pos: Vector3D
+        @param location: Mouse cursor location
+        @type location: Vector3D
         """
-        pygame.mouse.set_pos( location[:2] )
+        self._location = location
+        pygame.mouse.set_pos(
+            [ round( int( location[0] ) ), round( int( location[1] ) ) ] )
+
+    def update( self ):
+        """
+        Updates the mouse location for this frame
+        based on the display.
+        """
+        pos = pygame.mouse.get_pos()
+        self._location = Vector3D(
+            [ float( pos[0] ), float( pos[1] ), 0. ] )
 
     location = property( get_location, set_location )
-
 
 class Display( object ):
     """A Display Controller class."""
@@ -204,7 +211,7 @@ class Clock( object ):
         @type fps: float
         """
         self._limit = fps
-        self.tick_interval = MSEC / self._limit
+        self.tick_interval = round( MSEC / self._limit )
         self.tick_interval *= 2. # double speed
 
     def get_limit( self ):

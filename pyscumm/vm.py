@@ -15,8 +15,6 @@
 #    License along with this library; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-#!/usr/bin/env python
-
 """
 @author: Juan Jose Alonso Lara (KarlsBerg, jjalonso@pyscumm.org)
 @author: Juan Carlos Rodrigo Garcia (Brainsucker, jrodrigo@pyscumm.org)
@@ -25,7 +23,7 @@
 
 from types import NoneType
 import pygame.event
-import driver
+from driver import Clock, Mouse
 from base import Logger, StateMachine, State
 from constant import B_LEFT, B_CENTER, B_RIGHT
 from box import Point
@@ -98,8 +96,8 @@ class VM( StateMachine ):
         if self._shared_state: return
         StateMachine.__init__( self )
         self.display = None
-        self.mouse = driver.Mouse()
-        self.clock = driver.Clock()
+        self.mouse = Mouse()
+        self.clock = Clock()
         self.scene = None
         self.event = {
             pygame.QUIT            : self.quit,
@@ -152,6 +150,7 @@ class VM( StateMachine ):
         @param event: A Pygame MOUSEMOTION event
         @type event: Event(Pygame)
         """
+        self.mouse.update()
         self.state = self.state.mouse_motion( event )
 
     def mouse_button_up( self, event ):
@@ -273,7 +272,7 @@ class VM( StateMachine ):
                 leave = True
         self.display.close()
 
-def boot( scene, display, clock=None, mouse=None  ):
+def boot( scene, display, mouse=None, clock=None ):
     """
     Boot a scene. Prepare a Virtual Machine and
     start running the main loop.
@@ -294,6 +293,7 @@ def boot( scene, display, clock=None, mouse=None  ):
         pass
     if not isinstance( clock, NoneType ): VM().clock = clock
     if not isinstance( mouse, NoneType ): VM().mouse = mouse
+    VM().mouse.display = display
     VM().scene = scene
     VM().display = display
     VM().main()
@@ -455,6 +455,19 @@ class VMState( State ):
         VM().scene.draw()
         return self
 
+# Bit Flags
+BTN_PRESS_LEFT       = 1
+BTN_PRESS_CENTER     = 1<<1
+BTN_PRESS_RIGHT      = 1<<2
+BTN_CLICK_LEFT       = 1<<4
+BTN_CLICK_CENTER     = 1<<5
+BTN_CLICK_RIGHT      = 1<<6
+BTN_DBL_CLICK_LEFT   = 1<<8
+BTN_DBL_CLICK_CENTER = 1<<9
+BTN_DBL_CLICK_RIGHT  = 1<<10
+BTN_DRAG_LEFT        = 1<<12
+BTN_DRAG_CENTER      = 1<<13
+BTN_DRAG_RIGHT       = 1<<14
 
 class Mouse( VMState ):
     """
@@ -465,23 +478,6 @@ class Mouse( VMState ):
     can program it like this:
         VM().state = Mouse()
     """
-
-    # Bit Flags
-    BTN_PRESS_LEFT       = 1
-    BTN_PRESS_CENTER     = 1<<1
-    BTN_PRESS_RIGHT      = 1<<2
-    BTN_CLICK_LEFT       = 1<<4
-    BTN_CLICK_CENTER     = 1<<5
-    BTN_CLICK_RIGHT      = 1<<6
-    BTN_DBL_CLICK_LEFT   = 1<<8
-    BTN_DBL_CLICK_CENTER = 1<<9
-    BTN_DBL_CLICK_RIGHT  = 1<<10
-    BTN_DRAG_LEFT        = 1<<12
-    BTN_DRAG_CENTER      = 1<<13
-    BTN_DRAG_RIGHT       = 1<<14
-
-    # Button index, numbered as in Pygame's Events
-
 
     # Singleton's shared state
     _shared_state = {}
@@ -532,13 +528,13 @@ class Mouse( VMState ):
         VM().scene.mouse_button_down( event )
         if event.button == B_LEFT:
             self._process_mouse_button_down(
-                B_LEFT, self.BTN_PRESS_LEFT )
+                B_LEFT, BTN_PRESS_LEFT )
         elif event.button == B_CENTER:
             self._process_mouse_button_down(
-                B_CENTER, self.BTN_PRESS_CENTER )
+                B_CENTER, BTN_PRESS_CENTER )
         elif event.button == B_RIGHT:
             self._process_mouse_button_down(
-                B_RIGHT, self.BTN_PRESS_RIGHT )
+                B_RIGHT, BTN_PRESS_RIGHT )
         return self
 
     def mouse_button_up( self, event ):
@@ -552,24 +548,24 @@ class Mouse( VMState ):
         if event.button == B_LEFT:
             self._process_mouse_button_up(
                 B_LEFT,
-                self.BTN_PRESS_LEFT,
-                self.BTN_CLICK_LEFT,
-                self.BTN_DBL_CLICK_LEFT,
-                self.BTN_DRAG_LEFT )
+                BTN_PRESS_LEFT,
+                BTN_CLICK_LEFT,
+                BTN_DBL_CLICK_LEFT,
+                BTN_DRAG_LEFT )
         elif event.button == B_CENTER:
             self._process_mouse_button_up(
                 B_CENTER,
-                self.BTN_PRESS_CENTER,
-                self.BTN_CLICK_CENTER,
-                self.BTN_DBL_CLICK_CENTER,
-                self.BTN_DRAG_CENTER )
+                BTN_PRESS_CENTER,
+                BTN_CLICK_CENTER,
+                BTN_DBL_CLICK_CENTER,
+                BTN_DRAG_CENTER )
         elif event.button == B_RIGHT:
             self._process_mouse_button_up(
                 B_RIGHT,
-                self.BTN_PRESS_RIGHT,
-                self.BTN_CLICK_RIGHT,
-                self.BTN_DBL_CLICK_RIGHT,
-                self.BTN_DRAG_RIGHT )
+                BTN_PRESS_RIGHT,
+                BTN_CLICK_RIGHT,
+                BTN_DBL_CLICK_RIGHT,
+                BTN_DRAG_RIGHT )
         return self
 
 
@@ -729,26 +725,26 @@ class Mouse( VMState ):
         self._process_update_button(
             l_mouse, d_drag, t_click, t_now,
             B_LEFT,
-            self.BTN_PRESS_LEFT,
-            self.BTN_CLICK_LEFT,
-            self.BTN_DBL_CLICK_LEFT,
-            self.BTN_DRAG_LEFT )
+            BTN_PRESS_LEFT,
+            BTN_CLICK_LEFT,
+            BTN_DBL_CLICK_LEFT,
+            BTN_DRAG_LEFT )
         # Process the center button
         self._process_update_button(
             l_mouse, d_drag, t_click, t_now,
             B_CENTER,
-            self.BTN_PRESS_CENTER,
-            self.BTN_CLICK_CENTER,
-            self.BTN_DBL_CLICK_CENTER,
-            self.BTN_DRAG_CENTER )
+            BTN_PRESS_CENTER,
+            BTN_CLICK_CENTER,
+            BTN_DBL_CLICK_CENTER,
+            BTN_DRAG_CENTER )
         # Process the right button
         self._process_update_button(
             l_mouse, d_drag, t_click, t_now,
             B_RIGHT,
-            self.BTN_PRESS_RIGHT,
-            self.BTN_CLICK_RIGHT,
-            self.BTN_DBL_CLICK_RIGHT,
-            self.BTN_DRAG_RIGHT )
+            BTN_PRESS_RIGHT,
+            BTN_CLICK_RIGHT,
+            BTN_DBL_CLICK_RIGHT,
+            BTN_DRAG_RIGHT )
 
         # Update via the parent
         return VMState.update( self )

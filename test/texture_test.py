@@ -4,10 +4,10 @@ sys.path[len(sys.path):len(sys.path)+1] = ('.', '..')
 import random
 import pyscumm
 from pyscumm.scene import Scene, SceneState
-from pyscumm.gfx.gl import Display, Image, Texture
 from pyscumm.vm import VM
 from pyscumm.vector import *
 from pyscumm.constant import B_LEFT, B_CENTER, B_RIGHT
+from pyscumm.gfx.gl import Display, Image, Texture, Mouse
 
 class Taverna( Scene ):
     N = 3
@@ -21,7 +21,6 @@ class Taverna( Scene ):
         self[ "logobig" ] = Image( Texture("logo_quad.png", Vector2D([229.,180.]) ))
         self[ "logobig" ].location[0] = VM().display.size[0]/2
         self[ "logobig" ].location[1] = VM().display.size[1]/2
-        print VM().display.size[0]
         for i in xrange( self.N ):
             self[ "logo%d" % i ] = self[ "logobig" ].clone()
             self[ "logo%d" % i ].scale *= Vector3D([0.5,0.5,1.])
@@ -84,4 +83,4 @@ class Taverna1( SceneState ):
             self.scene[obj].rotate( 0.1 )
         return self
 
-pyscumm.vm.boot( Taverna(), Display() )
+pyscumm.vm.boot( Taverna(), Display(), Mouse() )

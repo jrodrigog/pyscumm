@@ -1,4 +1,27 @@
-import types
+#    PySCUMM Engine. SCUMM based engine for Python
+#    Copyright (C) 2006  PySCUMM Engine. http://pyscumm.org
+#
+#    This library is free software; you can redistribute it and/or
+#    modify it under the terms of the GNU Lesser General Public
+#    License as published by the Free Software Foundation; either
+#    version 2.1 of the License, or any later version.
+#
+#    This library is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#    Lesser General Public License for more details.
+#
+#    You should have received a copy of the GNU Lesser General Public
+#    License along with this library; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+"""
+@author: Juan Jose Alonso Lara (KarlsBerg, jjalonso@pyscumm.org)
+@author: Juan Carlos Rodrigo Garcia (Brainsucker, jrodrigo@pyscumm.org)
+@since: 20/11/2006
+"""
+
+from types import NoneType
 from vector import Vector3D, RotateVectorZ
 
 class Collider( object ):
@@ -22,7 +45,7 @@ class Box( Collider ):
             Vector3D( [ -1.,  1., 0. ] ) ] )
 
     def clone( self, obj=None, deep=False ):
-        if isinstance( obj, types.NoneType ): obj = Box()
+        if isinstance( obj, NoneType ): obj = Box()
         obj.shadow = self.shadow
         obj.depth = self.depth
         self.box.clone( obj.box, deep )
@@ -52,7 +75,7 @@ class Point( Collider, Vector3D ):
     def __init__( self, v=[0.,0.,0.] ):
         Vector3D.__init__( self, v )
     def clone( self, obj=None, deep=False ):
-        if isinstance( obj, types.NoneType ): obj = Point()
+        if isinstance( obj, NoneType ): obj = Point()
         return Vector3D.clone( self, obj, deep )
     def collides( self, collider ):
         if isinstance( collider, Point ):
@@ -66,7 +89,7 @@ class MultiBox( Collider, list ):
     def __init__( self, obj=[] ):
         list.__init__( self )
     def clone( self, obj=None, deep=False ):
-        if isinstance( obj, types.NoneType ): obj = MultiBox()
+        if isinstance( obj, NoneType ): obj = MultiBox()
         for o in self: obj.append( o.clone( deep=deep ) )
         return obj
     def __str__( self ):
@@ -85,7 +108,7 @@ class WalkArea( MultiBox ):
         for x in box: self.append( x )
 
     def clone( self, obj=None, deep=False ):
-        if isinstance( obj, types.NoneType ): obj = WalkArea()
+        if isinstance( obj, NoneType ): obj = WalkArea()
         return MultiBox.clone( self, obj, deep=deep )
 
     def __add( self, x ):
@@ -154,7 +177,7 @@ class BoxNode( list ):
         list.__init__( self, next )
         self.box = box
     def clone( self, obj=None, deep=False ):
-        if isinstance( obj, types.NoneType ): obj = BoxNode()
+        if isinstance( obj, NoneType ): obj = BoxNode()
         for o in self: obj.append( o.clone( deep=deep ) )
         return obj
     def __str__( self ):
@@ -168,7 +191,7 @@ class BoxRect( list ):
         self.box = box
 
     def clone( self, obj=None, deep=False ):
-        if isinstance( obj, types.NoneType ): obj = BoxRect()
+        if isinstance( obj, NoneType ): obj = BoxRect()
         self[0].clone( obj[0], deep )
         self[1].clone( obj[1], deep )
         self[2].clone( obj[2], deep )
@@ -213,7 +236,7 @@ class BoxRect( list ):
     def __init__( self, location=None, obj=[] ):
         list.__init__( self, obj )
         self._location = location
-        if isinstance( self._location, types.types.NoneType ):
+        if isinstance( self._location, types.NoneType ):
             self._location = Vector3D()
 
     def get_rect( self ):
@@ -227,7 +250,7 @@ class BoxRect( list ):
 
     def point_inside( self, point, rect=None ):
         #If dist is negative to all the rects, point is inside
-        if isinstance( rect, types.types.NoneType ):
+        if isinstance( rect, types.NoneType ):
             rect = self.rect
         return not bool( reduce(
             lambda x,y: x+y,
@@ -252,7 +275,7 @@ class Rect( Vector3D ):
     def __init__( self, obj=[0.,0.,0.] ):
         Vector3D.__init__( self, obj )
     def clone( self, obj=None, deep=False ):
-        if isinstance( obj, types.NoneType ): obj = Rect()
+        if isinstance( obj, NoneType ): obj = Rect()
         return Vector3D.clone( self, obj, deep )
     def dist_sqr( self, p ):
         """d = (Ax1+By1+C)/sqrt(A*A+B*B). (No square root)"""
