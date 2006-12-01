@@ -60,6 +60,7 @@ class Taverna( Scene ):
         img.insertion[1] = img.size[1] / 2.
         for i in xrange( self.N ):
             x = MyObject( img.clone() )
+            x.img.updated &= ~pyscumm.constant.SIZE_UPDATED
             #x[ 'img' ].location[0] = random.random() * 640
             #x[ 'img' ].location[1] = random.random() * 320
             x.img.location[0] = random.random() * VM().display.size[0]

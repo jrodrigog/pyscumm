@@ -97,7 +97,7 @@ class Drawable( object ):
         if self.copy != self: obj.copy = self.copy
         obj.name      = self.name
 
-        obj.updated = UPDATED
+        obj.updated = self.updated
 
         # Deep cloning
         if not deep: obj.child = self.child[:]

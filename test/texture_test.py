@@ -24,10 +24,12 @@ class Taverna( Scene ):
         self[ "logobig" ].location[1] = VM().display.size[1]/2.
         self[ "logobig" ].insertion[0] = -self[ "logobig" ].size[0]/2.
         self[ "logobig" ].insertion[1] = -self[ "logobig" ].size[1]/2.
+        print self[ "logobig" ].collider.box
         for i in xrange( self.N ):
             n = "logo%d" % i
             self[ n ] = self[ "logobig" ].clone()
             self[ n ].collider.visible = True
+            print self[ n ].collider.box
             #self[ n ].scale[0] *= 0.5
             #self[ n ].scale[1] *= 0.5
 

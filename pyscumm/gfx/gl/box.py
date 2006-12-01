@@ -55,8 +55,8 @@ class Box( AbstractBox, Object ):
 
     def clone( self, obj=None, deep=False ):
         if isinstance( obj, NoneType ): obj = Box()
-        AbstractBox.clone( self, obj, deep )
         Object.clone( self, obj, deep )
+        AbstractBox.clone( self, obj, deep )
         return obj
 
     def update( self ):
@@ -66,7 +66,7 @@ class Box( AbstractBox, Object ):
             self.updated = 0
             return
         #print "pyscumm.gfx.gl.Box.update()"
-        if ( self.copy.updated & SIZE_UPDATED ) and not self.copy.size.is_cero():
+        if self.copy.updated & SIZE_UPDATED:
             self.box[0] = Vector3D([0.,0.,0.])
             self.box[1] = Vector3D([self.copy.size[0],0.,0.])
             self.box[2] = Vector3D([self.copy.size[0],self.copy.size[1],0.])

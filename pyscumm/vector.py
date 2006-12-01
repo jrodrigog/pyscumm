@@ -443,7 +443,7 @@ class ProxyVector:
         self.mask = mask
     def clone( self, obj=None, deep=False ):
         if isinstance( obj, NoneType ): obj = ProxyVector()
-        obj.object = self.object
+        #obj.object = self.object
         obj.mask = self.mask
         return obj
 
