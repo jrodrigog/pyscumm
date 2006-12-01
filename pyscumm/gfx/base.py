@@ -23,10 +23,10 @@
 @since: 20/11/2006
 """
 
-
-import pygame.time, pyscumm.vector
 from types import NoneType
-
+import pygame.time
+from pyscumm.vector import Vector3D, Vector4D
+from pyscumm.box import Collider
 
 class SpeedSolver( object ):
     """A Singleton Speed Solver"""
@@ -46,112 +46,89 @@ class Drawable( object ):
     insertion, rotation, color and scale of the object"""
 
     def __init__( self ):
-        self._location  = pyscumm.vector.Vector3D( [0.,0.,0.] )
-        self._insertion = pyscumm.vector.Vector3D( [0.,0.,0.] )
-        self._rotation  = pyscumm.vector.Vector4D( [0.,0.,0.,1.] )
-        self._color     = pyscumm.vector.Vector4D( [1.,1.,1.,1.] )
-        self._scale     = pyscumm.vector.Vector3D( [1.,1.,1.] )
-        self._speed     = pyscumm.vector.Vector3D( [0.,0.,0.] )
-        self._size      = None
-        self._collider  = None
-        self._copy      = self
-        self._name      = None
-        self._visible   = True
-        self._solver    = SpeedSolver()
-        self._child     = []
+        self.location  = Vector3D( [0.,0.,0.] )
+        self.insertion = Vector3D( [0.,0.,0.] )
+        self.rotation  = Vector4D( [0.,0.,0.,1.] )
+        self.color     = Vector4D( [1.,1.,1.,1.] )
+        self.scale     = Vector3D( [1.,1.,1.] )
+        self.speed     = Vector3D( [0.,0.,0.] )
+        self.size      = None
+        self.collider  = None
+        self.copy      = self
+        self.name      = None
+        self.visible   = True
+        self.solver    = SpeedSolver()
+        self.child     = []
 
     def clone( self, obj=None, deep=False ):
         if isinstance( obj, NoneType ): obj = Drawable()
         # Clone always
-        self._location.clone( obj.location, deep )
-        self._insertion.clone( obj.insertion, deep )
-        self._rotation.clone( obj.rotation, deep )
-        self._color.clone( obj.color, deep )
-        self._scale.clone( obj.scale, deep )
-        self._speed.clone( obj.speed, deep )
-        if not isinstance( self._size, NoneType ):
-            self._size.clone( obj.size, deep )
-        if not isinstance( self._collider, NoneType ):
-            obj.collider = self._collider.clone( deep=deep )
+        self.location.clone( obj.location, deep )
+        self.insertion.clone( obj.insertion, deep )
+        self.rotation.clone( obj.rotation, deep )
+        self.color.clone( obj.color, deep )
+        self.scale.clone( obj.scale, deep )
+        self.speed.clone( obj.speed, deep )
+        if not isinstance( self.size, NoneType ):
+            self.size.clone( obj.size, deep )
+        if not isinstance( self.collider, NoneType ):
+            obj.collider = self.collider.clone( deep=deep )
             obj.collider.copy = obj
         # Set
-        obj.visible   = self._visible
-        if self._copy != self: obj.copy = self._copy
+        obj.visible   = self.visible
+        if self.copy != self: obj.copy = self.copy
         obj.name      = self.name
         # Deep cloning
-        if not deep: obj.child = self._child[:]
+        if not deep: obj.child = self.child[:]
         else: obj.child = [
-            i.clone( deep = True ) for i in self._child ]
+            i.clone( deep = True ) for i in self.child ]
         return obj
 
     def rotate(self, angle):
-        self._rotation[0] += angle
-    #def flip( self, axis): self.
+        self.rotation[0] += angle
+    def flip( self, axis ):
+        if axis == "x" or axis == 0: self.scale[0] *= -1
+        elif axis == "y" or axis == 1: self.scale[1] *= -1
+        elif axis == "z" or axis == 2: self.scale[2] *= -1
 
-    def get_visible( self ): return self._visible
-    def set_visible( self, visible ): self._visible = visible
-    def get_name( self ): return self._name
-    def set_name( self, name ): self._name = name
-    def get_color( self ): return self._color
-    def set_color( self, color ): self._color = color
-    def get_rotation( self ): return self._rotation
-    def set_rotation( self, rotation ): self._rotation = rotation
-    def get_insertion( self ): return self._insertion
-    def set_insertion( self, insertion ): self._insertion = insertion
-    def get_location( self ): return self._location
-    def set_location( self, location ): self._location = location
-    def get_scale( self ): return self._scale
-    def set_scale( self, scale ): self._scale = scale
-    def get_speed( self ): return self._speed
-    def set_speed( self, speed ): self._speed = speed
-    def get_solver( self ): return self._solver
-    def set_solver( self, solver ): self._solver = solver
-    def get_collider( self ): return self._collider
-    def set_collider( self, collider ): self._collider = collider
-    def get_size( self ): return self._size
-    def set_size( self, size ): self._size = size
-
-    def set_child( self, child ): self._child = child
-    def get_child( self ): return self._child
-    def set_copy( self, copy ): self._copy = copy
-    def get_copy( self ): return self._copy
-    def clear_copy( self ): self._copy = self
+    def clear_copy( self ): self.copy = self
 
     def set_rgb( self, rgb ):
-        self._color[0] = rgb[0]
-        self._color[1] = rgb[1]
-        self._color[2] = rgb[2]
+        self.color[0] = rgb[0]
+        self.color[1] = rgb[1]
+        self.color[2] = rgb[2]
     def get_rgb( self ):
-        return self._color[:-1]
+        return self.color[:-1]
 
-    def get_alpha( self ): return self._color[3]
-    def set_alpha( self, alpha ): self._color[3] = alpha
+    def get_alpha( self ): return self.color[3]
+    def set_alpha( self, alpha ): self.color[3] = alpha
 
-    def deserialize( self, element, obj=None ):
+    @classmethod
+    def deserialize( cls, element, obj=None ):
         """Deserialize from XML"""
         if obj == None: obj = Drawable()
         obj.name = element.getAttribute("name")
         tmp = element.getElementsByTagName( "Location" )
-        if len( tmp ): obj.location = pyscumm.vector.Vector3D.deserialize( tmp.item( 0 ) )
+        if len( tmp ): obj.location = Vector3D.deserialize( tmp.item( 0 ) )
         tmp = element.getElementsByTagName( "Insertion" )
-        if len( tmp ): obj.insertion = pyscumm.vector.Vector3D.deserialize( tmp.item( 0 ) )
+        if len( tmp ): obj.insertion = Vector3D.deserialize( tmp.item( 0 ) )
         tmp = element.getElementsByTagName( "Color" )
-        if len( tmp ): obj.color = pyscumm.vector.Vector4D.deserialize( tmp.item( 0 ) )
+        if len( tmp ): obj.color = Vector4D.deserialize( tmp.item( 0 ) )
         tmp = element.getElementsByTagName( "Rotation" )
-        if len( tmp ): obj.rotation = pyscumm.vector.Vector4D.deserialize( tmp.item( 0 ) )
+        if len( tmp ): obj.rotation = Vector4D.deserialize( tmp.item( 0 ) )
         tmp = element.getElementsByTagName( "Scale" )
-        if len( tmp ): obj.scale = pyscumm.vector.Vector3D.deserialize( tmp.item( 0 ) )
+        if len( tmp ): obj.scale = Vector3D.deserialize( tmp.item( 0 ) )
         tmp = element.getElementsByTagName( "Speed" )
-        if len( tmp ): obj.speed = pyscumm.vector.Vector3D.deserialize( tmp.item( 0 ) )
+        if len( tmp ): obj.speed = Vector3D.deserialize( tmp.item( 0 ) )
         tmp = element.getElementsByTagName( "Size" )
-        if len( tmp ): obj.size = pyscumm.vector.Vector3D.deserialize( tmp.item( 0 ) )
+        if len( tmp ): obj.size = Vector3D.deserialize( tmp.item( 0 ) )
         return obj
 
     def collides( self, obj ):
-        if isinstance( obj, pyscumm.box.Collider ):
-            return self._collider.collides( obj )
-        elif self._collider:
-            return self._collider.collides( obj.collider )
+        if isinstance( obj, Collider ):
+            return self.collider.collides( obj )
+        elif self.collider:
+            return self.collider.collides( obj.collider )
         return None
 
     def draw( self ):
@@ -160,26 +137,11 @@ class Drawable( object ):
 
     def update( self ):
         """Update the object"""
-        self._solver.solve( self )
-        for child in self._child: child.update()
+        self.solver.solve( self )
+        for child in self.child: child.update()
 
-    child     = property( get_child, set_child )
-    name      = property( get_name, set_name )
-    speed     = property( get_speed, set_speed )
-    copy      = property( get_copy, set_copy )
-    color     = property( get_color, set_color )
-    rotation  = property( get_rotation, set_rotation )
-    scale     = property( get_scale, set_scale )
-    insertion = property( get_insertion, set_insertion )
-    location  = property( get_location, set_location )
     rgb       = property( get_rgb, set_rgb )
     alpha     = property( get_alpha, set_alpha )
-    visible   = property( get_visible, set_visible )
-    solver    = property( get_solver, set_solver )
-    collider  = property( get_collider, set_collider )
-    size      = property( get_size, set_size )
-    deserialize = classmethod( deserialize )
-
 
 class Cycle( object ):
     """An abstract Cycle"""
@@ -187,102 +149,78 @@ class Cycle( object ):
     def __init__( self ):
         """Build the object"""
         # Start time of the cycle
-        self._start_time = 0
+        self.start_time = 0
         # Is the cycle started?
-        self._started = False
+        self.started = False
         # Time span of the cycle
-        self._time = 1000
+        self.time = 1000
         # Is the cycle looping?
-        self._loop = False
+        self.loop = False
         # Is the cycle a ping pong?
-        self._ping_pong = True
+        self.ping_pong = True
         # Cycle direction
-        self._direction = False
+        self.direction = False
         # Is it Paused
-        self._paused = False
+        self.paused = False
         # Elapsed time since the start
-        self._elapsed_time = 0
+        self.elapsed_time = 0
         # Las modulo time
-        self._last_modulo = -1
+        self.last_modulo = -1
 
     def clone( self, obj=None, deep=False ):
         """Clone this object, create a new one if required"""
         if isinstance( obj, NoneType ): obj = Cycle()
-        obj.started      = self._started
-        obj.time         = self._time
-        obj.loop         = self._loop
-        obj.ping_pong    = self._ping_pong
-        obj.direction    = self._direction
-        obj.paused       = self._paused
-        obj.start_time   = self._start_time
-        obj.elapsed_time = self._elapsed_time
-        obj.last_modulo  = self._last_modulo
+        obj.started      = self.started
+        obj.time         = self.time
+        obj.loop         = self.loop
+        obj.ping_pong    = self.ping_pong
+        obj.direction    = self.direction
+        obj.paused       = self.paused
+        obj.start_time   = self.start_time
+        obj.elapsed_time = self.elapsed_time
+        obj.last_modulo  = self.last_modulo
         return obj
-
-    def get_last_modulo( self ): return self._last_modulo
-    def set_last_modulo( self, last_modulo ): self._last_modulo = last_modulo
-    def get_started( self ): return self._started
-    def set_started( self, started ): self._started = started
-    def get_time( self ): return self._time
-    def get_paused( self ): return self._paused
-    def set_paused( self, paused ): self._paused = paused
-    def get_start_time( self ): return self._start_time
-    def set_start_time( self, start_time ): self._start_time = start_time
-    def get_elapsed_time( self ): return self._elapsed_time
-    def set_elapsed_time( self, elapsed_time ): self._elapsed_time = elapsed_time
-    def get_loop( self ): return self._loop
-    def set_loop( self, loop ): self._loop = loop
-    def get_ping_pong( self ): return self._ping_pong
-    def set_ping_pong( self, ping_pong ): self._ping_pong = ping_pong
-    def get_direction( self ): return self._direction
-    def set_direction( self, direction ): self._direction = direction
-    def get_time( self ): return self._time
-    def set_time( self, time ): self._time = time
 
     def pause( self ):
         """Pause the cycle"""
-        self._paused = True
+        self.paused = True
 
     def resume( self ):
         """Resume the cycle"""
-        self._start_time = pygame.time.get_ticks()
-        self._paused = False
+        self.start_time = pygame.time.get_ticks()
+        self.paused = False
 
     def update( self ):
         """Update the cycle"""
-        if self._paused or not self._started: return
-        self._elapsed_time = pygame.time.get_ticks() - self._start_time
-        m = ( self._elapsed_time % self._time )
-        if m < self._last_modulo:
+        if self.paused or not self.started: return
+        self.elapsed_time = pygame.time.get_ticks() - self.start_time
+        m = ( self.elapsed_time % self.time )
+        if m < self.last_modulo:
             self.ending()
-        self._last_modulo = m
+        self.last_modulo = m
 
     def start( self ):
         """Start the cycle"""
-        self._started = True
-        self._start_time = pygame.time.get_ticks()
-        self._last_modulo = -1
+        self.started = True
+        self.start_time = pygame.time.get_ticks()
+        self.last_modulo = -1
         self.update()
         Cycle.update( self )
 
     def stop( self ):
         """Stop the cycle"""
-        self._started = False
-        self._start_time = 0
-
-    def get_elapsed_time( self ):
-        """Get the cycling elapsed_time time"""
-        return self._elapsed_time
+        self.started = False
+        self.start_time = 0
 
     def ending( self ):
         """The cycle ended, reset it"""
-        if self._ping_pong: self.reverse()
-        elif self._loop: pass
+        if self.ping_pong: self.reverse()
+        elif self.loop: pass
         else: self.stop()
 
     def reverse( self ):
         """Reverse the cycle direction"""
-        self._direction = not self._direction
+        self.direction = not self.direction
 
     def forward( self ):
         """Reset the cycle direction to normal"""
@@ -292,7 +230,8 @@ class Cycle( object ):
         """Reset the cycle direction to normal"""
         direction = True
 
-    def deserialize( self, element, obj=None ):
+    @classmethod
+    def deserialize( cls, element, obj=None ):
         """Deserialize from XML"""
         if obj == None: obj = Cycle()
         tmp = element.getAttribute("time")
@@ -305,88 +244,67 @@ class Cycle( object ):
         if tmp: obj.direction = bool( int( tmp ) )
         return obj
 
-    time      = property( get_time, set_time )
-    loop      = property( get_loop, set_loop )
-    ping_pong = property( get_ping_pong, set_ping_pong )
-    direction = property( get_direction, set_direction )
-    started   = property( get_started, set_started )
-    paused    = property( get_paused, set_paused )
-
-    last_modulo  = property( get_last_modulo, set_last_modulo )
-    elapsed_time = property( get_elapsed_time, set_elapsed_time )
-    start_time   = property( get_start_time, set_start_time )
-
-    deserialize = classmethod( deserialize )
-
 
 class Animation( Cycle ):
     """An abstract Animation that provides a frame counter"""
     def __init__( self, reset=0, end=0, fps=30. ):
         Cycle.__init__( self )
-        self._frame = 0
-        self._reset = reset
-        self._end   = end
+        self.frame = 0
+        self.reset = reset
+        self.end   = end
         self.fps    = fps
-        self._last_frame = 0
+        self.last_frame = 0
         self.build()
 
     def clone( self, obj=None, deep=False ):
         if isinstance( obj, NoneType ): obj = Animation()
         Cycle.clone( self, obj, deep )
-        obj.reset = self._reset
-        obj.end   = self._end
-        obj.fps   = self._fps
-        obj.frame = self._frame
-        obj.last_frame = self._last_frame
+        obj.reset = self.reset
+        obj.end   = self.end
+        obj.fps   = self.fps
+        obj.frame = self.frame
+        obj.last_frame = self.last_frame
         obj.build()
         return obj
 
     def clear( self ): pass
     def build( self ):
-        self._length = self._end - self._reset
-        self._time = self._ani_speed * ( self._length + 1 )
+        self.length = self.end - self.reset
+        self.time = self.ani_speed * ( self.length + 1 )
 
-    def get_length( self ): return self._length
-    def get_frame( self ): return self._frame
-
-    def get_fps( self ): return self._fps
+    def get_fps( self ): return self.fps
     def set_fps( self, fps ):
-        self._fps = fps
-        self._ani_speed = 1000. / fps
+        self.fps = fps
+        self.ani_speed = 1000. / fps
 
-    def get_ani_speed( self ): return self._ani_speed
-    def set_ani_speed( self, speed ): self._ani_speed = ani_speed
-
-    def get_last_frame( self ): return self._last_frame
-    def set_last_frame( self, speed ): self._last_frame = last_frame
-
-    def get_reset( self ): return self._reset
+    def get_reset( self ): return self.reset
     def set_reset( self, reset ):
-        self._reset = reset
+        self.reset = reset
         self.build()
-    def get_end( self ): return self._end
+    def get_end( self ): return self.end
     def set_end( self, end ):
-        self._end = end
+        self.end = end
         self.build()
 
     def start( self ):
         """Start the animation"""
         Cycle.start( self )
-        self._last_frame = 0
+        self.last_frame = 0
 
-    def get_frame( self ): return self._frame
+    def get_frame( self ): return self.frame
 
     def update( self ):
         """Update the frame here"""
         Cycle.update( self )
         t = self.elapsed_time
-        if ( t - self._last_frame ) >= self._ani_speed:
-            self._last_frame = t
-            self._frame = ( self._frame + 1 ) % self._length
-        if self.direction: self._frame = self._reset + self._frame
-        else: self._frame = self._end - self._frame
+        if ( t - self.last_frame ) >= self.ani_speed:
+            self.last_frame = t
+            self.frame = ( self.frame + 1 ) % self.length
+        if self.direction: self.frame = self.reset + self.frame
+        else: self.frame = self.end - self.frame
 
-    def deserialize( self, element, obj=None ):
+    @classmethod
+    def deserialize( cls, element, obj=None ):
         """Deserialize from XML"""
         if obj == None: obj = Animation()
         Cycle.deserialize( element, obj )
@@ -403,7 +321,4 @@ class Animation( Cycle ):
     end    = property( get_end, set_end )
     fps    = property( get_fps, set_fps )
     frame  = property( get_frame )
-    length = property( get_length )
-    last_frame = property( get_last_frame, set_last_frame )
-    deserialize = classmethod( deserialize )
 

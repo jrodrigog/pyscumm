@@ -23,87 +23,39 @@
 @since: 14/11/2006
 """
 
-import time,  pygame.mouse, pyscumm.vector, pyscumm.vm
+import time
+import pygame.mouse
+from vector import Vector3D
+import vm
 
 class Mouse( object ):
     """A Mouse Controller Class."""
 
     def __init__( self ):
         """Build a Mouse object"""
-        self._double_click_time = 200
-        self._drag_distance = 0
-        self._visible = True
+        self.double_click_time = 200
+        self.drag_distance = 0
+        self.visible = True
 
     def get_location( self ):
         """
         Get the current location of the mouse cursor.
         @return: Mouse cursor location
-        @rtype: pyscumm.vector.Vector3D
+        @rtype: Vector3D
         """
         pos = pygame.mouse.get_pos()
-        return pyscumm.vector.Vector3D(
-            [ float( pos[0] ), pyscumm.vm.VM().display.size[1] - float( pos[1] ), 0. ] )
+        return Vector3D(
+            [ float( pos[0] ), vm.VM().display.size[1] - float( pos[1] ), 0. ] )
 
     def set_location( self, pos ):
         """
         Set the location of the mouse cursor.
         @param pos: Mouse cursor location
-        @type pos: pyscumm.vector.Vector3D
+        @type pos: Vector3D
         """
         pygame.mouse.set_pos( location[:2] )
 
-    def get_double_click_time( self ):
-        """
-        Get the current minimal time needed for a double click, in miliseconds.
-        @return: Minimal time
-        @rtype: float
-        """
-        return self._double_click_time
-
-    def set_double_click_time( self, value ):
-        """
-        Set the current minimal time needed for a double click, in miliseconds.
-        @param value: Minimal time
-        @type value: int
-        """
-        self._double_click_time = value
-
-    def get_drag_distance( self ):
-        """
-        Get the minimal distance in pixels to start a mouse drag.
-        @return: Distance in pixels
-        @rtype: int
-        """
-        return self._drag_distance
-
-    def set_drag_distance( self, value ):
-        """
-        Set the minimal distance in pixels to start a mouse drag.
-        @param value: Distance in pixels
-        @type value: int
-        """
-        self._drag_distance = value
-
-    def get_visible( self ):
-        """
-        Set the system mouse cursor visibility.
-        @return: Visibility state
-        @rtype: bool
-        """
-        return self._visible
-
-    def set_visible( self, value ):
-        """
-        Set the system mouse cursor visibility.
-        @param value: Visibility state
-        @type value: bool
-        """
-        self._visible = value
-
-    double_click_time   = property( get_double_click_time, set_double_click_time )
-    drag_distance       = property( get_drag_distance, set_drag_distance )
-    visible             = property( get_visible, set_visible )
-    location            = property( get_location, set_location )
+    location = property( get_location, set_location )
 
 
 class Display( object ):
@@ -111,11 +63,11 @@ class Display( object ):
 
     def __init__( self ):
         """Build a Display object"""
-        self._size = pyscumm.vector.Vector3D( [ 640, 480, 0 ] )
+        self._size = Vector3D( [ 640, 480, 0 ] )
+        self.open_flags = pygame.DOUBLEBUF
         self._icon = None
         self._opened = False
         self._title = "pyscumm window"
-        self._open_flags = pygame.DOUBLEBUF
 
     def info( self ):
         """
@@ -133,9 +85,8 @@ class Display( object ):
         self._opened = True
         pygame.init()
         pygame.display.init()
-        self.title = self._title
-        self.size = self._size
-
+        self._title = self._title
+        self.size = self.size
 
     def close( self ):
         """
@@ -145,7 +96,7 @@ class Display( object ):
         if not self._opened: return
         pygame.display.quit()
 
-    def list_modes( self ):
+    def get_modes( self ):
         """
         Get a list of possible dimensions to the current/best color depth.
         @return: A list of possible dimensions.
@@ -177,8 +128,8 @@ class Display( object ):
         @return: None
         """
         self._size = size
-        if self._opened:
-            pygame.display.set_mode( self._size[:2], self._open_flags )
+        if not self._opened: return
+        pygame.display.set_mode( self._size[:2], self.open_flags )
 
     def get_title( self ):
         """
@@ -197,23 +148,6 @@ class Display( object ):
         """
         self._title = title
         if self._opened: pygame.display.set_caption( self._title )
-
-    def get_open_flags( self ):
-        """
-        Get the Pygame flags used when opening the display.
-        @return: Pygame display open flags
-        @rtype: int
-        """
-        return self._open_flags
-
-    def set_open_flags( self, open_flags ):
-        """
-        Set the Pygame flags used when opening the display.
-        @param open flags: Pygame display open flags
-        @type open flags: int
-        @return: None
-        """
-        self._open_flags = open_flags
 
     def get_icon( self ):
         """
@@ -236,30 +170,32 @@ class Display( object ):
         @return: None
         """
         self._icon = file
-        if self._opened: pygame.display.set_icon( icon )
+        if not self._opened: return
+        pygame.display.set_icon( icon )
 
     def flip( self ):
         pygame.display.flip()
 
-    open_flags  = property( get_open_flags, get_open_flags )
-    title       = property( get_title, set_title )
-    size        = property( get_size, set_size )
-    icon        = property( get_icon, set_icon )
+    modes  = property( get_modes )
+    title  = property( get_title, set_title )
+    size   = property( get_size, set_size )
+    icon   = property( get_icon, set_icon )
 
+
+MSEC = 1000.
 
 class Clock( object ):
-    _sec_to_msec = 1000.
 
     def __init__( self ):
         """Build a Clock object."""
         # Next frame tick time
-        self._next_time = 0
+        self.time = 0
         # Interval between frame ticks
-        self._tick_interval = 0
+        self.tick_interval = 0
         # Frame count
-        self._frame_count = 0
+        self.frame_count = 0
         # Frame rate limit
-        self.limit = 60
+        self._limit = 60
 
     def set_limit( self, fps ):
         """
@@ -268,8 +204,8 @@ class Clock( object ):
         @type fps: float
         """
         self._limit = fps
-        self._tick_interval = self._sec_to_msec / self._limit
-        self._tick_interval *= 2. # double speed
+        self.tick_interval = MSEC / self._limit
+        self.tick_interval *= 2. # double speed
 
     def get_limit( self ):
         """
@@ -284,8 +220,8 @@ class Clock( object ):
         if we are drawing too fast.
         @return: None
         """
-        self._frame_count += 1
-        time.sleep( self._get_raw_time() / self._sec_to_msec )
+        self.frame_count += 1
+        time.sleep( self._get_raw_time() / MSEC )
 
     def _get_raw_time( self ):
         """
@@ -293,26 +229,17 @@ class Clock( object ):
         @return: float
         """
         now = pygame.time.get_ticks()
-        if self._next_time <= now:
-            self._next_time = now + self._tick_interval
+        if self.time <= now:
+            self.time = now + self.tick_interval
             return 0.
-        return self._next_time - now
-
-    def get_time( self ):
-        """
-        Get the next frame time.
-        Use this time for your calculations.
-        @return: float
-        """
-        return self._next_time
+        return self.time - now
 
     def get_fps( self ):
         """
         Get the frames per second.
         @return: float
         """
-        return self._frame_count / ( pygame.time.get_ticks() / self._sec_to_msec );
+        return self.frame_count / ( pygame.time.get_ticks() / MSEC );
 
     fps      = property( get_fps )
-    time     = property( get_time )
     limit    = property( get_limit, set_limit )

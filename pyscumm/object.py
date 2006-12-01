@@ -18,13 +18,13 @@
 #!/usr/bin/env python
 
 import box
-import pyscumm.base
+from base import StateMachine, State
 
-class Object( dict, pyscumm.base.StateMachine ):
+class Object( dict, StateMachine ):
 
     def __init__(self):
         dict.__init__( self )
-        pyscumm.base.StateMachine.__init__( self )
+        StateMachine.__init__( self )
 
     def __cmp__( self ):
         raise NotImplemented
@@ -43,13 +43,10 @@ class Object( dict, pyscumm.base.StateMachine ):
         self._state = self._state.draw()
 
 
-class ObjectState( pyscumm.base.State ):
+class ObjectState( State ):
 
     def __init__( self ):
-        pyscumm.base.State.__init__( self )
-
-    def __cmp__( self ):
-        raise NotImplemented
+        State.__init__( self )
 
     def action( self, cmd ):
         raise NotImplemented
@@ -67,7 +64,7 @@ class ObjectState( pyscumm.base.State ):
 class Cursor( Object ):
 
     def __init__( self ):
-        pyscumm.base.StateMachine.__init__(self)
+        StateMachine.__init__(self)
 
 
 class CursorState( ObjectState ):

@@ -24,7 +24,11 @@
 """
 
 from types import NoneType
-import pygame.event, base, driver, vector, box, pyscumm.gfx.gl
+import pygame.event
+import driver
+from base import Logger, StateMachine, State
+from constant import B_LEFT, B_CENTER, B_RIGHT
+from box import Point
 
 class ChangeScene( Exception ):
     """
@@ -40,16 +44,7 @@ class ChangeScene( Exception ):
         @param scene: The VM's active scene
         @type scene: Scene
         """
-        self._scene = scene
-
-    def get_scene( self ):
-        """
-        Get the Scene.
-        @return: Scene
-        """
-        return self._scene
-
-    scene = property( get_scene )
+        self.scene = scene
 
 
 class StopVM( Exception ):
@@ -74,7 +69,8 @@ class Event( dict ):
         """
         return self[ attr ]
 
-class VM( base.StateMachine ):
+
+class VM( StateMachine ):
     """
     VM (Virtual Machine) its a state machine (See state pattern), its the core of pyscumm,
     this haddle Pygame events, draw each drawable object depends of her Zplanes, etc
@@ -100,12 +96,12 @@ class VM( base.StateMachine ):
         with it's default components."""
         self.__dict__ = self._shared_state
         if self._shared_state: return
-        base.StateMachine.__init__( self )
-        self._mouse = driver.Mouse()
-        self._display = None
-        self._clock = driver.Clock()
-        self._scene = None
-        self._event = {
+        StateMachine.__init__( self )
+        self.display = None
+        self.mouse = driver.Mouse()
+        self.clock = driver.Clock()
+        self.scene = None
+        self.event = {
             pygame.QUIT            : self.quit,
             pygame.ACTIVEEVENT     : self.active_event,
             pygame.KEYDOWN         : self.key_down,
@@ -124,7 +120,7 @@ class VM( base.StateMachine ):
 
     def quit( self, event=None ):
         """Reports a Pygame's quit event to the active state."""
-        self._state = self._state.quit()
+        self.state = self.state.quit()
 
     def active_event( self, event ):
         """
@@ -132,7 +128,7 @@ class VM( base.StateMachine ):
         @param event: A Pygame ACTIVEEVENT event
         @type event: Event(Pygame)
         """
-        self._state = self._state.active_event( event )
+        self.state = self.state.active_event( event )
 
     def key_down( self, event ):
         """
@@ -140,7 +136,7 @@ class VM( base.StateMachine ):
         @param event: A Pygame KEYDOWN event
         @type event: Event(Pygame)
         """
-        self._state = self._state.key_down( event )
+        self.state = self.state.key_down( event )
 
     def key_up( self, event ):
         """
@@ -148,7 +144,7 @@ class VM( base.StateMachine ):
         @param event: A Pygame KEYUP event
         @type event: Event(Pygame)
         """
-        self._state = self._state.key_up( event )
+        self.state = self.state.key_up( event )
 
     def mouse_motion( self, event ):
         """
@@ -156,7 +152,7 @@ class VM( base.StateMachine ):
         @param event: A Pygame MOUSEMOTION event
         @type event: Event(Pygame)
         """
-        self._state = self._state.mouse_motion( event )
+        self.state = self.state.mouse_motion( event )
 
     def mouse_button_up( self, event ):
         """
@@ -164,7 +160,7 @@ class VM( base.StateMachine ):
         @param event: A Pygame MOUSEBUTTONUP event
         @type event: Event(Pygame)
         """
-        self._state = self._state.mouse_button_up( event )
+        self.state = self.state.mouse_button_up( event )
 
     def mouse_button_down( self, event ):
         """
@@ -172,7 +168,7 @@ class VM( base.StateMachine ):
         @param event: A Pygame MOUSEBUTTONDOWN event
         @type event: Event(Pygame)
         """
-        self._state = self._state.mouse_button_down( event )
+        self.state = self.state.mouse_button_down( event )
 
     def joy_axis_motion( self, event ):
         """
@@ -180,7 +176,7 @@ class VM( base.StateMachine ):
         @param event: A Pygame JOYAXISMOTION event
         @type event: Event(Pygame)
         """
-        self._state = self._state.joy_axis_motion( event )
+        self.state = self.state.joy_axis_motion( event )
 
     def joy_ball_motion( self, event ):
         """
@@ -188,7 +184,7 @@ class VM( base.StateMachine ):
         @param event: A Pygame JOYBALLMOTION event
         @type event: Event(Pygame)
         """
-        self._state = self._state.joy_ball_motion( event )
+        self.state = self.state.joy_ball_motion( event )
 
     def joy_hat_motion( self, event ):
         """
@@ -196,7 +192,7 @@ class VM( base.StateMachine ):
         @param event: A Pygame JOYHATMOTION event
         @type event: Event(Pygame)
         """
-        self._state = self._state.joy_hat_motion( event )
+        self.state = self.state.joy_hat_motion( event )
 
     def joy_button_up( self, event ):
         """
@@ -204,7 +200,7 @@ class VM( base.StateMachine ):
         @param event: A Pygame JOYBUTTONUP event
         @type event: Event(Pygame)
         """
-        self._state = self._state.joy_button_up( event )
+        self.state = self.state.joy_button_up( event )
 
     def joy_button_down( self, event ):
         """
@@ -212,7 +208,7 @@ class VM( base.StateMachine ):
         @param event: A Pygame JOYBUTTONDOWN event
         @type event: Event(Pygame)
         """
-        self._state = self._state.joy_button_down( event )
+        self.state = self.state.joy_button_down( event )
 
     def video_resize( self, event ):
         """
@@ -220,7 +216,7 @@ class VM( base.StateMachine ):
         @param event: A Pygame VIDEORESIZE event
         @type event: Event(Pygame)
         """
-        self._state = self._state.video_resize( event )
+        self.state = self.state.video_resize( event )
 
     def video_expose( self, event ):
         """
@@ -228,7 +224,7 @@ class VM( base.StateMachine ):
         @param event: A Pygame VIDEOEXPOSE event
         @type event: Event(Pygame)
         """
-        self._state = self._state.video_expose( event )
+        self.state = self.state.video_expose( event )
 
     def user_event( self, event ):
         """
@@ -236,20 +232,19 @@ class VM( base.StateMachine ):
         @param event: A Pygame USEREVENT event
         @type event: Event(Pygame)
         """
-        self._state = self._state.user_event( event )
+        self.state = self.state.user_event( event )
 
     def update( self ):
         """Reports an update event to the active state."""
-        self._state.update()
+        self.state.update()
 
     def draw( self ):
         """Reports a draw event to the active state."""
-        self._state.draw()
-
+        self.state.draw()
 
     def start( self ):
         """Reset the VM to the Mouse state."""
-        self._state = Mouse()
+        self.state = Mouse()
 
     def main( self ):
         """
@@ -259,122 +254,52 @@ class VM( base.StateMachine ):
         the VM will reset single with the new scene data without close the window.
         """
         self.start()
-        self._display.open()
-        self._scene.start()
+        self.display.open()
+        self.scene.start()
         leave = False
         while not leave:
             try:
-                self._clock.tick()
+                self.clock.tick()
                 for event in pygame.event.get():
-                    self._event[ event.type ]( event )
-                self._state.update()
-                self._state.draw()
-                self._display.flip()
+                    self.event[ event.type ]( event )
+                self.state.update()
+                self.state.draw()
+                self.display.flip()
             except ChangeScene, e:
-                self._scene.stop()
-                self._scene = e.scene
-                self._scene.start()
+                self.scene.stop()
+                self.scene = e.scene
+                self.scene.start()
             except StopVM:
                 leave = True
-        self._display.close()
+        self.display.close()
 
-    def boot( self, scene, display, clock=None, mouse=None  ):
-        """
-        Boot a scene. Prepare a Virtual Machine and
-        start running the main loop.
-        @param scene: A Scene object
-        @type scene: Scene
-        @param clock: A Clock object
-        @type clock: Clock
-        @param display: A Display object
-        @type display: Display
-        @param mouse: A Mouse object
-        @type mouse: Mouse
-        """
-        try:
-            import psyco
-            psyco.full()
-            base.Logger().info("Psyco enabled")
-        except ImportError:
-            pass
-        if not isinstance( clock, NoneType ): VM().clock = clock
-        if not isinstance( mouse, NoneType ): VM().mouse = mouse
-        VM().scene = scene
-        VM().display = display
-        VM().main()
-
-    def get_clock( self ):
-        """
-        Get the VM's clock.
-        @return: A Clock object
-        @rtype: Clock
-        """
-        return self._clock
-
-    def set_clock( self, clock ):
-        """
-        Set the VM's clock.
-        @param clock: A Clock object
-        @type clock: Clock
-        """
-        self._clock = clock
-
-    def get_display( self ):
-        """
-        Get the VM's display.
-        @return: A Display object
-        @rtype: Display
-        """
-        return self._display
-
-    def set_display( self, display ):
-        """
-        Set the VM's display.
-        @param display: A Display object
-        @type display: Display
-        """
-        self._display = display
-
-    def get_mouse( self ):
-        """
-        Get the VM's mouse.
-        @return: A Mouse object
-        @rtype: Mouse
-        """
-        return self._mouse
-
-    def set_mouse( self, mouse ):
-        """
-        Set the VM's mouse.
-        @param mouse: A Mouse object
-        @type mouse: Mouse
-        """
-        self._mouse = mouse
-
-    def get_scene( self ):
-        """
-        Get the VM's Scene.
-        @return: A Scene object
-        @rtype: Scene
-        """
-        return self._scene
-
-    def set_scene( self, scene ):
-        """
-        Set the VM's Scene.
-        @param scene: A Scene object
-        @type scene: Scene
-        """
-        self._scene = scene
-
-    scene   = property( get_scene, set_scene )
-    mouse   = property( get_mouse, set_mouse )
-    display = property( get_display, set_display )
-    clock   = property( get_clock, set_clock )
-    boot    = classmethod( boot )
+def boot( scene, display, clock=None, mouse=None  ):
+    """
+    Boot a scene. Prepare a Virtual Machine and
+    start running the main loop.
+    @param scene: A Scene object
+    @type scene: Scene
+    @param clock: A Clock object
+    @type clock: Clock
+    @param display: A Display object
+    @type display: Display
+    @param mouse: A Mouse object
+    @type mouse: Mouse
+    """
+    try:
+        import psyco
+        psyco.full()
+        Logger().info("Psyco enabled")
+    except ImportError:
+        pass
+    if not isinstance( clock, NoneType ): VM().clock = clock
+    if not isinstance( mouse, NoneType ): VM().mouse = mouse
+    VM().scene = scene
+    VM().display = display
+    VM().main()
 
 
-class VMState( base.State ):
+class VMState( State ):
     """
     This class is a abstract state of the VM, the pre-mades modes of VM inherit from
     this class. You can inherit it to write your own modes (states).
@@ -386,7 +311,7 @@ class VMState( base.State ):
 
     def __init__( self ):
         """Build a VMState object."""
-        base.State.__init__( self )
+        State.__init__( self )
 
 
     def quit( self ):
@@ -605,15 +530,15 @@ class Mouse( VMState ):
         @type event: Event(Pygame)
         """
         VM().scene.mouse_button_down( event )
-        if event.button == pyscumm.B_LEFT:
+        if event.button == B_LEFT:
             self._process_mouse_button_down(
-                pyscumm.B_LEFT, self.BTN_PRESS_LEFT )
-        elif event.button == pyscumm.B_CENTER:
+                B_LEFT, self.BTN_PRESS_LEFT )
+        elif event.button == B_CENTER:
             self._process_mouse_button_down(
-                pyscumm.B_CENTER, self.BTN_PRESS_CENTER )
-        elif event.button == pyscumm.B_RIGHT:
+                B_CENTER, self.BTN_PRESS_CENTER )
+        elif event.button == B_RIGHT:
             self._process_mouse_button_down(
-                pyscumm.B_RIGHT, self.BTN_PRESS_RIGHT )
+                B_RIGHT, self.BTN_PRESS_RIGHT )
         return self
 
     def mouse_button_up( self, event ):
@@ -624,23 +549,23 @@ class Mouse( VMState ):
         @type event: Event(Pygame)
         """
         VM().scene.mouse_button_up( event )
-        if event.button == pyscumm.B_LEFT:
+        if event.button == B_LEFT:
             self._process_mouse_button_up(
-                pyscumm.B_LEFT,
+                B_LEFT,
                 self.BTN_PRESS_LEFT,
                 self.BTN_CLICK_LEFT,
                 self.BTN_DBL_CLICK_LEFT,
                 self.BTN_DRAG_LEFT )
-        elif event.button == pyscumm.B_CENTER:
+        elif event.button == B_CENTER:
             self._process_mouse_button_up(
-                pyscumm.B_CENTER,
+                B_CENTER,
                 self.BTN_PRESS_CENTER,
                 self.BTN_CLICK_CENTER,
                 self.BTN_DBL_CLICK_CENTER,
                 self.BTN_DRAG_CENTER )
-        elif event.button == pyscumm.B_RIGHT:
+        elif event.button == B_RIGHT:
             self._process_mouse_button_up(
-                pyscumm.B_RIGHT,
+                B_RIGHT,
                 self.BTN_PRESS_RIGHT,
                 self.BTN_CLICK_RIGHT,
                 self.BTN_DBL_CLICK_RIGHT,
@@ -673,7 +598,7 @@ class Mouse( VMState ):
         self._last_collided = []
         #self._mouse_in      = []
         #self._mouse_out     = []
-        point = box.Point( l_mouse )
+        point = Point( l_mouse )
         for i in xrange( len( self._over )-1, -1, -1 ):
             box_ = self._over[i].collides( point )
             if not isinstance( box_, NoneType ): continue
@@ -803,7 +728,7 @@ class Mouse( VMState ):
         # Process the left button
         self._process_update_button(
             l_mouse, d_drag, t_click, t_now,
-            pyscumm.B_LEFT,
+            B_LEFT,
             self.BTN_PRESS_LEFT,
             self.BTN_CLICK_LEFT,
             self.BTN_DBL_CLICK_LEFT,
@@ -811,7 +736,7 @@ class Mouse( VMState ):
         # Process the center button
         self._process_update_button(
             l_mouse, d_drag, t_click, t_now,
-            pyscumm.B_CENTER,
+            B_CENTER,
             self.BTN_PRESS_CENTER,
             self.BTN_CLICK_CENTER,
             self.BTN_DBL_CLICK_CENTER,
@@ -819,7 +744,7 @@ class Mouse( VMState ):
         # Process the right button
         self._process_update_button(
             l_mouse, d_drag, t_click, t_now,
-            pyscumm.B_RIGHT,
+            B_RIGHT,
             self.BTN_PRESS_RIGHT,
             self.BTN_CLICK_RIGHT,
             self.BTN_DBL_CLICK_RIGHT,

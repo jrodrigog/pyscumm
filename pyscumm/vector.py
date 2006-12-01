@@ -12,7 +12,8 @@ class Vector2D( Vector ):
         obj[0] = self[0]
         obj[1] = self[1]
         return obj
-    def deserialize( self, element, obj=None ):
+    @classmethod
+    def deserialize( cls, element, obj=None ):
         """Deserialize from XML"""
         if obj == None: obj = Vector2D()
         tmp = element.getAttribute("x")
@@ -59,7 +60,6 @@ class Vector2D( Vector ):
         return rotation.rotate( self )
     def __repr__( self ):
         return "Vector2D([%.2f,%.2f])" % ( self[0], self[1] )
-    deserialize = classmethod( deserialize )
 
 class Vector3D( Vector ):
     """3D Vector class"""
@@ -71,7 +71,8 @@ class Vector3D( Vector ):
         obj[1] = self[1]
         obj[2] = self[2]
         return obj
-    def deserialize( self, element, obj=None ):
+    @classmethod
+    def deserialize( cls, element, obj=None ):
         """Deserialize from XML"""
         if obj == None: obj = Vector3D()
         tmp = element.getAttribute("x")
@@ -131,7 +132,6 @@ class Vector3D( Vector ):
         return rotation.rotate( self )
     def __repr__( self ):
         return "Vector3D([%.2f,%.2f,%.2f])" % ( self[0], self[1], self[2] )
-    deserialize = classmethod( deserialize )
 
 class Vector4D( Vector ):
     """4D Vector class"""
@@ -144,7 +144,8 @@ class Vector4D( Vector ):
         obj[2] = self[2]
         obj[3] = self[3]
         return obj
-    def deserialize( self, element, obj=None ):
+    @classmethod
+    def deserialize( cls, element, obj=None ):
         """Deserialize from XML"""
         if obj == None: obj = Vector4D()
         tmp = element.getAttribute("x")
@@ -213,7 +214,6 @@ class Vector4D( Vector ):
         raise NotImplementedError
     def __repr__( self ):
         return "Vector4D([%.2f,%.2f,%.2f,%.2f])" % ( self[0], self[1], self[2], self[3] )
-    deserialize = classmethod( deserialize )
 
 class VectorRotation( list ):
     """This abstract class implements a common rotation for

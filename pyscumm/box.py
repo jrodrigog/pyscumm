@@ -1,4 +1,5 @@
-import types, pyscumm
+import types
+from vector import Vector3D, RotateVectorZ
 
 class Collider( object ):
     def clone( self, obj=None, deep=False ):
@@ -12,55 +13,47 @@ class Collider( object ):
 
 class Box( Collider ):
     def __init__( self, shadow=1., depth=1. ):
-        self._shadow = shadow
-        self._depth = depth
-        self._box = BoxRect( self, [
-            pyscumm.vector.Vector3D( [ -1., -1., 0. ] ),
-            pyscumm.vector.Vector3D( [  1., -1., 0. ] ),
-            pyscumm.vector.Vector3D( [  1.,  1., 0. ] ),
-            pyscumm.vector.Vector3D( [ -1.,  1., 0. ] ) ] )
+        self.shadow = shadow
+        self.depth = depth
+        self.box = BoxRect( self, [
+            Vector3D( [ -1., -1., 0. ] ),
+            Vector3D( [  1., -1., 0. ] ),
+            Vector3D( [  1.,  1., 0. ] ),
+            Vector3D( [ -1.,  1., 0. ] ) ] )
+
     def clone( self, obj=None, deep=False ):
         if isinstance( obj, types.NoneType ): obj = Box()
-        obj.shadow = self._shadow
-        obj.depth = self._depth
-        self._box.clone( obj.box, deep )
+        obj.shadow = self.shadow
+        obj.depth = self.depth
+        self.box.clone( obj.box, deep )
         return obj
-    def get_z( self ): return self._location[2]
-    def set_z( self, z ): self._location[2] = z
-    def get_shadow( self ): return self._shadow
-    def set_shadow( self, shadow ): self._shadow = shadow
-    def get_depth( self ): return self._depth
-    def set_depth( self, depth ): self._depth = depth
-    def get_box( self ): return self._box
-    def set_box( self, box ): self._box = box
 
     def collides( self, collider ):
         if isinstance( collider, Point )\
-        and self._box.point_inside( collider ):
+        and self.box.point_inside( collider ):
             return self
         elif isinstance( collider, Box )\
-        and self._box.box_inside( collider.box ):
+        and self.box.box_inside( collider.box ):
             return self
         return None
+
     def __str__( self ):
         return "Box( location=%s, shadow=%s, depth=%s, box=%s )" % (
-            self._location,
-            self._shadow,
-            self._depth,
-            self._box )
-    def update( self ):
-        self._box.update()
-    shadow   = property( get_shadow, set_shadow )
-    depth    = property( get_depth, set_depth )
-    box      = property( get_box, set_box )
-    z        = property( get_z, set_z )
+            self.location,
+            self.shadow,
+            self.depth,
+            self.box )
 
-class Point( Collider, pyscumm.vector.Vector3D ):
+    def update( self ):
+        self.box.update()
+
+
+class Point( Collider, Vector3D ):
     def __init__( self, v=[0.,0.,0.] ):
-        pyscumm.vector.Vector3D.__init__( self, v )
+        Vector3D.__init__( self, v )
     def clone( self, obj=None, deep=False ):
         if isinstance( obj, types.NoneType ): obj = Point()
-        return pyscumm.vector.Vector3D.clone( self, obj, deep )
+        return Vector3D.clone( self, obj, deep )
     def collides( self, collider ):
         if isinstance( collider, Point ):
             raise NotImplementedError
@@ -159,22 +152,20 @@ class WalkArea( MultiBox ):
 class BoxNode( list ):
     def __init__( self, box=None, next=[] ):
         list.__init__( self, next )
-        self._box = box
+        self.box = box
     def clone( self, obj=None, deep=False ):
         if isinstance( obj, types.NoneType ): obj = BoxNode()
         for o in self: obj.append( o.clone( deep=deep ) )
         return obj
-    def get_box( self ): return self._box
-    def set_box( self, box ): self._box = box
     def __str__( self ):
-        return "BoxNode( %s, (%s) %s )" % ( self._box, id( self ), map( id, self ) )
-    box = property( get_box, set_box )
+        return "BoxNode( %s, (%s) %s )" % (
+            self.box, id( self ), map( id, self ) )
 
 
 class BoxRect( list ):
     def __init__( self, box=None, obj=[] ):
         list.__init__( self, obj )
-        self._box = box
+        self.box = box
 
     def clone( self, obj=None, deep=False ):
         if isinstance( obj, types.NoneType ): obj = BoxRect()
@@ -184,37 +175,28 @@ class BoxRect( list ):
         self[3].clone( obj[3], deep )
         return obj
 
-    def get_box( self ): return self._box
-    def set_box( self, box ): self._box = box
-
-    def get_rect( self ):
-        return self._rect
-
-    def get_point( self ):
-        return self._point
-
     def point_inside( self, point ):
         #If dist is negative to all the rects, point is inside
-        return self._rect[0].dist_sqr( point ) <= 0 \
-            and self._rect[1].dist_sqr( point ) <= 0 \
-            and self._rect[2].dist_sqr( point ) <= 0 \
-            and self._rect[3].dist_sqr( point ) <= 0
+        return self.rect[0].dist_sqr( point ) <= 0 \
+            and self.rect[1].dist_sqr( point ) <= 0 \
+            and self.rect[2].dist_sqr( point ) <= 0 \
+            and self.rect[3].dist_sqr( point ) <= 0
 
     def update( self ):
-        location  = self._box.copy.location
-        rotation  = pyscumm.vector.RotateVectorZ( self._box.copy.rotation[0] )
-        scale     = self._box.copy.scale
-        insertion = self._box.copy.insertion * scale
-        location  = self._box.copy.location
-        self._point = [
+        location  = self.box.copy.location
+        rotation  = RotateVectorZ( self.box.copy.rotation[0] )
+        scale     = self.box.copy.scale
+        insertion = self.box.copy.insertion * scale
+        location  = self.box.copy.location
+        self.point = [
             ( ( ( point * scale ) + insertion ).rotate( rotation ) ) + location
             for point in self ]
-        p_0, p_1, p_2, p_3 = self._point
-        self._rect = [
-            Rect.from_two_point( p_0, p_1 ),
-            Rect.from_two_point( p_1, p_2 ),
-            Rect.from_two_point( p_2, p_3 ),
-            Rect.from_two_point( p_3, p_0 ) ]
+        p_0, p_1, p_2, p_3 = self.point
+        self.rect = [
+            from_two_point( p_0, p_1 ),
+            from_two_point( p_1, p_2 ),
+            from_two_point( p_2, p_3 ),
+            from_two_point( p_3, p_0 ) ]
 
     def box_inside( self, box ):
         point = box.point
@@ -226,17 +208,13 @@ class BoxRect( list ):
     def __str__( self ):
         return "BoxRect( %s )" % ( list.__str__( self ) )
 
-    box   = property( get_box, set_box )
-    point = property( get_point )
-    rect  = property( get_rect )
-
 """
 class BoxRect( list ):
     def __init__( self, location=None, obj=[] ):
         list.__init__( self, obj )
         self._location = location
         if isinstance( self._location, types.types.NoneType ):
-            self._location = pyscumm.vector.Vector3D()
+            self._location = Vector3D()
 
     def get_rect( self ):
         return [
@@ -270,40 +248,40 @@ class BoxRect( list ):
     rect  = property( get_rect )
 """
 
-class Rect( pyscumm.vector.Vector3D ):
+class Rect( Vector3D ):
     def __init__( self, obj=[0.,0.,0.] ):
-        pyscumm.vector.Vector3D.__init__( self, obj )
+        Vector3D.__init__( self, obj )
     def clone( self, obj=None, deep=False ):
         if isinstance( obj, types.NoneType ): obj = Rect()
-        return pyscumm.vector.Vector3D.clone( self, obj, deep )
+        return Vector3D.clone( self, obj, deep )
     def dist_sqr( self, p ):
         """d = (Ax1+By1+C)/sqrt(A*A+B*B). (No square root)"""
         self_0, self_1, self_2 = self
         p_0, p_1, p_2 = p
         return ((self_0*p_0)+(self_1*p_1)+self_2)/((self_0*self_0)+(self_1*self_1))
-    @classmethod
-    def from_two_point( cls, a, b ):
-        """
-        (X-x1)(y2-y1) = (Y-y1)(x2-x1)
-        X(y2-y1)-x1(y2-y1) = Y(x2-x1)-y1(x2-x1)
-        X(y2-y1) -Y(x2-x1) +(-x1(y2-y1)+y1(x2-x1)) = 0
-        Ax + By + C = 0
-        """
-        a_0, a_1, a_2 = a
-        b_0, b_1, b_2 = b
-        return Rect([
-            b_1-a_1,                         # A
-            -(b_0-a_0),                      # B
-            (-a_0*(b_1-a_1))+(a_1*(b_0-a_0)) # C
-        ])
 
     def __str__( self ):
         return "Rect( %.2fx + %.2fy + %.2f = 0 )" % ( self[0], self[1], self[2] )
 
+def from_two_point( a, b ):
+    """
+    (X-x1)(y2-y1) = (Y-y1)(x2-x1)
+    X(y2-y1)-x1(y2-y1) = Y(x2-x1)-y1(x2-x1)
+    X(y2-y1) -Y(x2-x1) +(-x1(y2-y1)+y1(x2-x1)) = 0
+    Ax + By + C = 0
+    """
+    a_0, a_1, a_2 = a
+    b_0, b_1, b_2 = b
+    return Rect([
+        b_1-a_1,                         # A
+        -(b_0-a_0),                      # B
+        (-a_0*(b_1-a_1))+(a_1*(b_0-a_0)) # C
+    ])
+
 """
-class Rect( pyscumm.vector.Vector3D ):
+class Rect( Vector3D ):
     def __init__( self, obj=[0.,0.,0.] ):
-        pyscumm.vector.Vector3D.__init__( self, obj )
+        Vector3D.__init__( self, obj )
     def dist_sqr( self, p ):
         #d = (Ax1+By1+C)/sqrt(A*A+B*B). (No square root)
         return ((self[0]*p[0])+(self[1]*p[1])+self[2])/((self[0]*self[0])+(self[1]*self[1]))

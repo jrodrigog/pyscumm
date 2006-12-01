@@ -20,8 +20,9 @@
 
 import pygame, os.path
 import base, vm
+from base import StateMachine
 
-class Scene( base.StateMachine, dict ):
+class Scene( StateMachine, dict ):
     """This is a Scene. It is an state machine so it only
     delivers events to it's active state. It does keep track
     of the objects in the scene in its own dictionary. When
@@ -29,11 +30,11 @@ class Scene( base.StateMachine, dict ):
 
     def __init__( self ):
         """Build a Scene object."""
-        self._sorted = base.SortedList()
+        self.sorted = base.SortedList()
 
     def quit( self ):
         """Reports a Pygame's quit event to the active state."""
-        self._state = self._state.quit()
+        self.state = self.state.quit()
 
     def active_event( self, event ):
         """
@@ -41,7 +42,7 @@ class Scene( base.StateMachine, dict ):
         @param event: A Pygame's ACTIVEEVENT event
         @type event: Event(Pygame)
         """
-        self._state = self._state.active_event( event )
+        self.state = self.state.active_event( event )
 
     def key_down( self, event ):
         """
@@ -49,7 +50,7 @@ class Scene( base.StateMachine, dict ):
         @param event: A Pygame's KEYDOWN event
         @type event: Event(Pygame)
         """
-        self._state = self._state.key_down( event )
+        self.state = self.state.key_down( event )
 
     def key_up( self, event ):
         """
@@ -57,7 +58,7 @@ class Scene( base.StateMachine, dict ):
         @param event: A Pygame's KEYUP event
         @type event: Event(Pygame)
         """
-        self._state = self._state.key_up( event )
+        self.state = self.state.key_up( event )
 
     def mouse_motion( self, event ):
         """
@@ -65,7 +66,7 @@ class Scene( base.StateMachine, dict ):
         @param event: A Pygame's MOUSEMOTION event
         @type event: Event(Pygame)
         """
-        self._state = self._state.mouse_motion( event )
+        self.state = self.state.mouse_motion( event )
 
     def mouse_button_up( self, event ):
         """
@@ -73,7 +74,7 @@ class Scene( base.StateMachine, dict ):
         @param event: A Pygame's MOUSEBUTTONUP event
         @type event: Event(Pygame)
         """
-        self._state = self._state.mouse_button_up( event )
+        self.state = self.state.mouse_button_up( event )
 
     def mouse_button_down( self, event ):
         """
@@ -81,7 +82,7 @@ class Scene( base.StateMachine, dict ):
         @param event: A Pygame's MOUSEBUTTONDOWN event
         @type event: Event(Pygame)
         """
-        self._state = self._state.mouse_button_down( event )
+        self.state = self.state.mouse_button_down( event )
 
     def joy_axis_motion( self, event ):
         """
@@ -89,7 +90,7 @@ class Scene( base.StateMachine, dict ):
         @param event: A Pygame's JOYAXISMOTION event
         @type event: Event(Pygame)
         """
-        self._state = self._state.joy_axis_motion( event )
+        self.state = self.state.joy_axis_motion( event )
 
     def joy_ball_motion( self, event ):
         """
@@ -97,7 +98,7 @@ class Scene( base.StateMachine, dict ):
         @param event: A Pygame's JOYBALLMOTION event
         @type event: Event(Pygame)
         """
-        self._state = self._state.joy_ball_motion( event )
+        self.state = self.state.joy_ball_motion( event )
 
     def joy_hat_motion( self, event ):
         """
@@ -105,7 +106,7 @@ class Scene( base.StateMachine, dict ):
         @param event: A Pygame's JOYHATMOTION event
         @type event: Event(Pygame)
         """
-        self._state = self._state.joy_hat_motion( event )
+        self.state = self.state.joy_hat_motion( event )
 
     def joy_button_up( self, event ):
         """
@@ -113,7 +114,7 @@ class Scene( base.StateMachine, dict ):
         @param event: A Pygame's JOYBUTTONUP event
         @type event: Event(Pygame)
         """
-        self._state = self._state.joy_button_up( event )
+        self.state = self.state.joy_button_up( event )
 
     def joy_button_down( self, event ):
         """
@@ -121,7 +122,7 @@ class Scene( base.StateMachine, dict ):
         @param event: A Pygame's JOYBUTTONDOWN event
         @type event: Event(Pygame)
         """
-        self._state = self._state.joy_button_down( event )
+        self.state = self.state.joy_button_down( event )
 
     def video_resize( self, event ):
         """
@@ -129,7 +130,7 @@ class Scene( base.StateMachine, dict ):
         @param event: A Pygame's VIDEORESIZE event
         @type event: Event(Pygame)
         """
-        self._state = self._state.video_resize( event )
+        self.state = self.state.video_resize( event )
 
     def video_expose( self, event ):
         """
@@ -137,7 +138,7 @@ class Scene( base.StateMachine, dict ):
         @param event: A Pygame's VIDEOEXPOSE event
         @type event: Event(Pygame)
         """
-        self._state = self._state.video_expose( event )
+        self.state = self.state.video_expose( event )
 
     def user_event( self, event ):
         """
@@ -145,7 +146,7 @@ class Scene( base.StateMachine, dict ):
         @param event: A Pygame's USEREVENT event
         @type event: Event(Pygame)
         """
-        self._state = self._state.user_event( event )
+        self.state = self.state.user_event( event )
 
     def on_action_end( self, event ):
         """
@@ -153,7 +154,7 @@ class Scene( base.StateMachine, dict ):
         @param event: A Pyscumm ACTIONEND event
         @type event: Event
         """
-        self._state = self._state.on_action_end( event )
+        self.state = self.state.on_action_end( event )
 
     def on_mouse_motion( self, event ):
         """
@@ -161,7 +162,7 @@ class Scene( base.StateMachine, dict ):
         @param event: A Pyscumm MOUSEMOTION event
         @type event: Event
         """
-        self._state = self._state.on_mouse_motion( event )
+        self.state = self.state.on_mouse_motion( event )
 
     def on_mouse_in( self, event ):
         """
@@ -169,7 +170,7 @@ class Scene( base.StateMachine, dict ):
         @param event: A Pyscumm MOUSEIN event
         @type event: Event
         """
-        self._state = self._state.on_mouse_in( event )
+        self.state = self.state.on_mouse_in( event )
 
     def on_mouse_out( self, event ):
         """
@@ -177,7 +178,7 @@ class Scene( base.StateMachine, dict ):
         @param event: A Pyscumm MOUSEOUT event
         @type event: Event
         """
-        self._state = self._state.on_mouse_out( event )
+        self.state = self.state.on_mouse_out( event )
 
     def on_mouse_click( self, event ):
         """
@@ -185,7 +186,7 @@ class Scene( base.StateMachine, dict ):
         @param event: A Pyscumm MOUSECLICK event
         @type event: Event
         """
-        self._state = self._state.on_mouse_click( event )
+        self.state = self.state.on_mouse_click( event )
 
     def on_mouse_double_click( self, event ):
         """
@@ -193,7 +194,7 @@ class Scene( base.StateMachine, dict ):
         @param event: A Pyscumm MOUSEDOUBLECLICK event
         @type event: Event
         """
-        self._state = self._state.on_mouse_double_click( event )
+        self.state = self.state.on_mouse_double_click( event )
 
     def on_mouse_drag_start( self, event ):
         """
@@ -201,7 +202,7 @@ class Scene( base.StateMachine, dict ):
         @param event: A Pyscumm MOUSEDRAGSTART event
         @type event: Event
         """
-        self._state = self._state.on_mouse_drag_start( event )
+        self.state = self.state.on_mouse_drag_start( event )
 
     def on_mouse_drag_end( self, event ):
         """
@@ -209,7 +210,7 @@ class Scene( base.StateMachine, dict ):
         @param event: A Pyscumm MOUSEDRAGENG event
         @type event: Event
         """
-        self._state = self._state.on_mouse_drag_end( event )
+        self.state = self.state.on_mouse_drag_end( event )
 
     def on_mouse_button_down( self, event ):
         """
@@ -217,7 +218,7 @@ class Scene( base.StateMachine, dict ):
         @param event: A Pyscumm MOUSEDOWN event
         @type event: Event
         """
-        self._state = self._state.on_mouse_button_down( event )
+        self.state = self.state.on_mouse_button_down( event )
 
     def on_mouse_button_up( self, event ):
         """
@@ -225,41 +226,33 @@ class Scene( base.StateMachine, dict ):
         @param event: A Pyscumm MOUSEUP event
         @type event: Event
         """
-        self._state = self._state.on_mouse_button_up( event )
+        self.state = self.state.on_mouse_button_up( event )
 
     def draw( self ):
         """Reports a draw event to the active state."""
-        self._state = self._state.draw()
+        self.state = self.state.draw()
 
     def update( self ):
         """Reports an update event to the active state."""
-        self._state = self._state.update()
+        self.state = self.state.update()
 
     def sort( self ):
         """Sort the object list."""
-        self._sorted.sort()
+        self.sorted.sort()
 
     def __setitem__( self, key, obj ):
         if self.has_key( key ):
-            self._sorted.pop( self._sorted.index( self[ key ] ) )
+            self.sorted.pop( self.sorted.index( self[ key ] ) )
         dict.__setitem__( self, key, obj )
-        self._sorted.insert( obj )
+        self.sorted.insert( obj )
 
     def __delitem__( self, key ):
         obj = self[ key ]
         dict.__delitem__( self, key )
-        self._sorted.pop( self._sorted.index( obj ) )
-
-    def get_sorted( self ):
-        """Get the sorted list of objects.
-        @return: Sorted list of objects.
-        @rtype: SortedList"""
-        return self._sorted
-
-    sorted = property( get_sorted )
+        self.sorted.pop( self.sorted.index( obj ) )
 
 
-class SceneState( base.StateMachine ):
+class SceneState( StateMachine, object ):
     """
     This is an Abstract Scene State.
     By subclassing this class you cand override all the

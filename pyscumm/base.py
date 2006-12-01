@@ -24,13 +24,13 @@
 
 import heapq
 
-class StateMachine( object ):
+class StateMachine:
     """
     Abstract state machine (See: state pattern).
     """
 
     def __init__( self ):
-        self._state = None
+        self.state = None
 
     def start( self ):
         """
@@ -41,23 +41,6 @@ class StateMachine( object ):
         """
         raise NotImplementedError
 
-    def get_state( self ):
-        """
-        Get the active state of the machine.
-        @return: State
-        """
-        return self._state
-
-    def set_state( self, state ):
-        """
-        Set a new state in the machine.
-        @param state: The new state to active.
-        @type state: State Object
-        """
-        self._state = state
-
-    state = property( get_state, set_state )
-
 
 class State( object ):
     """
@@ -66,7 +49,7 @@ class State( object ):
     pass
 
 
-class Logger( object ):
+class Logger:
     """A Singleton Logger class"""
 
     _shared_state = {}
@@ -75,7 +58,7 @@ class Logger( object ):
         """Build a Logger object"""
         self.__dict__ = self._shared_state
         if self._shared_state: return
-        self._visual = True
+        self.visual = True
 
     def warn( self, message ):
         """
@@ -83,7 +66,7 @@ class Logger( object ):
         @param message: The message to log
         @type state: String
         """
-        if not self._visual: return
+        if not self.visual: return
         print "[pyscumm] warn : %s" % message
 
     def info( self, message ):
@@ -92,7 +75,7 @@ class Logger( object ):
         @param message: The message to log
         @type state: String
         """
-        if not self._visual: return
+        if not self.visual: return
         print "[pyscumm] info : %s" % message
 
     def error( self, message ):
@@ -101,27 +84,8 @@ class Logger( object ):
         @param message: The message to log
         @type state: String
         """
-        if not self._visual: return
+        if not self.visual: return
         print "[pyscumm] error : %s" % message
-
-    def get_visual( self ):
-        """
-        Get the visual logging output state.
-        @return: Visual logging state
-        @rtype: bool
-        """
-        return self._visual
-
-    def set_visual( self, visual ):
-        """
-        Set the visual logging output state, set this to
-        False and it won't print logging messages.
-        @param visual: Visual logging state
-        @type visual: bool
-        """
-        self._visual = visual
-
-    visual = property( get_visual, set_visual )
 
 
 class SortedList( list ):
