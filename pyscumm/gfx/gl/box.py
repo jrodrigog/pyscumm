@@ -66,7 +66,7 @@ class Box( AbstractBox, Object ):
             self.updated = 0
             return
         #print "pyscumm.gfx.gl.Box.update()"
-        if self.copy.updated & SIZE_UPDATED:
+        if ( self.copy.updated & SIZE_UPDATED ) and not self.copy.size.is_cero():
             self.box[0] = Vector3D([0.,0.,0.])
             self.box[1] = Vector3D([self.copy.size[0],0.,0.])
             self.box[2] = Vector3D([self.copy.size[0],self.copy.size[1],0.])
