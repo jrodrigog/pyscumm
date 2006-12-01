@@ -25,21 +25,24 @@ class MyObject( pyscumm.object.Object ):
     def collides( self, obj ):
         return self['box'].collides( obj )
 """
-
+JITTER = 50.
 class MyObject:
-    JITTER = 15.
-    WIDTH  = 50.
     def __init__( self, img ):
-        def jitter( x ):
-            return x + ( ( random.random() * self.JITTER * 2. ) - self.JITTER )
+        def jitter():
+            return ( random.random() * JITTER * 2. ) - JITTER
         self.img = img
         img.collider.visible = True
-        """
-        img.collider.box[0][0] = jitter( -self.WIDTH ); img.collider.box[0][1] = jitter( -self.WIDTH )
-        img.collider.box[1][0] = jitter(  self.WIDTH ); img.collider.box[1][1] = jitter( -self.WIDTH )
-        img.collider.box[2][0] = jitter(  self.WIDTH ); img.collider.box[2][1] = jitter(  self.WIDTH )
-        img.collider.box[3][0] = jitter( -self.WIDTH ); img.collider.box[3][1] = jitter(  self.WIDTH )
-        """
+        img.collider.init()
+        img.collider.box[0][0] += jitter(); img.collider.box[0][1] += jitter()
+        img.collider.box[1][0] += jitter(); img.collider.box[1][1] += jitter()
+        img.collider.box[2][0] += jitter(); img.collider.box[2][1] += jitter()
+        img.collider.box[3][0] += jitter(); img.collider.box[3][1] += jitter()
+        img.location[0] = random.random() * VM().display.size[0]
+        img.location[1] = random.random() * VM().display.size[1]
+        # Mid point, add all the vectors and divide by n
+        img.insertion = reduce( lambda x,y: x+y, img.collider.box, Vector3D() ).scale( -1. / 4. )
+
+        img.updated &= ~pyscumm.SIZE_UPDATED
     def collides( self, obj ):
         return self.img.collides( obj )
     def __cmp__( self, obj ):
@@ -65,11 +68,10 @@ class Taverna( Scene ):
             #x.img.updated &= ~pyscumm.constant.SIZE_UPDATED
             #x[ 'img' ].location[0] = random.random() * 640
             #x[ 'img' ].location[1] = random.random() * 320
-            x.img.location[0] = random.random() * VM().display.size[0]
-            x.img.location[1] = random.random() * VM().display.size[1]
             x.img.location[2] = float( i ) / self.N
             self[ id(x) ] = x
 
+ROT_SPEED = 0.5
 class Taverna1( SceneState ):
     _shared_state = {} # Singleton
 
@@ -114,6 +116,12 @@ class Taverna1( SceneState ):
     def on_mouse_click( self, event ):
         if event.button != B_RIGHT: return self
         raise pyscumm.vm.StopVM()
+        return self
+
+    def update( self ):
+        if self.scene.dragging: 
+            self.scene.dragging.img.rotation[0] += ROT_SPEED
+        SceneState.update( self )
         return self
 
 
