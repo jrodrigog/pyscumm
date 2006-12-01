@@ -60,6 +60,8 @@ class Taverna( Scene ):
         self.offset = None
         self.save_color = None
         self.colored = None
+        self.rot_dir = -1.
+        self.button = 0
         img = Image( Texture("logo_quad.png" ), Vector3D( [229.,180.,0.] ) )
         #img.insertion[0] = -img.size[0] / 2.
         #img.insertion[1] = -img.size[1] / 2.
@@ -71,7 +73,7 @@ class Taverna( Scene ):
             x.img.location[2] = float( i ) / self.N
             self[ id(x) ] = x
 
-ROT_SPEED = 0.5
+ROT_SPEED = 2.0
 class Taverna1( SceneState ):
     _shared_state = {} # Singleton
 
@@ -82,45 +84,42 @@ class Taverna1( SceneState ):
 
     def on_mouse_motion( self, event ):
         if not self.scene.dragging: return self
-        self.scene.dragging.img.location = event.location - self.scene.offset
+        self.scene.dragging.location = event.location - self.scene.offset
         return self
 
     def on_mouse_button_down( self, event ):
-        if event.button != B_LEFT \
-            or not event.object: return self
-        self.scene.colored = event.object.pop()
-        self.scene.save_color = self.scene.colored.img.color
-        self.scene.colored.img.color = Vector4D([ 1., 0., 0., 0.5 ])
+        if event.button == B_CENTER \
+            or not event.object or self.scene.dragging: return self
+        if event.button == B_LEFT: self.scene.rot_dir = -1.
+        elif event.button == B_RIGHT: self.scene.rot_dir = +1.
+        self.scene.dragging = event.object.pop().img
+        self.scene.offset = event.location - self.scene.dragging.location
+        self.scene.colored = self.scene.dragging.collider
+        self.scene.save_color = self.scene.colored.color
+        self.scene.colored.color = Vector4D([ 1., 0., 0., 0.5 ])
+        self.button = event.button 
         return self
 
     def on_mouse_button_up( self, event ):
-        if not self.scene.colored: return self
-        self.scene.colored.img.color = self.scene.save_color
+        if not self.scene.colored or event.button != self.button: return self
+        self.scene.colored.color = self.scene.save_color
+        self.scene.dragging = None
         return self
 
     def on_mouse_drag_start( self, event ):
-        if event.button != B_LEFT \
+        if event.button == B_CENTER \
             or not event.object: return self
         # Use the top object
-        self.scene.dragging = event.object.pop()
-        self.scene.offset = event.location - self.scene.dragging.img.location
+        self.scene.offset = event.location - self.scene.dragging.location
         return self
 
     def on_mouse_drag_end( self, event ):
         print VM().clock.fps
-        if event.button != B_LEFT \
-            or not self.scene.dragging: return self
-        self.scene.dragging = None
-        return self
-
-    def on_mouse_click( self, event ):
-        if event.button != B_RIGHT: return self
-        raise pyscumm.vm.StopVM()
         return self
 
     def update( self ):
         if self.scene.dragging: 
-            self.scene.dragging.img.rotation[0] += ROT_SPEED
+            self.scene.dragging.rotation[0] += ( self.scene.rot_dir * ROT_SPEED )
         SceneState.update( self )
         return self
 
