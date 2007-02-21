@@ -40,8 +40,8 @@ class Engine( StateMachine ):
         self.mouse              = Mouse()
         self.display            = Display()
         self.clock              = Clock()
-        self.__state_button     = [ 0, 0, 0 ]
-        self.__time_button        = [ 0, 0, 0 ]
+        self.__dragging         = [ 0, 0, 0 ]
+        self.__button_time      = [ 0, 0, 0 ]
 
     def run( self, state ):
         Debugger().info("turning ON engine...")
@@ -95,33 +95,36 @@ class Engine( StateMachine ):
 
     def __process_mouse_button_down( self, event ):
         if event.button not in [1,2,3]: return
-        self.__state_button[event.button-1] = True
-        if self.clock.time - self.__time_button[event.button-1] < self.mouse.doubleclick_time:
-            print "DOUBLE_CLICK"
-            self.__time_button[event.button-1] = 0
+        # Check if DOUBLE_CLICK
+        if self.clock.time - self.__button_time[event.button-1] < self.mouse.doubleclick_time:
+            event_dict = { "type":DOUBLE_CLICK, "btn":event.button, "obj":"NotImplemented", "pos":self.mouse.get_pos()  }
+            Debugger().info("DOUBLE_CLICK event launched %s" % event_dict)
+            self.state.on_event(event_dict)
+            self.__dragging[event.button-1] = 0
         else:
-            self.__time_button[event.button-1] = self.clock.time
-
+            self.__button_time[event.button-1] = self.clock.time
+        # Prepare a possible a DRAG_START
+            self.__dragging[event.button-1] = self.clock.time
 
     def __process_mouse_button_up( self, event ):
-        if event.button not in [1,2,3]: return
-        self.__state_button[event.button-1] = False
-        if self.__time_button[event.button-1]:
-            print 'SINGLE CLICK'
-        elif not self.__time_button[event.button-1] and not self.__state_button[event.button-1]:
-            print 'DRAG END'
-
-
-
-
-
+        if self.__dragging[event.button-1]:
+            event_dict = { "type":SINGLE_CLICK, "btn":event.button, "obj":"NotImplemented", "pos":self.mouse.get_pos()  }
+            Debugger().info("SINGLE_CLICK event launched %s" % event_dict)
+            self.state.on_event( event_dict )
+            self.__dragging[event.button-1] = 0
+        else:
+            event_dict = { "type":DRAG_END, "btn":event.button, "obj":"NotImplemented", "pos":self.mouse.get_pos()  }
+            Debugger().info("DRAG_END event launched %s" % event_dict)
+            self.state.on_event( event_dict )
 
     def __update( self ):
-        for list_pos, x in enumerate(self.__state_button):
-            if self.__time_button[list_pos]:
-                if ( self.clock.time - self.__time_button[list_pos] ) >= self.mouse.drag_time and self.__state_button[list_pos]:
-                    print 'DRAG START'
-                    self.__time_button[list_pos] = 0
+        for list_pos, x in enumerate(self.__dragging):
+            if self.__dragging[list_pos]:
+                if ( self.clock.time - self.__dragging[list_pos] ) >= self.mouse.drag_time:
+                    event_dict = { "type":DRAG_START, "btn":"NotImplementedError", "obj":"NotImplemented", "pos":self.mouse.get_pos()  }
+                    Debugger().info("DRAG_START event launched %s" % event_dict)
+                    self.state.on_event( event_dict )
+                    self.__dragging[list_pos] = 0
 
     def __draw( self ):
         self.state.draw()
